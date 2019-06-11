@@ -103,7 +103,7 @@ def player_attack(_player, _enemy, attack_style):
     else:
         # check the skill 17: the big wall
         _big_wall = False
-        for _ in _player.skill:
+        for _ in _enemy.skill:
             if _.skill_no == 17 and _.actived:
                 skill.show_skill(_.skill_no)
                 _.round_last -= 1
@@ -186,11 +186,15 @@ def player_attack(_player, _enemy, attack_style):
                             skill.show_skill(_.skill_no)
                             _player.hp -= 0.2 * _enemy.value['Atk'] * (1 - _def / (_def + 1500))
 
+                if _player.hp <= 0:
+                    return battle_result(_player, _enemy, 2)
                 # check the Elite Damage affix
                 _dmg = _dmg * (1 + _player.value['EliteDamage'] / 100)
 
                 _enemy.hp -= _dmg
-                print('怪物失去了体力，', int(_dmg))
+                print('怪物失去了体力：', int(_dmg))
+                if _enemy.hp <= 0:
+                    return battle_result(_player, _enemy, 1)
                 
                 if _player.value['HpHit'] or _player.value['HpAbsorb'] and _dmg:
                     _player.hp += _player.value['HpHit']
@@ -284,6 +288,10 @@ def player_attack(_player, _enemy, attack_style):
 
                 _player.hp -= _dmg
                 print('你失去了体力：', int(_dmg))
+                if _player.hp <= 0:
+                    return battle_result(_player, _enemy, 2)
+                if _enemy.hp <= 0:
+                    return battle_result(_player, _enemy, 1)
             _player.cri_dice = 0
     
     # check the skill 15, 16, 19, 20, 21 let  the round_last + 1 
@@ -316,4 +324,15 @@ def player_attack(_player, _enemy, attack_style):
 
 
     print('player:', int(_player.hp), '/', _player.max_hp, const.ENEMY_DATA[_enemy.no]['enemy_name'][_enemy.zone], int(_enemy.hp), '/', _enemy.value['max_hp'])
+    
+    return True
 
+# handling the battle result with _result:
+# 1 - player winned
+# 2 - enemy winned
+def battle_result(_player, _enemy, _result):
+    if _result == 1:
+        print('你击败了', const.ENEMY_DATA[_enemy.no]['enemy_name'][_enemy.zone])
+    elif _result == 2:
+        print('你死亡了！怪物在你身边发出荡笑...')
+    return False
