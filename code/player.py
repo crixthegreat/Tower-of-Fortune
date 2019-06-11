@@ -5,6 +5,7 @@
 #codetime: 2019/6/4 16:05:50
 """A module of TOF(tower of fortune)
 """
+import sys
 import copy
 import random
 from code import const, item, skill
@@ -91,21 +92,21 @@ class Player(object):
         # 11 - the dice god; 12 - dual swing; 13 - mighty hit 
         # 14 - stantard style
         for _ in self.skill:
-            if _ == 9:
+            if _.skill_no == 9:
                 _v['Atk'] += _v['Def'] / 2
-            elif _ == 10:
+            elif _.skill_no == 10:
                 _v['Def'] += _v['Atk'] / 2
-            elif _ == 11:
+            elif _.skill_no == 11:
                 _v['MinDice'] += 1
                 if _v['MinDice'] > _v['MaxDice']:
                     _v['MinDice'] = _v['MaxDice']
-            elif _ == 12:
+            elif _.skill_no == 12:
                 if self.item_equiped[0].main_type == 0 and self.item_equiped[1].main_type == 0:
                     _v['BlockValue'] += 10
-            elif _ == 13:
+            elif _.skill_no == 13:
                 if self.item_equiped[0].main_type == 1:
                     _v['CriDmg'] *= 2
-            elif _ == 14:
+            elif _.skill_no == 14:
                 if self.item_equiped[0].main_type == 0 and self.item_equiped[1].main_type == 2:
                     _v['HpRegen'] += self.level * 20 + 100
         return _v
@@ -179,64 +180,66 @@ def gen_player(level):
     _player.equip_item(item.gen_random_item(52, level, 500))
 
     _player.hp = _player.max_hp
+    _player.level = level
     return _player
 
 def ran_dice(min_dice, max_dice, luc, level, enemy=None):
     """the most funny and mystical part of this game
     To get a dice number, the ran_dice method does with following steps:
     1. get the dice faces (dice_no = max - min + 1)
-    2. get the every generating rate of the dice faces (dice_rate)
-    3. generate several zones as described below:
+    2. get the every generating rate of the dice faces (dice_rate: [dice_rate[0], dice_rate[1],...,dice_rate[dice_no - 1]]
+    3. generate every dice-zones as described below:
+    [dice_rate[0], dice_rate[0]+dice_rate[1], dice_rate[0]+dice_rate[1]+dice_rate[2],...,dice_rate[0]+dice_rate[1]+...+[dice_rate[dice_no -1]]]
+    4. throw a dice of 10000
+    5. return the ran_dice value , depending on where the dice locates 
 
-      1,...,max_rate(0),min_rate(1),...,max_rate(1),min_rate(2),...,max_rate(2),min_rate(3),...,...,10000
-    4. the span of every zones, which can even be 0, depends on the value of luc
-    5. generate a random number r, if r in range(min_rate(n), max_rate(n)), the dice is min_dice + n
-    the following code is written with VBA originally, so it's VB-style,
+    6. the key parts is how to calculte the dice_rate for every numbers using the lucky value 'luc'
+    7. here is the formula:
+        (1) dice_rate[_] = base_rate[_] * (1 + luc /  max_luc * ((dice_no - _ - 1) * 0.4 + 0.6))
+        (2) the _ is counted from the big number to the small one
+        (3) so, basically, the dice_rate of a number becomes bigger when your 'luc' value is bigger.
+        if you got the maxism lucky value ('max_luc'), the biggest number's rate becomes 1.6 times of base_rate, 
+        the second biggest number's rate becomes 2.0 times of base_rate, and so on.
+        (4) when the dice_rate accumlated is bigger than 10000, the left numbers' rate becomes 0, which means you won't get these small numbers
     """
+    # dice_no is the faces of the dice
     dice_no = max_dice - min_dice + 1
-    # I forgot what this means
+    # acc_rate is the accumlation of the 'dice_rate's
     acc_rate = 0
-    # I forgot the max_luc formula..., but I still know this means the max lucky value you can get in the level
-    max_luc = int(level * level / 1.8 + 1)
+    # max_luc is the largest value you can get when you are in level 'level'
+    # the number 13 means that you can equip 13 items which have the luc affix
+    # the formula below is the same as the one in the skill.py where the items are defined
+    max_luc =  int(level ** 3 /1500 + 10 + level) * 13
 
-
+    # when the luc is 0, this is a normal dice, every number has the same base rate
+    base_rate = [10000 / dice_no  for _ in range(dice_no)]
     dice_rate = [0 for _ in range(dice_no)]
-    for _ in range(1, dice_no):
-        if luc / max_luc / 2 * (_ - (max_dice + min_dice) / 2) + dice_no < 0:
-            dice_rate[_ - 1] = 0
+
+    # now change the every number's rate from the big number to the small number
+    for _ in range(dice_no-1, -1, -1):
+        dice_rate[_] = base_rate[_] * (1 + luc /  max_luc * ((dice_no - _ - 1) * 0.4 + 0.6))
+        if acc_rate + dice_rate[_] >= 10000:
+            dice_rate[_] = 10000 - acc_rate
+            break
         else:
-            dice_rate[_ - 1] = luc / max_luc / 2 * (_ -(max_dice + min_dice) / 2) + dice_no
-        acc_rate += dice_rate[_ - 1]
+            acc_rate += dice_rate[_]
 
-    dice_rate[dice_no - 1] = dice_no * dice_no - acc_rate
+    for _ in range(1,dice_no):
+        dice_rate[_] += dice_rate[_ -1]
 
-    min_rate = [0 for _ in range(dice_no)]
-    max_rate = [0 for _ in range(dice_no)]
-
-    for _ in range(dice_no):
-        dice_rate[_] = dice_rate[_] / dice_no / dice_no * 10000
-        for _i in range(_ + 1):
-            max_rate[_] += dice_rate[_i]
-        for _i in range(_):
-            min_rate[_] += dice_rate[_i]
-        min_rate[_] += 1
-        min_rate[_] = int(min_rate[_])
-        max_rate[_] = int(max_rate[_])
-
-    r = random.randrange(1,10000)
-    if r > max_rate[dice_no - 1]:
-        r = max_rate[dice_no -1]
     #print(dice_rate)
-    #print(min_rate)
-    #print(max_rate)
+    r = random.randrange(1,10000)
+    #print('raw r is:', r)
     for _ in range(dice_no):
-        if  min_rate[_] <= r <= max_rate[_]:
+        if  r < dice_rate[_]:
+            #print('it is', min_dice + _)
             if enemy:
                 skill.show_skill(90, min_dice + _)
             else:
                 skill.show_skill(91, min_dice + _)
-
             return min_dice + _
+    print('ran dice error!')
+    sys.exit()
 # player function dice explode, when equal dice happened for the third time
 def dice_equal(player, enemy):
     if player.cri_dice == 2:

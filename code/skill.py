@@ -72,7 +72,7 @@ def show_skill(skill_no, t=None):
     elif skill_no == 19:
         print('怪物身上环绕着神奇的光芒...')
     elif skill_no == 20:
-        print('怪物反弹攻击，造成了伤害，', t)
+        print('怪物反弹攻击，造成了伤害，', int(t))
     elif skill_no == 21:
         print('你站在毒中，受到了伤害')
     elif skill_no == 21.5:
