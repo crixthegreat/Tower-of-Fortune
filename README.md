@@ -1,2 +1,2 @@
 # Tower-of-Fortune
-a rpg game with diablo-like equipment system
+a rpg game with a diablo-like equipment system
