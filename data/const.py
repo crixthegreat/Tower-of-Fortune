@@ -47,6 +47,8 @@ TITLE_MUSIC_FILE = './music/title.ogg'
 BG_MUSIC_FILE = './music/main.ogg'
 HIGHSCORE_MUSIC_FILE = './music/highscore.ogg'
 MAP_FILE = './materials/background/map.tmx'
+ITEM_IMG_FILE = './pic/item.png'
+DICE_IMG_FILE = './pic/dice.png'
 # The player affixes
 
 PLAYER_AFFIX = dict(

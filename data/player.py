@@ -9,7 +9,9 @@ import sys
 import copy
 import pickle
 import random
+from cocos import actions
 from data import const, item, skill
+import materials
 from materials.front_layer import show_message
 
 class Player(object):
@@ -165,6 +167,47 @@ class Player(object):
         for _ in _skill:
             self.skill.append(skill.Skill(_))
 
+    def show_dice(self, _dice, enemy=False):
+        if self.cri_dice == 0:
+            if enemy:
+                materials.main_scr.sprites['enemy_dice_0'].visible = True
+                materials.main_scr.sprites['enemy_dice_1'].visible = False
+                materials.main_scr.sprites['enemy_dice_2'].visible = False
+                materials.main_scr.sprites['enemy_dice_0'].image = materials.dice_image[_dice - 1]
+            else:
+                materials.main_scr.sprites['player_dice_0'].visible = True
+                materials.main_scr.sprites['player_dice_1'].visible = False
+                materials.main_scr.sprites['player_dice_2'].visible = False
+                materials.main_scr.sprites['player_dice_0'].image = materials.dice_image[_dice - 1]
+        elif self.cri_dice == 1:
+            if enemy:
+                materials.main_scr.sprites['enemy_dice_1'].visible = True
+                materials.main_scr.sprites['enemy_dice_2'].visible = False
+                materials.main_scr.sprites['enemy_dice_1'].image = materials.dice_image[_dice - 1]
+            else:
+                materials.main_scr.sprites['player_dice_1'].visible = True
+                materials.main_scr.sprites['player_dice_2'].visible = False
+                materials.main_scr.sprites['player_dice_1'].image = materials.dice_image[_dice - 1]
+        elif self.cri_dice == 2:
+            if enemy:
+                materials.main_scr.sprites['enemy_dice_2'].visible = True
+                materials.main_scr.sprites['enemy_dice_2'].image = materials.dice_image[_dice - 1]
+            else:
+                materials.main_scr.sprites['player_dice_2'].visible = True
+                materials.main_scr.sprites['player_dice_2'].image = materials.dice_image[_dice - 1]
+            
+    def show_player(self):
+        materials.front_layer.labels['level_label'].element.text = 'Lv:' + str(self.level)
+        materials.front_layer.labels['hp_label'].element.text = 'Hp:' + str(int(self.hp)) + ' / ' + str(self.max_hp)
+        materials.front_layer.labels['exp_label'].element.text = 'Exp:' + str(int(self.exp)) + ' / ' + str(int(self.level ** 3.5) + 300)
+
+    def show_attack(self):
+        _action = actions.MoveBy((20,0), 0.1) + actions.MoveBy((-20,0), 0.1)
+        self.sprite.do(_action)
+
+    def show_under_attack(self):
+        _action = actions.RotateBy(15, 0.1) + actions.RotateBy(-15, 0.1)
+        self.sprite.do(_action)
 
 def gen_player(level):
     """generate a player who has full-set equipment 
@@ -186,6 +229,8 @@ def gen_player(level):
 
     _player.hp = _player.max_hp
     _player.level = level
+    _player.sprite = materials.main_scr.sprites['player_sprite']
+    _player.show_player()
     return _player
 
 def ran_dice(min_dice, max_dice, luc, level, enemy=None):
@@ -238,10 +283,10 @@ def ran_dice(min_dice, max_dice, luc, level, enemy=None):
     for _ in range(dice_no):
         if  r < dice_rate[_]:
             #print('it is', min_dice + _)
-            if enemy:
-                skill.show_skill(90, min_dice + _)
-            else:
-                skill.show_skill(91, min_dice + _)
+            #if enemy:
+            #    skill.show_skill(90, min_dice + _)
+            #else:
+            #    skill.show_skill(91, min_dice + _)
             return min_dice + _
     print('ran dice error!')
     sys.exit()
@@ -269,7 +314,10 @@ def save(_player):
 
 def load():
     with open(const.SAVE_FILE,'rb') as f:
-        return pickle.load(f)
+        _player = pickle.load(f)
+        _player.sprite = materials.main_scr.sprites['player_sprite']
+        _player.show_player()
+        return _player
 
     
 

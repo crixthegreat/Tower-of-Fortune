@@ -6,6 +6,7 @@
 import sys
 import random
 from data import const
+import materials
 
 class Item(object):
     """Item Class
@@ -151,6 +152,28 @@ def show(item):
         print('无')
         return None
 
+    materials.sprites['item'].visible = True
+    materials.sprites['item'].image = materials.item_image[(59-item.type) * 5 + item.rare_type]
+    materials.labels['item_name'].element.text = item.name
+    materials.labels['item_type'].element.text = 'Lv ' + str(item.level) + ' ' + const.RARE_TYPE_NAME[item.rare_type] + ' ' + const.MAIN_TYPE_NAME[item.main_type]
+    _list = []
+    for _ in range(const.AFFIX_MAX_USED_NO):
+        if item.affix[_]:
+            _list.append(_)
+    # move the affix whose def-value is 4 and 3 to front
+    for _ in _list:
+        if const.ITEMS_DATA[item.type]['affix_value'][_] == 3:
+            _list.remove(_)
+            _list = [_] + _list
+    for _ in _list:
+        if const.ITEMS_DATA[item.type]['affix_value'][_] == 4:
+            _list.remove(_)
+            _list = [_] + _list
+    materials.labels['item_main_affix'].element.text = const.ITEM_AFFIX_CNAME[_list[0]] + str(item.affix[_list[0]])
+    _str = ''
+    for _ in range(1, len(_list)):
+        _str +=  (const.ITEM_AFFIX_CNAME[_list[_]] + str(item.affix[_list[_]]) + '\n')
+    materials.labels['item_affix'].element.text = _str
     print(item.name, item.level, const.RARE_TYPE_NAME[item.rare_type], const.MAIN_TYPE_NAME[item.main_type])
     
     for _ in range(const.AFFIX_MAX_USED_NO):
