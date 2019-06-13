@@ -7,7 +7,9 @@
 import sys
 import copy
 import random
+from cocos import actions
 from data import const, skill
+import materials
 """the code handling enemys
 There are totally 31 types of enemys which has six zone-level each other.
 The type no.1 is chief-boss enemy(rank 4)
@@ -18,18 +20,27 @@ The random rate of enemys above is defined by ENEMY_RATE
 """
 class Enemy(object):
 
-    def __init__(self):
+    def __init__(self, sprite=None):
         self.no = 0
         self.rank = 0
         self.level = 1
         self.skill = []
         self.zone = 0
+        self.sprite = sprite
         self.value = copy.deepcopy(const.ENEMY_AFFIX)
         # enemy has 5 type for ATK, CRIDMG and MAXHP
         # so every single kind of enemy have 125 types!
         # see the const.ENEMY_ATK_NAME,ENEMY_CRIDMG_NAME and ENEMY_MAXHP_NAME
         self.type = [2 ,2, 2]
         self.hp = self.value['max_hp']
+
+    def show_attack(self):
+        _action = actions.MoveBy((-20,0), 0.1) + actions.MoveBy((20,0), 0.1)
+        self.sprite.do(_action)
+
+    def show_under_attack(self):
+        _action = actions.RotateBy(-15, 0.1) + actions.RotateBy(15, 0.1)
+        self.sprite.do(_action)
 
 def gen_enemy(no=None, rank=None, zone=None, level=None):
     # check the rank of the enemy
@@ -156,6 +167,8 @@ def gen_enemy(no=None, rank=None, zone=None, level=None):
             _enemy.value['Min_Dice'] = _enemy.value['Max_Dice']
     _enemy.no = no
     _enemy.hp = _enemy.value['max_hp']
+
+    _enemy.sprite = materials.main_scr.sprites['enemy_sprite']
     return _enemy
 
 

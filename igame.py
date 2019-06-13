@@ -75,13 +75,13 @@ class Game(object):
     def show_enemy(self, enemy):
         if not enemy:
             return None
-        show_message((const.ENEMY_ATK_NAME[enemy.type[0]] + const.ENEMY_CRIDMG_NAME[enemy.type[1]] + const.ENEMY_MAXHP_NAME[enemy.type[2]] + '的' + const.ENEMY_RANK_NAME[enemy.rank]))
-        show_message(('LV ' + str(enemy.level)))
-        show_message((const.ENEMY_DATA[enemy.no]['enemy_name'][enemy.zone] + '在' + const.ZONE_NAME[enemy.zone] + '出现了'))
-        #print(enemy.value)
-        #print('它拥有技能：')
-        #for _ in enemy.skill:
-        #    print(const.SKILL_DATA[_.skill_no]['name'])
+        materials.front_layer.labels['enemy_name_label'].element.text = const.ENEMY_ATK_NAME[enemy.type[0]] + const.ENEMY_CRIDMG_NAME[enemy.type[1]] + const.ENEMY_MAXHP_NAME[enemy.type[2]] + '的' + const.ENEMY_RANK_NAME[enemy.rank]
+        materials.front_layer.labels['enemy_level_label'].element.text = 'Lv: ' + str(enemy.level)
+        materials.front_layer.labels['enemy_hp_label'].element.text = str(int(enemy.hp)) + ' / ' + str(int(enemy.value['max_hp']))
+        _str = ''
+        for _ in enemy.skill:
+            _str += (const.SKILL_DATA[_.skill_no]['name'] + '\n')
+        materials.front_layer.labels['enemy_skill_label'].element.text = _str
 
 
 
@@ -100,6 +100,7 @@ class Menu_Screen(Layer):
 
 
         self.image = materials.images['bg_img']
+
         for _, _label in materials.labels.items():
             self.add(_label)
         for _, _label in materials.menu.labels.items():
@@ -108,7 +109,7 @@ class Menu_Screen(Layer):
             self.add(_sprite)
         for _, _sprite in materials.menu.sprites.items():
             self.add(_sprite)
-        #materials.menu.sprites['t2_sprite'].scale = 1.5
+        
 
         self.game.show_menu()
 
@@ -181,11 +182,20 @@ class Main_Screen(ScrollableLayer):
         self.keys_pressed = set()
         self.player = player.Player(materials.main_scr.sprites['player_sprite'])
 
+        for _, _sprite in materials.sprites.items():
+            self.add(_sprite)
         for _, _sprite in materials.main_scr.sprites.items():
             self.add(_sprite)
+        for _, _label in materials.labels.items():
+            self.add(_label)
         # use the time interval event to calculate the time used
         self.schedule_interval(self.refresh_time, 0.04)
 
+        for _ in range(3):
+            materials.materials.main_scr.sprites['player_dice_' + str(_)].scale = 0.5
+            materials.materials.main_scr.sprites['player_dice_' + str(_)].visible = False
+            materials.materials.main_scr.sprites['enemy_dice_' + str(_)].scale = 0.5
+            materials.materials.main_scr.sprites['enemy_dice_' + str(_)].visible = False
 
     def refresh_time(self, dt):
         # the 'dt' means the time passed after the last event occured

@@ -7,12 +7,18 @@
 import sys
 import random
 from data import const, player, item, enemy, skill
+import materials
 from materials.front_layer import show_message
+
 
 def player_attack(_player, _enemy, attack_style):
     """calculate the attack action
     attack_style = [0,8] means the 9 kind of attack styles
     """
+    #for _ in range(3):
+    #    materials.main_scr.sprites['player_dice_' + str(_)].visible = False
+    #    materials.main_scr.sprites['enemy_dice_' + str(_)].visible = False
+
     # firstly let's check the attack style
     show_message(const.ATTACK_STYLE_DATA[attack_style]['name'])
     _min_dice = _player.value['MinDice']
@@ -58,8 +64,10 @@ def player_attack(_player, _enemy, attack_style):
             _player.hp = _player.max_hp
     # now throw the dice
     _player_dice = player.ran_dice(_min_dice, _max_dice, _luc, _player.level)
+    _player.show_dice(_player_dice)
     _enemy_dice =  player.ran_dice(_enemy.value['Min_Dice'], _enemy.value['Max_Dice'], _enemy.value['Luc'], _enemy.level, 1)
-    
+    _player.show_dice(_enemy_dice,True)
+
     # now check the skill 0: throw the dice again
     if _player_dice < _enemy_dice:
         for _ in _player.skill:
@@ -117,6 +125,7 @@ def player_attack(_player, _enemy, attack_style):
         if not _big_wall:
             if _player_dice > _enemy_dice:
                 # the normal attack damage value
+                _player.show_attack()
                 _dmg = _atk * (1 - _enemy.value['Def'] / (_enemy.value['Def'] + 1500)) * (1 + (_player_dice - _enemy_dice) * 0.1)
                 for _ in _player.skill:
                     # check the skill 2: poison weapon!
@@ -195,6 +204,8 @@ def player_attack(_player, _enemy, attack_style):
                 _enemy.hp -= _dmg
                 if _dmg:
                     show_message('怪物失去了体力：' + str(int(_dmg)))
+                    materials.front_layer.labels['enemy_hp_label'].element.text = str(int(_enemy.hp)) + ' / ' + str(int(_enemy.value['max_hp']))
+                    _enemy.show_under_attack()
                 if _enemy.hp <= 0:
                     return battle_result(_player, _enemy, 1)
                 
@@ -206,6 +217,7 @@ def player_attack(_player, _enemy, attack_style):
                         _player.hp = _player.max_hp
             # the enemy attack!
             else:
+                _enemy.show_attack()
                 _dmg = _enemy.value['Atk'] * (1 - _def / (_def + 1500) * (1 + (_enemy_dice - _player_dice) * 0.1)) * (1 - _player.value['ShortDistanceAtkDecreaseRate'] / 100)
                 if _player.cri_dice == 2:
                     skill.show_skill(107)
@@ -287,9 +299,10 @@ def player_attack(_player, _enemy, attack_style):
                         _.actived = True
                         
 
-
-                _player.hp -= _dmg
-                show_message('你失去了体力：' +str(int(_dmg)))
+                if _dmg:
+                    _player.hp -= _dmg
+                    _player.show_under_attack()
+                    show_message('你失去了体力：' +str(int(_dmg)))
 
         _player.cri_dice = 0
     
@@ -329,7 +342,10 @@ def player_attack(_player, _enemy, attack_style):
     if _enemy.hp <= 0:
         return battle_result(_player, _enemy, 1)
 
-    show_message('player:' + str(int(_player.hp)) + '/' + str(_player.max_hp) + const.ENEMY_DATA[_enemy.no]['enemy_name'][_enemy.zone] + str(int(_enemy.hp)) + '/'+ str(_enemy.value['max_hp']))
+    #show_message('player:' + str(int(_player.hp)) + '/' + str(_player.max_hp) + const.ENEMY_DATA[_enemy.no]['enemy_name'][_enemy.zone] + str(int(_enemy.hp)) + '/'+ str(_enemy.value['max_hp']))
+    
+    _player.show_player()
+
     
     return True
 
@@ -406,7 +422,7 @@ def battle_result(_player, _enemy, _result):
             _player.add_to_item_box(_)
             item.show(_)
 
-
+        _player.cri_dice = 0
     elif _result == 2:
         show_message('你死亡了！怪物在你身边发出荡笑...')
     return False
