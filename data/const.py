@@ -58,6 +58,7 @@ ITEM_IMG_FILE = './pic/item.png'
 DICE_IMG_FILE = './pic/dice.png'
 RIP_IMG_FILE = './pic/rip.png'
 ICON_SELECT_IMG_FILE = './pic/icon_select.png'
+ITEM_BOX_IMG_FILE = './pic/item_box.png'
 # The player affixes
 
 PLAYER_AFFIX = dict(
@@ -103,7 +104,8 @@ with open(ITEM_DATA_FILE, 'r') as f:
                 name_string=_line[1], 
                 affix_value=_line[2:AFFIX_MAX_USED_NO + 2], 
                 affix_can_use=_line[24], 
-                main_type=_line[25][::-1][1:][::-1])
+                main_type=_line[25], 
+                equiped_pos=_line[26][::-1][1:][::-1])
         #print(_line, _item['main_type'])
         if _ == 1:
             ITEM_AFFIX_CNAME = _line
@@ -137,6 +139,10 @@ with open(ITEM_DATA_FILE, 'r') as f:
                     _item['main_type'] = int(_item['main_type'])
                 else:
                     _item['main_type'] = -1
+                if _item['equiped_pos'] != '':
+                    _item['equiped_pos'] = int(_item['equiped_pos'])
+                else:
+                    _item['equiped_pos'] = -1
             ITEMS_DATA.append(_item)
         line = f.readline()
 #print(ITEM_TYPE_USED)

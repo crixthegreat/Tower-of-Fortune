@@ -77,9 +77,25 @@ class Game(object):
             materials.main_scr.sprites['player_dice_' + str(_)].visible = False
             materials.main_scr.sprites['enemy_dice_' + str(_)].visible = False
 
+        self.player.sprite.visible = True
         self.zone = self.player.zone
         materials.front_layer.labels['zone_label'].element.text = const.ZONE_NAME[self.zone]
 
+    def show_loot(self):
+        item.hide()
+        materials.main_scr.sprites['icon_select'].visible = False
+        for _ in range(8):
+            materials.main_scr.sprites['loot' + str(_)].visible = False
+
+        if self.player.loot:
+            _loot = self.player.loot
+            for _ in range(len(_loot)):
+                materials.main_scr.sprites['loot' + str(_)].visible = True
+                materials.main_scr.sprites['loot' + str(_)].image = materials.item_image[(59-_loot[_].type) * 5 + _loot[_].rare_type]
+            materials.main_scr.sprites['icon_select'].visible = True
+            materials.main_scr.sprites['icon_select'].x = 562 + (30 * self.loot_selected)
+
+            item.show(self.player.loot[self.loot_selected], self.player.item_equiped[self.player.loot[self.loot_selected].equiped_pos])
 
 
 
@@ -99,14 +115,20 @@ class Menu_Screen(Layer):
 
         self.image = materials.images['bg_img']
 
-        for _, _label in materials.labels.items():
-            self.add(_label)
-        for _, _label in materials.menu.labels.items():
-            self.add(_label)
-        #for _, _sprite in materials.sprites.items():
-        #    self.add(_sprite)
-        for _, _sprite in materials.menu.sprites.items():
-            self.add(_sprite)
+        if hasattr(materials, 'labels'):
+            for _, _label in materials.labels.items():
+                self.add(_label)
+                _label.visible = False
+        if hasattr(materials.menu, 'labels'):
+            for _, _label in materials.menu.labels.items():
+                self.add(_label)
+        if hasattr(materials, 'sprites'):
+            for _, _sprite in materials.sprites.items():
+                self.add(_sprite)
+                _sprite.visible = False
+        if hasattr(materials.menu, 'sprites'):
+            for _, _sprite in materials.menu.sprites.items():
+                self.add(_sprite)
         
 
         self.game.show_menu()
@@ -164,8 +186,9 @@ class Front_Layer(Layer):
     def __init__(self):
 
         super(Front_Layer, self).__init__()
-        for _, _label in materials.front_layer.labels.items():
-            self.add(_label)
+        if hasattr(materials.front_layer, 'labels'):
+            for _, _label in materials.front_layer.labels.items():
+                self.add(_label)
         
         self.image = materials.images['front_img']
     
@@ -184,10 +207,22 @@ class Main_Screen(ScrollableLayer):
         self.game = game
         self.keys_pressed = set()
 
-        for _, _sprite in materials.main_scr.sprites.items():
-            self.add(_sprite)
-        for _, _sprite in materials.sprites.items():
-            self.add(_sprite)
+        if hasattr(materials.main_scr, 'sprites'):
+            for _, _sprite in materials.main_scr.sprites.items():
+                self.add(_sprite)
+                _sprite.visible = False
+        if hasattr(materials, 'sprites'):
+            for _, _sprite in materials.sprites.items():
+                self.add(_sprite)
+                _sprite.visible = False
+        if hasattr(materials, 'labels'):
+            for _, _label in materials.labels.items():
+                self.add(_label)
+                _label.visible = False
+        if hasattr(materials.main_scr, 'labels'):
+            for _, _label in materials.main_scr.labels.items():
+                self.add(_label)
+                _label.visible = False
         materials.sprites['strike'].visible = False
         materials.sprites['explode'].visible = False
         materials.main_scr.sprites['icon_select'].visible = False
@@ -196,8 +231,10 @@ class Main_Screen(ScrollableLayer):
             materials.main_scr.sprites['loot' + str(_)].visible = False
             materials.main_scr.sprites['loot' + str(_)].scale = 0.4
 
-        for _, _label in materials.labels.items():
-            self.add(_label)
+        if hasattr(materials, 'labels'):
+            for _, _label in materials.labels.items():
+                self.add(_label)
+                _label.visible = False
         # use the time interval event to calculate the time used
         self.schedule_interval(self.refresh_time, 0.04)
 
@@ -221,9 +258,10 @@ class Main_Screen(ScrollableLayer):
             self.keys_pressed.add(key)
         key_names = [pyglet.window.key.symbol_string(k) for k in self.keys_pressed]
         # press the SPACE key to return to the title anywhere any time
-        if 'SPACE' in key_names:
+        if 'F2' in key_names:
             # return to the menu(title) screen
             self.keys_pressed.clear()
+            self.game.status = 'END'
             self.game.show_menu()
             director.replace(FlipY3DTransition(Scene(my_menu)))
         elif self.game.game_status == 'STARTED':
@@ -242,39 +280,50 @@ class Main_Screen(ScrollableLayer):
                         materials.main_scr.sprites['player_dice_' + str(_)].visible = False
                         materials.main_scr.sprites['enemy_dice_' + str(_)].visible = False
                     self.game.game_status = 'END'
-                    if self.game.player.loot:
-                        _loot = self.game.player.loot
-                        for _ in range(len(_loot)):
-                            materials.main_scr.sprites['loot' + str(_)].visible = True
-                            materials.main_scr.sprites['loot' + str(_)].image = materials.item_image[(59-_loot[_].type) * 5 + _loot[_].rare_type]
-                        materials.main_scr.sprites['icon_select'].visible = True
-                
-        # play the game again
+                    self.game.show_loot()
+
+        # when the battle ends
         elif self.game.game_status == 'END':
             if self.game.player.loot:
                 _loot = self.game.player.loot
                 if 'UP' in key_names:
                     # sell the loot
-                    pass
+                    self.game.player.sell_item(_loot[self.game.loot_selected])
+                    self.game.player.loot.remove(self.game.player.loot[self.game.loot_selected])
+                    if self.game.loot_selected > len(self.game.player.loot) - 1:
+                        self.game.loot_selected -= 1
+                    if self.game.loot_selected == -1:
+                        self.game.loot_selected = 0
+                    self.game.show_loot()
                 elif 'DOWN' in key_names:
-                    # get the loot
+                    # equip the loot
                     pass
                 elif 'RIGHT' in key_names:
                     # select the next(right) loot
-                    if self.loot_selected + 1 < len(_loot):
-                        self.loot_selected += 1
-                        materials.main_scr.sprites['icon_select'].x += 30
+                    for _ in range(self.game.loot_selected + 1, len(_loot)):
+                        if _loot[_]:
+                            self.game.loot_selected = _
+                            materials.main_scr.sprites['icon_select'].x = 562 + (30 * _)
+                            item.show(_loot[_], self.game.player.item_equiped[_loot[_].equiped_pos])
+                            break
                 elif 'LEFT' in key_names:
                     # select the left loot
-                    if self.loot_selected + 1 < len(_loot):
-                        self.loot_selected += 1
-                        materials.main_scr.sprites['icon_select'].x += 30
+                    for _ in range(self.game.loot_selected -1, -1, -1):
+                        if _loot[_]:
+                            self.game.loot_selected = _
+                            materials.main_scr.sprites['icon_select'].x = 562 + (30 * _)
+                            item.show(_loot[_], self.game.player.item_equiped[_loot[_].equiped_pos])
+                            break
+                # take it to the item box
+                elif 'SPACE' in key_names:
+                    pass
             elif 'DOWN' in key_names:
                 self.game.enemy = enemy.gen_enemy(None, None, self.game.zone, random.randrange(self.game.zone * 10 + 1, (self.game.zone + 1) * 10))
                 if self.game.enemy:
                     self.game.game_status = 'STARTED'
                     enemy.show_enemy(self.game.enemy)
                     self.game.player.loot = []
+    
 
                 
     def style_cal(self, _style):
