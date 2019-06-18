@@ -6,11 +6,12 @@
 """A module of TOF(tower of fortune)
 """
 import sys
+import time
 import copy
 import pickle
 import random
 from cocos import actions
-from data import const, item, skill
+from data import const, item, skill, battle
 import materials
 from materials.front_layer import show_message
 
@@ -55,7 +56,7 @@ class Player(object):
         # cri_dice means that the equal dice occurs
         # 0 - not occur, 1 - occured once, 2 - occured twice, 3 - occured third times(dice explode)
         self.cri_dice = 0
-        self.x2 = 0
+        self.loot = []
         self.x3 = 0
         self.x4 =0
         
@@ -197,17 +198,28 @@ class Player(object):
                 materials.main_scr.sprites['player_dice_2'].image = materials.dice_image[_dice - 1]
             
     def show_player(self):
-        materials.front_layer.labels['level_label'].element.text = 'Lv:' + str(self.level)
-        materials.front_layer.labels['hp_label'].element.text = 'Hp:' + str(int(self.hp)) + ' / ' + str(self.max_hp)
-        materials.front_layer.labels['exp_label'].element.text = 'Exp:' + str(int(self.exp)) + ' / ' + str(int(self.level ** 3.5) + 300)
+        materials.front_layer.labels['level_label'].element.text = str(self.level)
+        materials.front_layer.labels['hp_label'].element.text = str(int(self.hp)) + '/' + str(self.max_hp)
+        materials.front_layer.labels['exp_label'].element.text = str(int(self.exp)) + '/' + str(int(self.level ** 3.5) + 300)
 
     def show_attack(self):
         _action = actions.MoveBy((20,0), 0.1) + actions.MoveBy((-20,0), 0.1)
         self.sprite.do(_action)
 
-    def show_under_attack(self):
+    def show_under_attack(self, cri_dice):
         _action = actions.RotateBy(15, 0.1) + actions.RotateBy(-15, 0.1)
         self.sprite.do(_action)
+        materials.sprites['strike'].visible = True
+        materials.sprites['strike'].position = 200,340
+        if cri_dice==1:
+            materials.sprites['strike'].image = materials.gif_to_anime(const.CRITICAL_STRIKE_IMG_FILE)
+            materials.sprites['strike'].do(actions.FadeOut(1.5))
+        elif cri_dice==0:
+            materials.sprites['strike'].image = materials.gif_to_anime(const.STRIKE_IMG_FILE)
+            materials.sprites['strike'].do(actions.FadeOut(1))
+        elif cri_dice==2:
+            materials.sprites['strike'].image = materials.gif_to_anime(const.SUPER_STRIKE_IMG_FILE)
+            materials.sprites['strike'].do(actions.FadeOut(2.5))
 
 def gen_player(level):
     """generate a player who has full-set equipment 
@@ -301,6 +313,11 @@ def dice_equal(player, enemy):
             player.hp = 1
         if enemy.hp < 1:
             enemy.hp =1
+        materials.sprites['strike'].visible = True
+        materials.sprites['strike'].position = 400,234
+        materials.sprites['strike'].image = materials.gif_to_anime(const.EXPLODE_IMG_FILE)
+        materials.sprites['strike'].do(actions.FadeOut(3))
+        battle.show_hp_change(player, enemy, 2, 0-int(player.hp/2), 0-int(enemy.hp/2))
     elif player.cri_dice == 1:
         skill.show_skill(103)
     elif player.cri_dice == 0:

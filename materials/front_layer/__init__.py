@@ -19,33 +19,42 @@ time_label & best_time_label : as the name says
 
 labels = dict(old_msg_box=cocos.text.Label('old message', 
     font_size=12,font_name='Gadugi', 
-    bold=False,color=const.DEFAULT_COLOR, x=500, y=200, width= 250, multiline=True), 
+    bold=False,color=const.DEFAULT_COLOR, x=530, y=100, width= 250, multiline=True), 
     msg_box=cocos.text.Label('message here', 
         font_size=14,font_name='Gadugi', 
-        bold=False,color=const.DEFAULT_COLOR, x=500, y=50))
+        bold=False,color=const.DEFAULT_COLOR, x=530, y=10))
 
-labels['level_label'] = cocos.text.Label('Lv:',
+labels['zone_label'] = cocos.text.Label('',
         font_size=14,font_name='Gadugi', 
-        bold=False,color=const.DEFAULT_COLOR, x=10, y=580)
-labels['hp_label'] = cocos.text.Label('Hp:', 
-        font_size=14,font_name='Gadugi', 
-        bold=False,color=const.DEFAULT_COLOR, x=100, y=580)
+        bold=False,color=const.DEFAULT_COLOR, x=350, y=555, width=100, align='center')
+labels['level_label'] = cocos.text.Label('',
+        font_size=10,font_name='Gadugi', 
+        bold=False,color=const.DEFAULT_COLOR, x=40, y=545)
+labels['hp_label'] = cocos.text.Label('', 
+        font_size=10,font_name='Gadugi', 
+        bold=False,color=const.DEFAULT_COLOR, x=120, y=560)
 labels['exp_label'] = cocos.text.Label('Exp:', 
-        font_size=14,font_name='Gadugi', 
-        bold=False,color=const.DEFAULT_COLOR, x=10, y=550)
+        font_size=10,font_name='Gadugi', 
+        bold=False,color=const.DEFAULT_COLOR, x=120, y=545)
 labels['enemy_name_label'] = cocos.text.Label('Name:', 
+        font_size=12,font_name='Gadugi', 
+        bold=False,color=const.DEFAULT_COLOR, x=610, y=560)
+labels['enemy_level_label'] = cocos.text.Label('',
         font_size=14,font_name='Gadugi', 
-        bold=False,color=const.DEFAULT_COLOR, x=600, y=580)
-labels['enemy_level_label'] = cocos.text.Label('Lv:',
-        font_size=14,font_name='Gadugi', 
-        bold=False,color=const.DEFAULT_COLOR, x=600, y=550)
-labels['enemy_hp_label'] = cocos.text.Label('Hp:', 
-        font_size=14,font_name='Gadugi', 
-        bold=False,color=const.DEFAULT_COLOR, x=700, y=550)
-labels['enemy_skill_label'] = cocos.text.Label('Skill:', 
-        font_size=14,font_name='Gadugi', 
-        bold=False,color=const.DEFAULT_COLOR, x=700, y=520, width=100, multiline=True)
+        bold=False,color=const.DEFAULT_COLOR, x=640, y=540)
+labels['enemy_hp_label'] = cocos.text.Label('', 
+        font_size=10,font_name='Gadugi', 
+        bold=False,color=const.DEFAULT_COLOR, x=700, y=540)
+labels['enemy_skill_label'] = cocos.text.Label('', 
+        font_size=10,font_name='Gadugi', 
+        bold=False,color=const.DEFAULT_COLOR, x=620, y=515)
 
+labels['player_hp_change_label'] = cocos.text.Label('', 
+        font_size=12,font_name='Gadugi', 
+        bold=False,color=const.DEFAULT_COLOR, x=200, y=220)
+labels['enemy_hp_change_label'] = cocos.text.Label('', 
+        font_size=12,font_name='Gadugi', 
+        bold=False,color=const.DEFAULT_COLOR, x=500, y=220)
 
 sprites = {}
 

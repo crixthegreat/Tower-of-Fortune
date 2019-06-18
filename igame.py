@@ -59,7 +59,10 @@ class Game(object):
         self.enter = 0
         self.msg = []
         self.zone = 0
+        self.style = [0, 0, 0]
+        self.loot_selected = 0
     
+
     def show_menu(self):
         """display the menu screen
         """
@@ -69,19 +72,14 @@ class Game(object):
     def show_game(self):
         """show the game screen and initial the game
         """
-        self.show_enemy(self.enemy)
+        materials.main_scr.sprites['enemy_sprite'].visible = False
+        for _ in range(3):
+            materials.main_scr.sprites['player_dice_' + str(_)].visible = False
+            materials.main_scr.sprites['enemy_dice_' + str(_)].visible = False
 
+        self.zone = self.player.zone
+        materials.front_layer.labels['zone_label'].element.text = const.ZONE_NAME[self.zone]
 
-    def show_enemy(self, enemy):
-        if not enemy:
-            return None
-        materials.front_layer.labels['enemy_name_label'].element.text = const.ENEMY_ATK_NAME[enemy.type[0]] + const.ENEMY_CRIDMG_NAME[enemy.type[1]] + const.ENEMY_MAXHP_NAME[enemy.type[2]] + '的' + const.ENEMY_RANK_NAME[enemy.rank]
-        materials.front_layer.labels['enemy_level_label'].element.text = 'Lv: ' + str(enemy.level)
-        materials.front_layer.labels['enemy_hp_label'].element.text = str(int(enemy.hp)) + ' / ' + str(int(enemy.value['max_hp']))
-        _str = ''
-        for _ in enemy.skill:
-            _str += (const.SKILL_DATA[_.skill_no]['name'] + '\n')
-        materials.front_layer.labels['enemy_skill_label'].element.text = _str
 
 
 
@@ -105,8 +103,8 @@ class Menu_Screen(Layer):
             self.add(_label)
         for _, _label in materials.menu.labels.items():
             self.add(_label)
-        for _, _sprite in materials.sprites.items():
-            self.add(_sprite)
+        #for _, _sprite in materials.sprites.items():
+        #    self.add(_sprite)
         for _, _sprite in materials.menu.sprites.items():
             self.add(_sprite)
         
@@ -128,7 +126,8 @@ class Menu_Screen(Layer):
                 director.replace(Scene(credit_layer))
                 return 1
             if self.game.enter == 1:
-                self.game.player = player.gen_player(1)
+                self.game.player = player.gen_player(60)
+                self.game.player.zone = 1
             elif self.game.enter == 0:
                 self.game.player = player.load()
             else:
@@ -167,7 +166,11 @@ class Front_Layer(Layer):
         super(Front_Layer, self).__init__()
         for _, _label in materials.front_layer.labels.items():
             self.add(_label)
+        
+        self.image = materials.images['front_img']
     
+    def draw(self):
+        self.image.blit(0, 0)
 
 class Main_Screen(ScrollableLayer):
     """The main game screen
@@ -180,12 +183,19 @@ class Main_Screen(ScrollableLayer):
         super(Main_Screen, self).__init__()
         self.game = game
         self.keys_pressed = set()
-        self.player = player.Player(materials.main_scr.sprites['player_sprite'])
 
-        for _, _sprite in materials.sprites.items():
-            self.add(_sprite)
         for _, _sprite in materials.main_scr.sprites.items():
             self.add(_sprite)
+        for _, _sprite in materials.sprites.items():
+            self.add(_sprite)
+        materials.sprites['strike'].visible = False
+        materials.sprites['explode'].visible = False
+        materials.main_scr.sprites['icon_select'].visible = False
+        materials.main_scr.sprites['icon_select'].scale = 0.25
+        for _ in range(8):
+            materials.main_scr.sprites['loot' + str(_)].visible = False
+            materials.main_scr.sprites['loot' + str(_)].scale = 0.4
+
         for _, _label in materials.labels.items():
             self.add(_label)
         # use the time interval event to calculate the time used
@@ -201,7 +211,7 @@ class Main_Screen(ScrollableLayer):
         # the 'dt' means the time passed after the last event occured
         if self.game.game_status == 'STARTED':
             #print(self.tx, self.ty, materials.alpha_sprite(5).x, materials.alpha_sprite(5).y)
-            game_screen.set_focus(self.player.sprite.x, self.player.sprite.y) 
+            game_screen.set_focus(self.game.player.sprite.x, self.game.player.sprite.y) 
 
     def on_key_press(self, key, modifiers):
         # use a set(keys_pressed) to store all the keys pressed
@@ -218,17 +228,82 @@ class Main_Screen(ScrollableLayer):
             director.replace(FlipY3DTransition(Scene(my_menu)))
         elif self.game.game_status == 'STARTED':
             if 'RIGHT' in key_names:
-                _r = battle.player_attack(self.game.player, self.game.enemy, 0)
+                self.game.style[0] += 1
+            elif 'LEFT' in key_names:
+                self.game.style[1] += 1
+            elif 'UP' in key_names:
+                self.game.style[2] += 1
+            _style = self.style_cal(self.game.style)
+            if  0<= _style <= 9: 
+                _r = battle.player_attack(self.game.player, self.game.enemy, _style)
+                self.game.style = [0, 0, 0]
                 if not _r:
+                    for _ in range(3):
+                        materials.main_scr.sprites['player_dice_' + str(_)].visible = False
+                        materials.main_scr.sprites['enemy_dice_' + str(_)].visible = False
                     self.game.game_status = 'END'
+                    if self.game.player.loot:
+                        _loot = self.game.player.loot
+                        for _ in range(len(_loot)):
+                            materials.main_scr.sprites['loot' + str(_)].visible = True
+                            materials.main_scr.sprites['loot' + str(_)].image = materials.item_image[(59-_loot[_].type) * 5 + _loot[_].rare_type]
+                        materials.main_scr.sprites['icon_select'].visible = True
                 
         # play the game again
         elif self.game.game_status == 'END':
-            if 'DOWN' in key_names:
+            if self.game.player.loot:
+                _loot = self.game.player.loot
+                if 'UP' in key_names:
+                    # sell the loot
+                    pass
+                elif 'DOWN' in key_names:
+                    # get the loot
+                    pass
+                elif 'RIGHT' in key_names:
+                    # select the next(right) loot
+                    if self.loot_selected + 1 < len(_loot):
+                        self.loot_selected += 1
+                        materials.main_scr.sprites['icon_select'].x += 30
+                elif 'LEFT' in key_names:
+                    # select the left loot
+                    if self.loot_selected + 1 < len(_loot):
+                        self.loot_selected += 1
+                        materials.main_scr.sprites['icon_select'].x += 30
+            elif 'DOWN' in key_names:
                 self.game.enemy = enemy.gen_enemy(None, None, self.game.zone, random.randrange(self.game.zone * 10 + 1, (self.game.zone + 1) * 10))
-                self.game.game_status = 'STARTED'
-                self.game.show_game()
+                if self.game.enemy:
+                    self.game.game_status = 'STARTED'
+                    enemy.show_enemy(self.game.enemy)
+                    self.game.player.loot = []
+
                 
+    def style_cal(self, _style):
+        if _style[0] + _style[1] + _style[2] != 3:
+            return 10
+        if _style[0] == 0:
+            if _style[1] == 0:
+                return 9
+            elif _style[1] == 1:
+                return 6
+            elif _style[2] == 2:
+                return 7
+            else:
+                return 8
+        elif _style[0] == 1:
+            if _style[1] == 0:
+                return 5
+            elif _style[1] == 1:
+                return 4
+            else:
+                return 3
+        elif _style[0] == 2:
+            if _style[1] == 0:
+                return 2
+            else:
+                return 1
+        else:
+            return 0
+
 
     def on_key_release(self, key, modifiers):
         
@@ -242,7 +317,6 @@ class Main_Screen(ScrollableLayer):
 
 if __name__ == '__main__':
     msg = []
-
 
     # change the working dir to the exe temp dir 
     # when you use pyinstaller to make a one-file exe package, you need doing this above

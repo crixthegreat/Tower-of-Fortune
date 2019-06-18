@@ -13,6 +13,8 @@ VERSION = 'alpha 0.01'
 ZONE_NAME = ['普通的森林', '中等的丛林', '困难的地牢', '噩梦的幻境', '地狱的试炼', '炼狱的折磨']
 MAX_LEN = 20
 DEFAULT_COLOR = (0, 0, 0, 255)
+GREEN_COLOR = (0,200,30,255)
+ORANGE_COLOR = (230,30,230,255)
 HIGHLIGHT_COLOR = (200, 30, 30, 255)
 
 # used for items
@@ -41,6 +43,11 @@ ATTACK_STYLE_FILE = './data/attack_style.csv'
 SAVE_FILE = './data/save.tof'
 
 BACKGROUND_IMG_FILE = './pic/bg.png'
+FRONT_IMG_FILE = './pic/front.png'
+STRIKE_IMG_FILE = './pic/strike.gif'
+CRITICAL_STRIKE_IMG_FILE = './pic/critical_strike.gif'
+SUPER_STRIKE_IMG_FILE = './pic/super_strike.gif'
+EXPLODE_IMG_FILE = './pic/explode.gif'
 PLAYER_IMG_FILE = './pic/player_s.png'
 ENEMY_IMG_FILE = './pic/monster-30-1_s.png'
 TITLE_MUSIC_FILE = './music/title.ogg'
@@ -49,6 +56,8 @@ HIGHSCORE_MUSIC_FILE = './music/highscore.ogg'
 MAP_FILE = './materials/background/map.tmx'
 ITEM_IMG_FILE = './pic/item.png'
 DICE_IMG_FILE = './pic/dice.png'
+RIP_IMG_FILE = './pic/rip.png'
+ICON_SELECT_IMG_FILE = './pic/icon_select.png'
 # The player affixes
 
 PLAYER_AFFIX = dict(
