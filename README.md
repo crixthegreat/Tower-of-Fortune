@@ -7,3 +7,4 @@ a rpg game with a diablo-like equipment system
 - skill effects
 - save & load game
 - player graveyard
+- credit layer
