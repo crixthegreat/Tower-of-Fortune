@@ -201,6 +201,7 @@ class Player(object):
         materials.front_layer.labels['level_label'].element.text = str(self.level)
         materials.front_layer.labels['hp_label'].element.text = str(int(self.hp)) + '/' + str(self.max_hp)
         materials.front_layer.labels['exp_label'].element.text = str(int(self.exp)) + '/' + str(int(self.level ** 3.5) + 300)
+        materials.front_layer.labels['gold_label'].element.text = str(int(self.gold))
 
     def show_attack(self):
         _action = actions.MoveBy((20,0), 0.1) + actions.MoveBy((-20,0), 0.1)
@@ -220,6 +221,13 @@ class Player(object):
         elif cri_dice==2:
             materials.sprites['strike'].image = materials.gif_to_anime(const.SUPER_STRIKE_IMG_FILE)
             materials.sprites['strike'].do(actions.FadeOut(2.5))
+
+    def sell_item(self, _item):
+        # the price of a item is:
+        # level * 10 * (rare_type + 1)
+        _price = _item.level * (_item.rare_type + 1) * 10
+        self.gold += _price
+        materials.front_layer.labels['gold_label'].element.text = str(int(self.gold))
 
 def gen_player(level):
     """generate a player who has full-set equipment 

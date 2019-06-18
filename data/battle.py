@@ -427,11 +427,15 @@ def battle_result(_player, _enemy, _result):
         for _ in range(_loot_no):
             _loot_list.append(item.gen_random_item(None, _enemy.level, _loot_mf))
         
-        if _loot_no:
-            show_message('怪物掉落了些好东西')
         for _ in _loot_list:
             _player.loot.append(_)
-            item.show(_)
+
+        if _loot_no:
+            show_message('怪物掉落了些好东西')
+            print('equip_pos:',_loot_list[0].equiped_pos)
+            item.show(_loot_list[0], _player.item_equiped[_loot_list[0].equiped_pos])
+
+
 
         _player.cri_dice = 0
     elif _result == 2:

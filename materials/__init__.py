@@ -84,34 +84,7 @@ front_image = pyglet.image.load(const.FRONT_IMG_FILE)
 
 images = {'alpha_image':alpha_image, 'bg_img':bg_img, 'item_image':item_image, 'dice_image':dice_image, 'front_img':front_image}
 
-labels = {}
 
-labels['item_name'] = cocos.text.Label('',font_size=16,
-        font_name = 'Gadugi',
-        bold=True,
-        color=const.HIGHLIGHT_COLOR, 
-        x=180, y=150)
-labels['item_type'] = cocos.text.Label('',font_size=12,
-        font_name = 'Gadugi',
-        bold=False,
-        color=const.DEFAULT_COLOR, 
-        x=180, y=120)
-labels['item_main_affix'] = cocos.text.Label('',font_size=18,
-        font_name = 'Gadugi',
-        bold=True,
-        color=const.HIGHLIGHT_COLOR, 
-        x=180, y=80)
-labels['item_affix'] = cocos.text.Label('',font_size=12,
-        font_name = 'Gadugi',
-        bold=False,
-        color=const.DEFAULT_COLOR, 
-        x=180, y=60, width=200, multiline=True)
-
-#def gif_to_sprite(_file, _scale=1):
-#    _anime = pyglet.image.load_animation(_file)
-#    _bin = pyglet.image.atlas.TextureBin()
-#    _anime.add_to_texture_bin(_bin)
-#    return cocos.sprite.Sprite(_anime, position =(600,300), scale = _scale)
 
 
 def gif_to_anime(_file):
@@ -134,7 +107,8 @@ strike_anime.add_to_texture_bin(strike_bin)
 
 #sprites = {'alpha_str' + str(_):cocos.sprite.Sprite(alpha_image[_], position=(0, 0)) for _ in range(const.MAX_LEN)}
 sprites = {}
-sprites['item'] = cocos.sprite.Sprite(item_image[0], position = (100,100))
+sprites['item'] = cocos.sprite.Sprite(item_image[0], position = (400,335))
+sprites['player_item'] = cocos.sprite.Sprite(item_image[0], position = (220,315))
 sprites['strike'] = gif_to_sprite(const.STRIKE_IMG_FILE, 0.7)
 sprites['explode'] = gif_to_sprite(const.EXPLODE_IMG_FILE, 2)
 

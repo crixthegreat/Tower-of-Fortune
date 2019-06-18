@@ -29,13 +29,16 @@ labels['zone_label'] = cocos.text.Label('',
         bold=False,color=const.DEFAULT_COLOR, x=350, y=555, width=100, align='center')
 labels['level_label'] = cocos.text.Label('',
         font_size=10,font_name='Gadugi', 
+        bold=False,color=const.DEFAULT_COLOR, x=40, y=560)
+labels['gold_label'] = cocos.text.Label('',
+        font_size=10,font_name='Gadugi', 
         bold=False,color=const.DEFAULT_COLOR, x=40, y=545)
 labels['hp_label'] = cocos.text.Label('', 
         font_size=10,font_name='Gadugi', 
-        bold=False,color=const.DEFAULT_COLOR, x=120, y=560)
+        bold=False,color=const.DEFAULT_COLOR, x=115, y=565)
 labels['exp_label'] = cocos.text.Label('Exp:', 
         font_size=10,font_name='Gadugi', 
-        bold=False,color=const.DEFAULT_COLOR, x=120, y=545)
+        bold=False,color=const.DEFAULT_COLOR, x=115, y=545)
 labels['enemy_name_label'] = cocos.text.Label('Name:', 
         font_size=12,font_name='Gadugi', 
         bold=False,color=const.DEFAULT_COLOR, x=610, y=560)
