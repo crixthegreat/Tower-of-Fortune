@@ -15,16 +15,25 @@ import random
 #player_image = []
 #player_image = pyglet.image.ImageGrid(pyglet.image.load('./pic/player.png'), 1, 3)
 #images = {'player_img':player_image}
+images = {}
 
-player_image =pyglet.image.load(os.path.abspath(const.PLAYER_IMG_FILE)) 
-enemy_image =pyglet.image.load(os.path.abspath(const.ENEMY_IMG_FILE)) 
+player_image = pyglet.image.load(os.path.abspath(const.PLAYER_IMG_FILE)) 
+enemy_image = pyglet.image.load(os.path.abspath(const.ENEMY_IMG_FILE)) 
+icon_select_image = pyglet.image.load(os.path.abspath(const.ICON_SELECT_IMG_FILE)) 
+
+images['rip'] = pyglet.image.load(os.path.abspath(const.RIP_IMG_FILE)) 
+images['enemy_image'] = enemy_image
 """
 time_label & best_time_label : as the name says
 """
 
 sprites = {}
-sprites['player_sprite'] = cocos.sprite.Sprite(player_image, position=(200, 300))
-sprites['enemy_sprite'] = cocos.sprite.Sprite(enemy_image, position=(600, 400))
+sprites['player_sprite'] = cocos.sprite.Sprite(player_image, position=(240, 300))
+sprites['enemy_sprite'] = cocos.sprite.Sprite(enemy_image, position=(600, 300))
+for _ in range(8):
+    sprites['loot' + str(_)] = cocos.sprite.Sprite(player_image, position=(590 + _ * 30, 210))
+sprites['icon_select'] = cocos.sprite.Sprite(icon_select_image, position=(562, 185))
+
 for _ in range(3):
     sprites['player_dice_' + str(_)] = cocos.sprite.Sprite(materials.dice_image[0], position=(370,250 + 66 * _ ))
     sprites['enemy_dice_' + str(_)] = cocos.sprite.Sprite(materials.dice_image[1], position=(450, 250 + 66 * _))

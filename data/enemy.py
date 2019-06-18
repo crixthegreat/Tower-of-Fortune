@@ -5,6 +5,7 @@
 #codetime: 2019/6/7 13:50:35
 
 import sys
+import time
 import copy
 import random
 from cocos import actions
@@ -38,12 +39,26 @@ class Enemy(object):
         _action = actions.MoveBy((-20,0), 0.1) + actions.MoveBy((20,0), 0.1)
         self.sprite.do(_action)
 
-    def show_under_attack(self):
+    def show_under_attack(self, cri_dice=False):
         _action = actions.RotateBy(-15, 0.1) + actions.RotateBy(15, 0.1)
         self.sprite.do(_action)
+        materials.sprites['strike'].visible = True
+        materials.sprites['strike'].position = 600,340
+        if cri_dice==1:
+            materials.sprites['strike'].image = materials.gif_to_anime(const.CRITICAL_STRIKE_IMG_FILE)
+            materials.sprites['strike'].do(actions.FadeOut(1.5))
+        elif cri_dice==0:
+            materials.sprites['strike'].image = materials.gif_to_anime(const.STRIKE_IMG_FILE)
+            materials.sprites['strike'].do(actions.FadeOut(1))
+        elif cri_dice==2:
+            materials.sprites['strike'].image = materials.gif_to_anime(const.SUPER_STRIKE_IMG_FILE)
+            materials.sprites['strike'].do(actions.FadeOut(2.5))
+        
 
 def gen_enemy(no=None, rank=None, zone=None, level=None):
     # check the rank of the enemy
+    if materials.main_scr.sprites['enemy_sprite'].are_actions_running():
+        return None
     if not rank:
         _r = random.randrange(100)
         if _r <= const.ENEMY_RATE['CHIEF_BOSS']:
@@ -167,8 +182,19 @@ def gen_enemy(no=None, rank=None, zone=None, level=None):
             _enemy.value['Min_Dice'] = _enemy.value['Max_Dice']
     _enemy.no = no
     _enemy.hp = _enemy.value['max_hp']
-
+    materials.main_scr.sprites['enemy_sprite'].visible = True
     _enemy.sprite = materials.main_scr.sprites['enemy_sprite']
+    _enemy.sprite.image = materials.main_scr.images['enemy_image']
+
     return _enemy
 
-
+def show_enemy(enemy):
+    if not enemy:
+        return None
+    materials.front_layer.labels['enemy_name_label'].element.text = const.ENEMY_ATK_NAME[enemy.type[0]] + const.ENEMY_CRIDMG_NAME[enemy.type[1]] + const.ENEMY_MAXHP_NAME[enemy.type[2]] + '的' + const.ENEMY_RANK_NAME[enemy.rank]
+    materials.front_layer.labels['enemy_level_label'].element.text = str(enemy.level)
+    materials.front_layer.labels['enemy_hp_label'].element.text = str(int(enemy.hp)) + '/' + str(int(enemy.value['max_hp']))
+    _str = ''
+    for _ in enemy.skill:
+        _str += (const.SKILL_DATA[_.skill_no]['name'] + ' ' * 4)
+    materials.front_layer.labels['enemy_skill_label'].element.text = _str

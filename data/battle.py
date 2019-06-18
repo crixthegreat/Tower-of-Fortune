@@ -9,6 +9,7 @@ import random
 from data import const, player, item, enemy, skill
 import materials
 from materials.front_layer import show_message
+from cocos import actions
 
 
 def player_attack(_player, _enemy, attack_style):
@@ -20,6 +21,9 @@ def player_attack(_player, _enemy, attack_style):
     #    materials.main_scr.sprites['enemy_dice_' + str(_)].visible = False
 
     # firstly let's check the attack style
+    if materials.sprites['strike'].are_actions_running():
+        #print(materials.sprites['strike'].are_actions_running())
+        return True
     show_message(const.ATTACK_STYLE_DATA[attack_style]['name'])
     _min_dice = _player.value['MinDice']
     _max_dice = _player.value['MaxDice']
@@ -204,8 +208,10 @@ def player_attack(_player, _enemy, attack_style):
                 _enemy.hp -= _dmg
                 if _dmg:
                     show_message('怪物失去了体力：' + str(int(_dmg)))
+                    #def show_hp_change(_player=None, _enemy=None, cri_dice=0, _player_dmg=0, _enemy_dmg=0):
+                    show_hp_change(None, _enemy, _player.cri_dice, 0, (0-int(_dmg)))
                     materials.front_layer.labels['enemy_hp_label'].element.text = str(int(_enemy.hp)) + ' / ' + str(int(_enemy.value['max_hp']))
-                    _enemy.show_under_attack()
+                    _enemy.show_under_attack(_player.cri_dice)
                 if _enemy.hp <= 0:
                     return battle_result(_player, _enemy, 1)
                 
@@ -301,7 +307,9 @@ def player_attack(_player, _enemy, attack_style):
 
                 if _dmg:
                     _player.hp -= _dmg
-                    _player.show_under_attack()
+                    _player.show_under_attack(_player.cri_dice)
+                    #def show_hp_change(_player=None, _enemy=None, cri_dice=0, _player_dmg=0, _enemy_dmg=0):
+                    show_hp_change(_player, None, _player.cri_dice, (0-int(_dmg)))
                     show_message('你失去了体力：' +str(int(_dmg)))
 
         _player.cri_dice = 0
@@ -357,6 +365,9 @@ def battle_result(_player, _enemy, _result):
     _loot_no = 0
     if _result == 1:
         show_message('你击败了', const.ENEMY_DATA[_enemy.no]['enemy_name'][_enemy.zone])
+        #materials.main_scr.sprites['enemy_sprite'].do(actions.Blink(5,1))
+        materials.main_scr.sprites['enemy_sprite'].image = materials.main_scr.images['rip']
+
         if _player.level - _enemy.level <= 2:
             _exp = 50 + _player.value['ExpWhenKill']
             _gold = 50
@@ -419,10 +430,85 @@ def battle_result(_player, _enemy, _result):
         if _loot_no:
             show_message('怪物掉落了些好东西')
         for _ in _loot_list:
-            _player.add_to_item_box(_)
+            _player.loot.append(_)
             item.show(_)
 
         _player.cri_dice = 0
     elif _result == 2:
         show_message('你死亡了！怪物在你身边发出荡笑...')
     return False
+
+def show_hp_change(_player=None, _enemy=None, cri_dice=0, _player_dmg=0, _enemy_dmg=0):
+    if _player:
+        if cri_dice==1:
+            materials.front_layer.labels['player_hp_change_label'].element.font_size = 30
+            materials.front_layer.labels['player_hp_change_label'].element.color = const.ORANGE_COLOR
+            materials.front_layer.labels['player_hp_change_label'].element.text = str(_player_dmg)
+            materials.front_layer.labels['player_hp_change_label'].element.x = 150
+            materials.front_layer.labels['player_hp_change_label'].element.y = 320
+            materials.front_layer.labels['player_hp_change_label'].visible = True
+            if not materials.front_layer.labels['player_hp_change_label'].are_actions_running():
+                materials.front_layer.labels['player_hp_change_label'].do(actions.MoveBy((-100,0),0.3) + actions.FadeOut(0.3) + actions.MoveBy((100,0),0.3))
+            else:
+                materials.front_layer.labels['player_hp_change_label'].visible = False
+
+        elif cri_dice==0:
+            materials.front_layer.labels['player_hp_change_label'].element.font_size = 26
+            materials.front_layer.labels['player_hp_change_label'].element.color = const.DEFAULT_COLOR
+            materials.front_layer.labels['player_hp_change_label'].element.text = str(_player_dmg)
+            materials.front_layer.labels['player_hp_change_label'].element.x = 150
+            materials.front_layer.labels['player_hp_change_label'].element.y = 320
+            materials.front_layer.labels['player_hp_change_label'].visible = True
+            if not materials.front_layer.labels['player_hp_change_label'].are_actions_running():
+                materials.front_layer.labels['player_hp_change_label'].do(actions.MoveBy((-80,0),0.3) + actions.FadeOut(0.3) + actions.MoveBy((80,0),0.3))
+            else:
+                materials.front_layer.labels['player_hp_change_label'].visible = False
+        elif cri_dice==2:
+            materials.front_layer.labels['player_hp_change_label'].element.font_size = 36
+            materials.front_layer.labels['player_hp_change_label'].element.color = const.HIGHLIGHT_COLOR
+            materials.front_layer.labels['player_hp_change_label'].element.text = str(_player_dmg)
+            materials.front_layer.labels['player_hp_change_label'].element.x = 150
+            materials.front_layer.labels['player_hp_change_label'].element.y = 320
+            materials.front_layer.labels['player_hp_change_label'].visible = True
+            if not materials.front_layer.labels['player_hp_change_label'].are_actions_running():
+                materials.front_layer.labels['player_hp_change_label'].do(actions.MoveBy((-100,0),0.3) + actions.FadeOut(0.3) + actions.MoveBy((100,0),0.3))
+            else:
+                materials.front_layer.labels['player_hp_change_label'].visible = False
+    if _enemy:
+        if cri_dice==1:
+            materials.front_layer.labels['enemy_hp_change_label'].element.font_size = 30
+            materials.front_layer.labels['enemy_hp_change_label'].element.color = const.ORANGE_COLOR
+            materials.front_layer.labels['enemy_hp_change_label'].element.text = str(_enemy_dmg)
+            materials.front_layer.labels['enemy_hp_change_label'].element.x = 600
+            materials.front_layer.labels['enemy_hp_change_label'].element.y = 320
+            materials.front_layer.labels['enemy_hp_change_label'].visible = True
+            if not materials.front_layer.labels['enemy_hp_change_label'].are_actions_running():
+                materials.front_layer.labels['enemy_hp_change_label'].do(actions.MoveBy((100,0),0.3) + actions.FadeOut(0.3) + actions.MoveBy((-100,0),0.3))
+            else:
+                materials.front_layer.labels['enemy_hp_change_label'].visible = False
+        elif cri_dice==0:
+            materials.front_layer.labels['enemy_hp_change_label'].element.font_size = 26
+            materials.front_layer.labels['enemy_hp_change_label'].element.color = const.DEFAULT_COLOR
+            materials.front_layer.labels['enemy_hp_change_label'].element.text = str(_enemy_dmg)
+            materials.front_layer.labels['enemy_hp_change_label'].element.x = 600
+            materials.front_layer.labels['enemy_hp_change_label'].element.y = 320
+            materials.front_layer.labels['enemy_hp_change_label'].visible = True
+            if not materials.front_layer.labels['enemy_hp_change_label'].are_actions_running():
+                materials.front_layer.labels['enemy_hp_change_label'].do(actions.MoveBy((80,0),0.3) + actions.FadeOut(0.3) + actions.MoveBy((-80,0),0.3))
+            else:
+                materials.front_layer.labels['enemy_hp_change_label'].visible = False
+        elif cri_dice==2:
+            materials.front_layer.labels['enemy_hp_change_label'].element.font_size = 36
+            materials.front_layer.labels['enemy_hp_change_label'].element.color = const.HIGHLIGHT_COLOR
+            materials.front_layer.labels['enemy_hp_change_label'].element.text = str(_enemy_dmg)
+            materials.front_layer.labels['enemy_hp_change_label'].element.x = 600
+            materials.front_layer.labels['enemy_hp_change_label'].element.y = 320
+            materials.front_layer.labels['enemy_hp_change_label'].visible = True
+            if not materials.front_layer.labels['enemy_hp_change_label'].are_actions_running():
+                materials.front_layer.labels['enemy_hp_change_label'].do(actions.MoveBy((100,0),0.3) + actions.FadeOut(0.3) + actions.MoveBy((-100,0),0.3))
+            else:
+                materials.front_layer.labels['enemy_hp_change_label'].visible = False
+
+
+
+    return None
