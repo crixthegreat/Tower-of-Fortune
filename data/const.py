@@ -44,6 +44,7 @@ SAVE_FILE = './data/save.tof'
 
 BACKGROUND_IMG_FILE = './pic/bg.png'
 FRONT_IMG_FILE = './pic/front.png'
+INFO_LAYER_IMG_FILE = './pic/info_layer.png'
 STRIKE_IMG_FILE = './pic/strike.gif'
 CRITICAL_STRIKE_IMG_FILE = './pic/critical_strike.gif'
 SUPER_STRIKE_IMG_FILE = './pic/super_strike.gif'
@@ -58,7 +59,9 @@ ITEM_IMG_FILE = './pic/item.png'
 DICE_IMG_FILE = './pic/dice.png'
 RIP_IMG_FILE = './pic/rip.png'
 ICON_SELECT_IMG_FILE = './pic/icon_select.png'
+SKILL_SELECT_IMG_FILE = './pic/skill_select.png'
 ITEM_BOX_IMG_FILE = './pic/item_box.png'
+ATTACK_STYLE_IMG_FILE = './pic/item_box.png'
 # The player affixes
 
 PLAYER_AFFIX = dict(

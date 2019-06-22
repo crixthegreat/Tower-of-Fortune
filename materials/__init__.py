@@ -81,8 +81,9 @@ alpha_image = pyglet.image.ImageGrid(pyglet.image.load('./pic/alpha.png'), 2, 27
 item_image = pyglet.image.ImageGrid(pyglet.image.load(const.ITEM_IMG_FILE), 60, 5)
 dice_image = pyglet.image.ImageGrid(pyglet.image.load(const.DICE_IMG_FILE), 5, 2)
 front_image = pyglet.image.load(const.FRONT_IMG_FILE) 
+info_layer_image = pyglet.image.load(const.INFO_LAYER_IMG_FILE) 
 
-images = {'alpha_image':alpha_image, 'bg_img':bg_img, 'item_image':item_image, 'dice_image':dice_image, 'front_img':front_image}
+images = {'alpha_image':alpha_image, 'bg_img':bg_img, 'item_image':item_image, 'dice_image':dice_image, 'front_img':front_image, 'info_layer_img':info_layer_image}
 
 
 
@@ -117,3 +118,4 @@ import materials.background
 import materials.main_scr
 import materials.front_layer
 import materials.menu
+import materials.info_layer

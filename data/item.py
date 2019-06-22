@@ -14,10 +14,11 @@ class Item(object):
     # item_type = [0, 59]
     def __init__(self, item_type):
 
+        # .type means the item's type 
         self.type = item_type
         # AFFIX_MAX_USED_NO = 20
         self.affix = [0 for _ in range(const.AFFIX_MAX_USED_NO)]
-        # main_type means the equiped position of the item
+        # the main type means bigger division(e.g. single-hand weapon is one of the main types, including sword, bow, harmmer and so on)
         self.main_type = const.ITEMS_DATA[self.type]['main_type']
         self.equiped_pos = const.ITEMS_DATA[self.type]['equiped_pos']
         self.level = 0

@@ -6,9 +6,10 @@
 """THE MAIN SCREEN DEFINITION FILE
 """
 import os
-from data import const
+from data import const, player, enemy, skill, battle, item
 import pyglet
 import cocos
+from cocos.layer import Layer, ScrollingManager, ScrollableLayer
 import materials
 import random
 
@@ -21,6 +22,7 @@ player_image = pyglet.image.load(os.path.abspath(const.PLAYER_IMG_FILE))
 enemy_image = pyglet.image.load(os.path.abspath(const.ENEMY_IMG_FILE)) 
 icon_select_image = pyglet.image.load(os.path.abspath(const.ICON_SELECT_IMG_FILE)) 
 item_box_image = pyglet.image.load(os.path.abspath(const.ITEM_BOX_IMG_FILE)) 
+attack_style_image = pyglet.image.ImageGrid(pyglet.image.load('./pic/attack_style.png'), 5, 2)
 
 images['rip'] = pyglet.image.load(os.path.abspath(const.RIP_IMG_FILE)) 
 images['enemy_image'] = enemy_image
@@ -76,6 +78,7 @@ for _ in range(8):
     sprites['loot' + str(_)] = cocos.sprite.Sprite(player_image, position=(590 + _ * 30, 210))
 sprites['icon_select'] = cocos.sprite.Sprite(icon_select_image, position=(562, 185))
 sprites['item_box'] = cocos.sprite.Sprite(item_box_image, position=(360, 285))
+sprites['attack_style'] = cocos.sprite.Sprite(attack_style_image[0], position=(400, 115))
 
 for _ in range(3):
     sprites['player_dice_' + str(_)] = cocos.sprite.Sprite(materials.dice_image[0], position=(370,250 + 66 * _ ))
@@ -83,6 +86,183 @@ for _ in range(3):
 
 bg_music = materials.Audio(const.BG_MUSIC_FILE)
 highscore_music = materials.Audio(const.HIGHSCORE_MUSIC_FILE)
+
+class Main_Screen(ScrollableLayer):
+    """The main game screen
+    do a lot of key events
+    """
+    is_event_handler = True
+
+    def __init__(self, game):
+
+        super(Main_Screen, self).__init__()
+        self.game = game
+        self.keys_pressed = set()
+
+        if hasattr(materials.main_scr, 'sprites'):
+            for _, _sprite in materials.main_scr.sprites.items():
+                self.add(_sprite)
+                _sprite.visible = False
+        if hasattr(materials, 'sprites'):
+            for _, _sprite in materials.sprites.items():
+                self.add(_sprite)
+                _sprite.visible = False
+        if hasattr(materials, 'labels'):
+            for _, _label in materials.labels.items():
+                self.add(_label)
+                _label.visible = False
+        if hasattr(materials.main_scr, 'labels'):
+            for _, _label in materials.main_scr.labels.items():
+                self.add(_label)
+                _label.visible = False
+        materials.sprites['strike'].visible = False
+        materials.sprites['explode'].visible = False
+        materials.main_scr.sprites['icon_select'].visible = False
+        materials.main_scr.sprites['icon_select'].scale = 0.25
+        for _ in range(8):
+            materials.main_scr.sprites['loot' + str(_)].visible = False
+            materials.main_scr.sprites['loot' + str(_)].scale = 0.4
+
+        if hasattr(materials, 'labels'):
+            for _, _label in materials.labels.items():
+                self.add(_label)
+                _label.visible = False
+        # use the time interval event to calculate the time used
+        self.schedule_interval(self.refresh_time, 0.04)
+
+        for _ in range(3):
+            materials.materials.main_scr.sprites['player_dice_' + str(_)].scale = 0.5
+            materials.materials.main_scr.sprites['player_dice_' + str(_)].visible = False
+            materials.materials.main_scr.sprites['enemy_dice_' + str(_)].scale = 0.5
+            materials.materials.main_scr.sprites['enemy_dice_' + str(_)].visible = False
+
+    def refresh_time(self, dt):
+        # the 'dt' means the time passed after the last event occured
+        if self.game.game_status == 'STARTED':
+            #print(self.tx, self.ty, materials.alpha_sprite(5).x, materials.alpha_sprite(5).y)
+            self.game.screen_set_focus(self.game.player.sprite.x, self.game.player.sprite.y) 
+
+    def on_key_press(self, key, modifiers):
+        # use a set(keys_pressed) to store all the keys pressed
+        # the number '983547510784' means 'SHIFT + SPACE' key
+        _str = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+        if key != 983547510784:
+            self.keys_pressed.add(key)
+        key_names = [pyglet.window.key.symbol_string(k) for k in self.keys_pressed]
+        # press the SPACE key to return to the title anywhere any time
+        if 'F2' in key_names:
+            # return to the menu(title) screen
+            self.keys_pressed.clear()
+            self.game.show_menu()
+        if 'I' in key_names:
+            # open the player information screen
+            self.keys_pressed.clear()
+            self.game.show_info()
+        elif self.game.game_status == 'STARTED':
+            if 'RIGHT' in key_names:
+                self.game.style[0] += 1
+            elif 'LEFT' in key_names:
+                self.game.style[1] += 1
+            elif 'UP' in key_names:
+                self.game.style[2] += 1
+            _style = self.style_cal(self.game.style)
+            if  0<= _style <= 9: 
+                _r = battle.player_attack(self.game.player, self.game.enemy, _style)
+                materials.main_scr.sprites['attack_style'].visible = True
+                materials.main_scr.sprites['attack_style'].scale = 0.35
+                materials.main_scr.sprites['attack_style'].image = materials.main_scr.attack_style_image[_style]
+
+
+                self.game.style = [0, 0, 0]
+                if not _r:
+                    for _ in range(3):
+                        materials.main_scr.sprites['player_dice_' + str(_)].visible = False
+                        materials.main_scr.sprites['enemy_dice_' + str(_)].visible = False
+                    self.game.game_status = 'END'
+                    self.game.show_loot()
+
+        # when the battle ends
+        elif self.game.game_status == 'END':
+            if self.game.player.loot:
+                _loot = self.game.player.loot
+                if 'UP' in key_names:
+                    # sell the loot
+                    self.game.player.sell_item(_loot[self.game.loot_selected])
+                    self.game.player.loot.remove(self.game.player.loot[self.game.loot_selected])
+                    if self.game.loot_selected > len(self.game.player.loot) - 1:
+                        self.game.loot_selected -= 1
+                    if self.game.loot_selected == -1:
+                        self.game.loot_selected = 0
+                    self.game.show_loot()
+                elif 'DOWN' in key_names:
+                    # equip the loot
+                    pass
+                elif 'RIGHT' in key_names:
+                    # select the next(right) loot
+                    for _ in range(self.game.loot_selected + 1, len(_loot)):
+                        if _loot[_]:
+                            self.game.loot_selected = _
+                            materials.main_scr.sprites['icon_select'].x = 562 + (30 * _)
+                            item.show(_loot[_], self.game.player.item_equiped[_loot[_].equiped_pos])
+                            break
+                elif 'LEFT' in key_names:
+                    # select the left loot
+                    for _ in range(self.game.loot_selected -1, -1, -1):
+                        if _loot[_]:
+                            self.game.loot_selected = _
+                            materials.main_scr.sprites['icon_select'].x = 562 + (30 * _)
+                            item.show(_loot[_], self.game.player.item_equiped[_loot[_].equiped_pos])
+                            break
+                # take it to the item box
+                elif 'SPACE' in key_names:
+                    pass
+            elif 'DOWN' in key_names:
+                self.game.enemy = enemy.gen_enemy(None, None, self.game.zone, random.randrange(self.game.zone * 10 + 1, (self.game.zone + 1) * 10))
+                if self.game.enemy:
+                    self.game.game_status = 'STARTED'
+                    enemy.show_enemy(self.game.enemy)
+                    self.game.player.loot = []
+    
+
+                
+    def style_cal(self, _style):
+        if _style[0] + _style[1] + _style[2] != 3:
+            return 10
+        if _style[0] == 0:
+            if _style[1] == 0:
+                return 9
+            elif _style[1] == 1:
+                return 6
+            elif _style[2] == 2:
+                return 7
+            else:
+                return 8
+        elif _style[0] == 1:
+            if _style[1] == 0:
+                return 5
+            elif _style[1] == 1:
+                return 4
+            else:
+                return 3
+        elif _style[0] == 2:
+            if _style[1] == 0:
+                return 2
+            else:
+                return 1
+        else:
+            return 0
+
+
+    def on_key_release(self, key, modifiers):
+        
+        #print('main key:', self.keys_pressed)
+        if self.keys_pressed and key in self.keys_pressed:
+            self.keys_pressed.remove(key)
+
+    #def draw(self):
+     #   self.image.blit(0, 0)
+
+
 
 def show(level=None):
     """to display main game screen

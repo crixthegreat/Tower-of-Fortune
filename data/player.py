@@ -41,8 +41,7 @@ class Player(object):
         # 10 - shoe
         # 11 - ringA
         # 12 - ringB
-
-        # nothing equiped
+        # born with nothing equiped
         self.item_equiped = [None for _ in range(13)]
         self.gold = 1000
         self.exp = 0
@@ -202,6 +201,10 @@ class Player(object):
         materials.front_layer.labels['hp_label'].element.text = str(int(self.hp)) + '/' + str(self.max_hp)
         materials.front_layer.labels['exp_label'].element.text = str(int(self.exp)) + '/' + str(int(self.level ** 3.5) + 300)
         materials.front_layer.labels['gold_label'].element.text = str(int(self.gold))
+        _str = ''
+        for _ in self.skill:
+            _str += (const.SKILL_DATA[_.skill_no]['name'] + ' ' * 4)
+            materials.front_layer.labels['player_skill_label'].element.text = _str
 
     def show_attack(self):
         _action = actions.MoveBy((20,0), 0.1) + actions.MoveBy((-20,0), 0.1)
@@ -250,7 +253,6 @@ def gen_player(level):
     _player.hp = _player.max_hp
     _player.level = level
     _player.sprite = materials.main_scr.sprites['player_sprite']
-    _player.show_player()
     return _player
 
 def ran_dice(min_dice, max_dice, luc, level, enemy=None):
