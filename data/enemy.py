@@ -191,7 +191,7 @@ def gen_enemy(no=None, rank=None, zone=None, level=None):
 def show_enemy(enemy):
     if not enemy:
         return None
-    materials.front_layer.labels['enemy_name_label'].element.text = const.ENEMY_ATK_NAME[enemy.type[0]] + const.ENEMY_CRIDMG_NAME[enemy.type[1]] + const.ENEMY_MAXHP_NAME[enemy.type[2]] + '的' + const.ENEMY_RANK_NAME[enemy.rank]
+    materials.front_layer.labels['enemy_name_label'].element.text = const.ENEMY_ATK_NAME[enemy.type[0]] + const.ENEMY_CRIDMG_NAME[enemy.type[1]] + const.ENEMY_MAXHP_NAME[enemy.type[2]] + '的' + const.ENEMY_RANK_NAME[enemy.rank] + ' ' + const.ENEMY_DATA[enemy.no]['enemy_name'][enemy.zone]
     materials.front_layer.labels['enemy_level_label'].element.text = str(enemy.level)
     materials.front_layer.labels['enemy_hp_label'].element.text = str(int(enemy.hp)) + '/' + str(int(enemy.value['max_hp']))
     _str = ''

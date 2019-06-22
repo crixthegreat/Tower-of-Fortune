@@ -24,7 +24,7 @@ def player_attack(_player, _enemy, attack_style):
     if materials.sprites['strike'].are_actions_running():
         #print(materials.sprites['strike'].are_actions_running())
         return True
-    show_message(const.ATTACK_STYLE_DATA[attack_style]['name'])
+    #show_message(const.ATTACK_STYLE_DATA[attack_style]['name'])
     _min_dice = _player.value['MinDice']
     _max_dice = _player.value['MaxDice']
     _atk = _player.value['Atk'] * (1 + const.ATTACK_STYLE_DATA[attack_style]['Atk'] / 100)

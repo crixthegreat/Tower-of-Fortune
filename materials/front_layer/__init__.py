@@ -9,6 +9,7 @@ import os
 from data import const
 import pyglet
 import cocos
+from cocos.layer import Layer, ScrollingManager, ScrollableLayer
 import materials
 
 images = {}
@@ -27,6 +28,7 @@ labels = dict(old_msg_box=cocos.text.Label('old message',
 labels['zone_label'] = cocos.text.Label('',
         font_size=14,font_name='Gadugi', 
         bold=False,color=const.DEFAULT_COLOR, x=350, y=555, width=100, align='center')
+
 labels['level_label'] = cocos.text.Label('',
         font_size=10,font_name='Gadugi', 
         bold=False,color=const.DEFAULT_COLOR, x=40, y=560)
@@ -39,8 +41,12 @@ labels['hp_label'] = cocos.text.Label('',
 labels['exp_label'] = cocos.text.Label('Exp:', 
         font_size=10,font_name='Gadugi', 
         bold=False,color=const.DEFAULT_COLOR, x=115, y=545)
+labels['player_skill_label'] = cocos.text.Label('', 
+        font_size=10,font_name='Gadugi', 
+        bold=False,color=const.DEFAULT_COLOR, x=30, y=515)
+
 labels['enemy_name_label'] = cocos.text.Label('Name:', 
-        font_size=12,font_name='Gadugi', 
+        font_size=10,font_name='Gadugi', 
         bold=False,color=const.DEFAULT_COLOR, x=610, y=560)
 labels['enemy_level_label'] = cocos.text.Label('',
         font_size=14,font_name='Gadugi', 
@@ -62,6 +68,18 @@ labels['enemy_hp_change_label'] = cocos.text.Label('',
 sprites = {}
 
 #bg_music = materials.Audio(Const.BG_MUSIC_FILE)
+
+class Front_Layer(Layer):
+    def __init__(self):
+        super(Front_Layer, self).__init__()
+        if hasattr(materials.front_layer, 'labels'):
+            for _, _label in materials.front_layer.labels.items():
+                self.add(_label)
+        
+        self.image = materials.images['front_img']
+    def draw(self):
+        self.image.blit(0, 0)
+
 
 
 def show_message(_msg, _type=None):
