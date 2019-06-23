@@ -335,16 +335,3 @@ def dice_equal(player, enemy):
     
     player.cri_dice += 1
 
-def save(_player):
-    with open(const.SAVE_FILE,'wb') as f:
-        pickle.dump(_player, f, -1)
-
-def load():
-    with open(const.SAVE_FILE,'rb') as f:
-        _player = pickle.load(f)
-        _player.sprite = materials.main_scr.sprites['player_sprite']
-        _player.show_player()
-        return _player
-
-    
-

@@ -91,7 +91,8 @@ class Menu_Screen(Layer):
                 self.game.player.show_player()
                 self.game.player.zone = 1
             elif self.game.enter == 0:
-                self.game.player = player.load()
+                pass
+                #self.game.player = self.game.load()
             else:
                 print('game enter error!')
                 sys.exit()

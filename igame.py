@@ -126,12 +126,32 @@ class Game(object):
         _value_string += str(int(self.player.value['EliteDamage'])) + '%' + ' '
         materials.info_layer.labels['player_value_label'].element.text = _value_string
 
+        for _ in range(13):
+            materials.info_layer.sprites['equiped_item' + str(_)].visible = True
+            materials.info_layer.sprites['equiped_item' + str(_)].scale = 0.5
+            materials.info_layer.sprites['equiped_item' + str(_)].image = materials.item_image[(59-self.player.item_equiped[_].type) * 5 + self.player.item_equiped[_].rare_type]
+
     def screen_set_focus(self, x, y):
         game_screen.set_focus(self.player.sprite.x, self.player.sprite.y)
     
     def show_menu(self):
         self.game_status = 'END'
         director.replace(FlipY3DTransition(Scene(my_menu)))
+    
+    """ The Save & Load methods need to be rewrited
+
+    def save(self):
+        with open(const.SAVE_FILE,'wb') as f:
+            pickle.dump(self.player, f, -1)
+
+    def load(self):
+        with open(const.SAVE_FILE,'rb') as f:
+            _player = pickle.load(f)
+            _player.sprite = materials.main_scr.sprites['player_sprite']
+            _player.show_player()
+            return _player
+    """
+    
 
 
 if __name__ == '__main__':
