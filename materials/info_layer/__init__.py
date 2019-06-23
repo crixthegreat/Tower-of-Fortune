@@ -30,11 +30,74 @@ labels['player_value_label'] = cocos.text.Label('',
 
 
 skill_select_image = pyglet.image.load(os.path.abspath(const.SKILL_SELECT_IMG_FILE)) 
+item_select_image =  pyglet.image.load(os.path.abspath(const.ITEM_SELECT_IMG_FILE)) 
 
 sprites = {}
 
 sprites['skill_select'] = cocos.sprite.Sprite(skill_select_image, position=(45, 520))
 sprites['skill_choose'] = cocos.sprite.Sprite(skill_select_image, position=(45, 400))
+
+for n in range(13):
+    sprites['equiped_item' + str(n)] = cocos.sprite.Sprite(materials.item_image[0], position=(0,0))
+    _start_x = 455
+    _start_y = 527
+    # main hand
+    if n == 0:
+        _tx = _start_x - 66
+        _ty = _start_y - 291
+    # off hand
+    elif n == 1:
+        _tx = _start_x + 63
+        _ty = _start_y - 291
+    # head
+    elif n == 2:
+        _tx = _start_x
+        _ty = _start_y
+    # shoulder
+    elif n == 3:
+        _tx = _start_x - 50
+        _ty = _start_y - 50
+    # necklace
+    elif n == 4:
+        _tx = _start_x + 53
+        _ty = _start_y - 23
+    #chest
+    elif n == 5:
+        _tx = _start_x
+        _ty = _start_y - 68
+    # wrist
+    elif n == 6:
+        _tx = _start_x + 53
+        _ty = _start_y - 105
+    # gloove
+    elif n == 7:
+        _tx = _start_x - 66
+        _ty = _start_y - 145
+    # waist    
+    elif n == 8:
+        _tx = _start_x
+        _ty = _start_y - 140
+    # leg
+    elif n == 9:
+        _tx = _start_x + 17
+        _ty = _start_y - 215
+    # shoe
+    elif n == 10:
+        _tx = _start_x - 26
+        _ty = _start_y - 265
+    # ringA
+    elif n == 11:
+        _tx = _start_x - 64
+        _ty = _start_y - 215
+    # ringB
+    elif n == 12:
+        _tx = _start_x + 63
+        _ty = _start_y - 215
+    
+    sprites['equiped_item' + str(n)].position = _tx, _ty
+
+sprites['equiped_item_select'] = cocos.sprite.Sprite(item_select_image, position=(350, 400))
+sprites['item_box_select'] = cocos.sprite.Sprite(item_select_image, position=(45, 100))
 #bg_music = materials.Audio(Const.BG_MUSIC_FILE)
 
 class Info_Layer(Layer):
@@ -61,9 +124,12 @@ class Info_Layer(Layer):
             for _, _sprite in materials.info_layer.sprites.items():
                 self.add(_sprite)
                 _sprite.visible = False
+        
 
         materials.info_layer.sprites['skill_select'].scale = 0.4
         materials.info_layer.sprites['skill_choose'].scale = 0.4
+        materials.info_layer.sprites['equiped_item_select'].scale = 0.3
+        materials.info_layer.sprites['item_box_select'].scale = 0.4
 
         self.game = game
         self.image = materials.images['info_layer_img']
@@ -93,14 +159,38 @@ class Info_Layer(Layer):
                 pass
             elif 'UP' in key_names:
                 pass
-            elif 'DOWN' in key_names:
-                pass
+            # check the equiped item
+            elif 'E' in key_names:
+                self.item_equiped_selected = 0
+                self.status = 'equiped_item_select'
+                materials.info_layer.equiped_item_select(self.game.player, 0)
+                
             # set skill
             elif 'S' in key_names and self.game.game_status == 'END':
                 self.skill_selected = 0
                 materials.info_layer.skill_select(self.game.player, 0)
                 self.status = 'skill'
 
+        elif self.status == 'equiped_item_select':
+            if 'LEFT' in key_names:
+                if self.item_equiped_selected > 0:
+                    self.item_equiped_selected -= 1
+                    materials.info_layer.equiped_item_select(self.game.player, self.item_equiped_selected)
+                else:
+                    self.item_equiped_selected = 12
+                    materials.info_layer.equiped_item_select(self.game.player, self.item_equiped_selected)
+
+            elif 'RIGHT' in key_names:
+                if self.item_equiped_selected < 12:
+                    self.item_equiped_selected += 1
+                    materials.info_layer.equiped_item_select(self.game.player, self.item_equiped_selected)
+                else:
+                    self.item_equiped_selected = 0
+                    materials.info_layer.equiped_item_select(self.game.player, self.item_equiped_selected)
+                        
+            elif 'SPACE' in key_names:
+                materials.info_layer.equiped_item_select()
+                self.status = 'view'
         elif self.status == 'skill':
             # you get n skills when your level is:
             # n=1, lv 1-9
@@ -219,3 +309,68 @@ def skill_choose(n=None):
         sprites['skill_choose'].y = 379 - 45 * (n // 3)
         sprites['skill_choose'].visible = True
         labels['skill_description_label'].element.text = const.SKILL_DATA[n]['description']
+
+def equiped_item_select(_player=None, n=None):
+    if n is None:
+        sprites['equiped_item_select'].visible = False
+    elif n <= 12:
+        _start_x = 455
+        _start_y = 527
+        # main hand
+        if n == 0:
+            _tx = _start_x - 65
+            _ty = _start_y - 291
+        # off hand
+        elif n == 1:
+            _tx = _start_x + 63
+            _ty = _start_y - 291
+        # head
+        elif n == 2:
+            _tx = _start_x
+            _ty = _start_y
+        # shoulder
+        elif n == 3:
+            _tx = _start_x - 47
+            _ty = _start_y - 50
+        # necklace
+        elif n == 4:
+            _tx = _start_x + 53
+            _ty = _start_y - 23
+        #chest
+        elif n == 5:
+            _tx = _start_x
+            _ty = _start_y - 68
+        # wrist
+        elif n == 6:
+            _tx = _start_x + 53
+            _ty = _start_y - 105
+        # gloove
+        elif n == 7:
+            _tx = _start_x - 65
+            _ty = _start_y - 145
+        # waist    
+        elif n == 8:
+            _tx = _start_x
+            _ty = _start_y - 140
+        # leg
+        elif n == 9:
+            _tx = _start_x + 17
+            _ty = _start_y - 215
+        # shoe
+        elif n == 10:
+            _tx = _start_x - 24
+            _ty = _start_y - 265
+        # ringA
+        elif n == 11:
+            _tx = _start_x - 64
+            _ty = _start_y - 215
+        # ringB
+        elif n == 12:
+            _tx = _start_x + 63
+            _ty = _start_y - 215
+        
+        sprites['equiped_item_select'].x = _tx
+        sprites['equiped_item_select'].y = _ty
+        sprites['equiped_item_select'].visible = True
+
+

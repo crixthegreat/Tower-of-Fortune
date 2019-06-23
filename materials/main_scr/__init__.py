@@ -217,6 +217,7 @@ class Main_Screen(ScrollableLayer):
                 elif 'SPACE' in key_names:
                     pass
             elif 'DOWN' in key_names:
+                #self.game.save()
                 self.game.enemy = enemy.gen_enemy(None, None, self.game.zone, random.randrange(self.game.zone * 10 + 1, (self.game.zone + 1) * 10))
                 if self.game.enemy:
                     self.game.game_status = 'STARTED'
