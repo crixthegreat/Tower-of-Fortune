@@ -21,9 +21,8 @@ def player_attack(_player, _enemy, attack_style):
     #    materials.main_scr.sprites['enemy_dice_' + str(_)].visible = False
 
     # firstly let's check the attack style
-    if materials.sprites['strike'].are_actions_running():
-        #print(materials.sprites['strike'].are_actions_running())
-        return True
+    
+
     #show_message(const.ATTACK_STYLE_DATA[attack_style]['name'])
     _min_dice = _player.value['MinDice']
     _max_dice = _player.value['MaxDice']
@@ -365,8 +364,7 @@ def battle_result(_player, _enemy, _result):
     _loot_no = 0
     if _result == 1:
         show_message('你击败了', const.ENEMY_DATA[_enemy.no]['enemy_name'][_enemy.zone])
-        #materials.main_scr.sprites['enemy_sprite'].do(actions.Blink(5,1))
-        materials.main_scr.sprites['enemy_sprite'].image = materials.main_scr.images['rip']
+        materials.main_scr.sprites['enemy_sprite'].do(actions.Blink(5,2))
 
         if _player.level - _enemy.level <= 2:
             _exp = 50 + _player.value['ExpWhenKill']
@@ -430,10 +428,6 @@ def battle_result(_player, _enemy, _result):
         for _ in _loot_list:
             _player.loot.append(_)
 
-        if _loot_no:
-            show_message('怪物掉落了些好东西')
-            print('equip_pos:',_loot_list[0].equiped_pos)
-            item.show(_loot_list[0], _player.item_equiped[_loot_list[0].equiped_pos])
 
 
 

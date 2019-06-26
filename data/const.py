@@ -66,6 +66,9 @@ ITEM_BOX_IMG_FILE = './pic/item_box.png'
 SINGLE_ITEM_BOX_IMG_FILE = './pic/single_item_box.png'
 SINGLE_EQUIPED_ITEM_BOX_IMG_FILE = './pic/single_equiped_item_box.png'
 ATTACK_STYLE_IMG_FILE = './pic/item_box.png'
+ATTACK_IMG_FILE = './pic/attack.png'
+DEFEND_IMG_FILE = './pic/defend.png'
+LUCK_IMG_FILE = './pic/luck.png'
 # The player affixes
 
 PLAYER_AFFIX = dict(
