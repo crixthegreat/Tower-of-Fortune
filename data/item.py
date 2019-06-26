@@ -153,10 +153,14 @@ def show(item, player_item):
     if item == None:
         print('无')
         return None
+    
     materials.sprites['item'].visible = True
     materials.sprites['item'].scale = 0.6
     materials.sprites['item'].image = materials.item_image[(59-item.type) * 5 + item.rare_type]
+    
     materials.main_scr.sprites['item_box'].visible = True
+   
+
     materials.main_scr.labels['item_name'].element.text = item.name
     materials.main_scr.labels['item_type'].element.text = 'Lv ' + str(item.level) + '\n' + const.RARE_TYPE_NAME[item.rare_type] + ' ' + const.MAIN_TYPE_NAME[item.main_type]
     materials.main_scr.labels['item_name'].visible = True
@@ -184,14 +188,16 @@ def show(item, player_item):
 
     print(item.name, item.level, const.RARE_TYPE_NAME[item.rare_type], const.MAIN_TYPE_NAME[item.main_type])
     
-    for _ in range(const.AFFIX_MAX_USED_NO):
-        if item.affix[_]:
-            print(const.ITEM_AFFIX_CNAME[_], item.affix[_])
+    #for _ in range(const.AFFIX_MAX_USED_NO):
+    #    if item.affix[_]:
+    #        print(const.ITEM_AFFIX_CNAME[_], item.affix[_])
 
     if player_item:
+
         materials.sprites['player_item'].visible = True
         materials.sprites['player_item'].scale = 0.6
         materials.sprites['player_item'].image = materials.item_image[(59-player_item.type) * 5 + player_item.rare_type]
+
         materials.main_scr.labels['player_item_name'].element.text = player_item.name
         materials.main_scr.labels['player_item_type'].element.text = 'Lv ' + str(player_item.level) + '\n' + const.RARE_TYPE_NAME[player_item.rare_type] + ' ' + const.MAIN_TYPE_NAME[player_item.main_type]
         materials.main_scr.labels['player_item_name'].visible = True

@@ -195,8 +195,14 @@ class Main_Screen(ScrollableLayer):
                         self.game.loot_selected = 0
                     self.game.show_loot()
                 elif 'DOWN' in key_names:
-                    # equip the loot
-                    pass
+                    # get the loot
+                    if self.game.player.add_to_item_box(_loot[self.game.loot_selected]):
+                        self.game.player.loot.remove(self.game.player.loot[self.game.loot_selected])
+                        if self.game.loot_selected > len(self.game.player.loot) - 1:
+                            self.game.loot_selected -= 1
+                        if self.game.loot_selected == -1:
+                            self.game.loot_selected = 0
+                        self.game.show_loot()
                 elif 'RIGHT' in key_names:
                     # select the next(right) loot
                     for _ in range(self.game.loot_selected + 1, len(_loot)):

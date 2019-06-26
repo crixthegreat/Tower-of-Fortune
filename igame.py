@@ -103,33 +103,13 @@ class Game(object):
 
     def refresh_info(self):
         self.player.show_player()
-        _value_string = ''
-        _value_string += str(int(self.player.value['Atk'])) + ' '
-        _value_string += str(int(self.player.value['Def'])) + ' '
-        _value_string += str(int(self.player.value['Luc'])) + ' '
-        _value_string += str(int(self.player.value['Vit'])) + ' '
-        _value_string += str(int(self.player.value['CriDmg'])) + ' '
-        _value_string += str(int(self.player.value['BlockValue'])) + '%' + ' '
-        _value_string += str(int(self.player.value['ShortDistanceAtkDecreaseRate'])) + '%' + ' '
-        _value_string += str(int(self.player.value['BrambleDmg'])) + ' '
-        _value_string += str(int(self.player.value['HpBonusRate'])) + '%' + ' '
-        _value_string += str(int(self.player.value['HpRegen'])) + ' '
-        _value_string += str(int(self.player.value['HpAbsorb'])) + '%' + ' '
-        _value_string += str(int(self.player.value['HpHit'])) + ' '
-        _value_string += str(int(self.player.value['MagicFind'])) + ' '
-        _value_string += str(int(self.player.value['GoldFind'])) + ' '
-        _value_string += str(int(self.player.value['ExpBonus'])) + '%' + ' '
-        _value_string += str(int(self.player.value['ExpWhenKill'])) + ' '
-        _value_string += str(int(self.player.value['MaxDice'])) + ' '
-        _value_string += str(int(self.player.value['MinDice'])) + ' '
-        _value_string += str(int(self.player.value['DebuffRoundMinus'])) + ' '
-        _value_string += str(int(self.player.value['EliteDamage'])) + '%' + ' '
-        materials.info_layer.labels['player_value_label'].element.text = _value_string
+        # show the value of the player
+        my_info.show_player_value()
 
-        for _ in range(13):
-            materials.info_layer.sprites['equiped_item' + str(_)].visible = True
-            materials.info_layer.sprites['equiped_item' + str(_)].scale = 0.5
-            materials.info_layer.sprites['equiped_item' + str(_)].image = materials.item_image[(59-self.player.item_equiped[_].type) * 5 + self.player.item_equiped[_].rare_type]
+        # show the equiped items of the player
+        my_info.show_player_item()
+        # show the items in the player's item box
+        my_info.show_item_box()
 
     def screen_set_focus(self, x, y):
         game_screen.set_focus(self.player.sprite.x, self.player.sprite.y)

@@ -18,6 +18,7 @@ ORANGE_COLOR = (230,30,230,255)
 HIGHLIGHT_COLOR = (200, 30, 30, 255)
 
 # used for items
+MAX_ITEM_BOX = 130
 LEGEND_DROP_RATE = 2
 SET_DROP_RATE = 2
 RARE_DROP_RATE = 100
@@ -62,6 +63,8 @@ ICON_SELECT_IMG_FILE = './pic/icon_select.png'
 ITEM_SELECT_IMG_FILE = './pic/item_select.png'
 SKILL_SELECT_IMG_FILE = './pic/skill_select.png'
 ITEM_BOX_IMG_FILE = './pic/item_box.png'
+SINGLE_ITEM_BOX_IMG_FILE = './pic/single_item_box.png'
+SINGLE_EQUIPED_ITEM_BOX_IMG_FILE = './pic/single_equiped_item_box.png'
 ATTACK_STYLE_IMG_FILE = './pic/item_box.png'
 # The player affixes
 
