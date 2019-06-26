@@ -132,36 +132,41 @@ class Player(object):
         # 2 - off hand
         _main_type = const.ITEMS_DATA[item.type]['main_type']
         
-        
+        # when a single hand weapon equiped, the off hand item moves into item box
         if _main_type == 0:
             _pos = 0
-            self.add_to_item_box(self.item_equiped[0])
+            if self.item_equiped[0]:
+                if const.ITEMS_DATA[self.item_equiped[0].type]['main_type'] == 1:
+                    self.add_to_item_box(self.item_equiped[0])
+                else:
+                    self.add_to_item_box(self.item_equiped[1])
+                    self.item_equiped[1] = copy.deepcopy(self.item_equiped[0])
         elif _main_type == 1:
             _pos = 0
-            # if occupied, add it to the item box
             self.add_to_item_box(self.item_equiped[0])
             self.add_to_item_box(self.item_equiped[1])
+            self.item_equiped[1] = None
         elif _main_type == 2:
             _pos = 1
+            self.add_to_item_box(self.item_equiped[1])
             if self.item_equiped[0].main_type == 1:
                 self.add_to_item_box(self.item_equiped[0])
+                self.item_equiped[0] = None
         elif  3 <= _main_type  <= 11:
-            _pos = _main_type - 1
+            _pos = item.equiped_pos
             self.add_to_item_box(self.item_equiped[_pos])
         elif _main_type == 12:
-            if self.item_equiped[11]:
-                if self.item_equiped[12]:
-                    self.add_to_item_box(self.item_equiped[11])
-                    _pos = 11
-                else:
-                    _pos = 12
-            else:
-                _pos = 11
+            _pos = 11
+            self.add_to_item_box(self.item_equiped[12])
+            self.item_equiped[12] = copy.deepcopy(self.item_equiped[11])
         self.item_equiped[_pos] = item
 
     def add_to_item_box(self, item):
-        if item:
+        if item and len(self.item_box) < const.MAX_ITEM_BOX:
             self.item_box.append(item)
+            return True
+        else:
+            return False
 
     def equip_skill(self, *_skill):
         for _ in _skill:
@@ -253,6 +258,10 @@ def gen_player(level):
     _player.hp = _player.max_hp
     _player.level = level
     _player.sprite = materials.main_scr.sprites['player_sprite']
+
+    for _ in range(54):
+        _player.item_box.append(item.gen_random_item())
+
     return _player
 
 def ran_dice(min_dice, max_dice, luc, level, enemy=None):
