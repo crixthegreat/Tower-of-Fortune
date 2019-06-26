@@ -24,6 +24,11 @@ icon_select_image = pyglet.image.load(os.path.abspath(const.ICON_SELECT_IMG_FILE
 item_box_image = pyglet.image.load(os.path.abspath(const.ITEM_BOX_IMG_FILE)) 
 attack_style_image = pyglet.image.ImageGrid(pyglet.image.load('./pic/attack_style.png'), 5, 2)
 
+
+attack_image = pyglet.image.load(os.path.abspath(const.ATTACK_IMG_FILE)) 
+defend_image = pyglet.image.load(os.path.abspath(const.DEFEND_IMG_FILE)) 
+luck_image = pyglet.image.load(os.path.abspath(const.LUCK_IMG_FILE)) 
+
 images['rip'] = pyglet.image.load(os.path.abspath(const.RIP_IMG_FILE)) 
 images['enemy_image'] = enemy_image
 """
@@ -73,12 +78,21 @@ labels['player_item_affix'] = cocos.text.Label('',font_size=9,
 
 sprites = {}
 sprites['player_sprite'] = cocos.sprite.Sprite(player_image, position=(240, 300))
-sprites['enemy_sprite'] = cocos.sprite.Sprite(enemy_image, position=(600, 300))
+sprites['enemy_sprite'] = cocos.sprite.Sprite(enemy_image, position=(630, 320))
 for _ in range(8):
     sprites['loot' + str(_)] = cocos.sprite.Sprite(player_image, position=(590 + _ * 30, 210))
 sprites['icon_select'] = cocos.sprite.Sprite(icon_select_image, position=(562, 185))
 sprites['item_box'] = cocos.sprite.Sprite(item_box_image, position=(360, 285))
+
+
+sprites['style1'] = cocos.sprite.Sprite(attack_image, position=(330, 165))
+sprites['style2'] = cocos.sprite.Sprite(defend_image, position=(400, 165))
+sprites['style3'] = cocos.sprite.Sprite(luck_image, position=(470, 165))
 sprites['attack_style'] = cocos.sprite.Sprite(attack_style_image[0], position=(400, 115))
+
+sprites['style1'].scale = 0.3 
+sprites['style2'].scale = 0.3 
+sprites['style3'].scale = 0.3 
 
 for _ in range(3):
     sprites['player_dice_' + str(_)] = cocos.sprite.Sprite(materials.dice_image[0], position=(370,250 + 66 * _ ))
@@ -128,7 +142,7 @@ class Main_Screen(ScrollableLayer):
                 self.add(_label)
                 _label.visible = False
         # use the time interval event to calculate the time used
-        self.schedule_interval(self.refresh_time, 0.04)
+        self.schedule_interval(self.refresh_time, 0.1)
 
         for _ in range(3):
             materials.materials.main_scr.sprites['player_dice_' + str(_)].scale = 0.5
@@ -138,9 +152,36 @@ class Main_Screen(ScrollableLayer):
 
     def refresh_time(self, dt):
         # the 'dt' means the time passed after the last event occured
+        self.game.screen_set_focus(self.game.player.sprite.x, self.game.player.sprite.y) 
+        if materials.sprites['strike'].are_actions_running() or materials.main_scr.sprites['player_sprite'].are_actions_running() or materials.main_scr.sprites['enemy_sprite'].are_actions_running():
+            return None
         if self.game.game_status == 'STARTED':
-            #print(self.tx, self.ty, materials.alpha_sprite(5).x, materials.alpha_sprite(5).y)
-            self.game.screen_set_focus(self.game.player.sprite.x, self.game.player.sprite.y) 
+            _style = self.style_cal(self.game.style)
+            if  0<= _style <= 9: 
+                _r = battle.player_attack(self.game.player, self.game.enemy, _style)
+                materials.main_scr.sprites['style1'].visible = False
+                materials.main_scr.sprites['style2'].visible = False
+                materials.main_scr.sprites['style3'].visible = False
+                materials.main_scr.sprites['attack_style'].visible = True
+                materials.main_scr.sprites['attack_style'].scale = 0.35
+                materials.main_scr.sprites['attack_style'].image = materials.main_scr.attack_style_image[_style]
+                self.game.style = [0, 0, 0]
+                if not _r:
+                    for _ in range(3):
+                        materials.main_scr.sprites['player_dice_' + str(_)].visible = False
+                        materials.main_scr.sprites['enemy_dice_' + str(_)].visible = False
+                    self.game.game_status = 'BATTLE_END'
+                    return None
+        if self.game.game_status == 'BATTLE_END':
+            materials.main_scr.sprites['enemy_sprite'].visible = True
+            materials.main_scr.sprites['enemy_sprite'].image = materials.main_scr.images['rip']
+            self.game.game_status = 'END'
+            self.game.show_loot()
+            _loot_list = self.game.player.loot
+            if _loot_list:
+                #show_message('怪物掉落了些好东西')
+                #print('equip_pos:',_loot_list[0].equiped_pos)
+                item.show(_loot_list[0], self.game.player.item_equiped[_loot_list[0].equiped_pos])
 
     def on_key_press(self, key, modifiers):
         # use a set(keys_pressed) to store all the keys pressed
@@ -159,27 +200,23 @@ class Main_Screen(ScrollableLayer):
             self.keys_pressed.clear()
             self.game.show_info()
         elif self.game.game_status == 'STARTED':
-            if 'RIGHT' in key_names:
-                self.game.style[0] += 1
-            elif 'LEFT' in key_names:
-                self.game.style[1] += 1
-            elif 'UP' in key_names:
-                self.game.style[2] += 1
+            _round = self.game.style[0] + self.game.style[1] + self.game.style[2]
             _style = self.style_cal(self.game.style)
-            if  0<= _style <= 9: 
-                _r = battle.player_attack(self.game.player, self.game.enemy, _style)
-                materials.main_scr.sprites['attack_style'].visible = True
-                materials.main_scr.sprites['attack_style'].scale = 0.35
-                materials.main_scr.sprites['attack_style'].image = materials.main_scr.attack_style_image[_style]
+            if _style >= 10:
+                if 'RIGHT' in key_names:
+                    self.game.style[0] += 1
+                    sprites['style' + str(_round + 1)].visible = True
+                    sprites['style' + str(_round + 1)].image = attack_image
+                elif 'LEFT' in key_names:
+                    self.game.style[1] += 1
+                    sprites['style' + str(_round + 1)].visible = True
+                    sprites['style' + str(_round + 1)].image = defend_image
+                elif 'UP' in key_names:
+                    self.game.style[2] += 1
+                    sprites['style' + str(_round + 1)].visible = True
+                    sprites['style' + str(_round + 1)].image = luck_image
 
 
-                self.game.style = [0, 0, 0]
-                if not _r:
-                    for _ in range(3):
-                        materials.main_scr.sprites['player_dice_' + str(_)].visible = False
-                        materials.main_scr.sprites['enemy_dice_' + str(_)].visible = False
-                    self.game.game_status = 'END'
-                    self.game.show_loot()
 
         # when the battle ends
         elif self.game.game_status == 'END':

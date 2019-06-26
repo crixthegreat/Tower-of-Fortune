@@ -211,8 +211,10 @@ class Info_Layer(Layer):
         key_names = [pyglet.window.key.symbol_string(k) for k in self.keys_pressed]
         
         if 'I' in key_names:
-            self.skill_select()
             self.skill_choose()
+            self.skill_select()
+            self.equiped_item_select()
+            self.item_box_select('clear')
             self.status == 'view'
             self.game.show_game()
 
@@ -277,6 +279,18 @@ class Info_Layer(Layer):
                     self.item_box_selected = (len(self.game.player.item_box) - 1) // 13 * 13
                 self.show_item_box()
                 self.item_box_select()
+            # sell the item in the item box
+            elif 'S' in key_names:
+                self.game.player.sell_item(self.game.player.item_box.pop(self.item_box_selected))
+                if self.game.player.item_box:
+                    if self.item_box_selected >= len(self.game.player.item_box):
+                        self.item_box_selected = len(self.game.player.item_box) - 1
+                    self.item_box_select()
+                # if sold out
+                else:
+                    self.item_box_select('clear')
+                self.show_item_box()
+            # close the item box    
             elif 'SPACE' in key_names:
                 self.item_box_select(clear=True)
                 self.hide_item()
@@ -416,18 +430,24 @@ class Info_Layer(Layer):
                     sprites['item_box' + str(_)].visible = True
                     sprites['item_box' + str(_)].image = materials.item_image[(59 - self.game.player.item_box[_item_no].type) * 5 + self.game.player.item_box[_item_no].rare_type]
             labels['item_box_page'].element.text = str((self.item_box_selected // 13) + 1) + '/10'
+        else:
+            for _ in range(13):
+                sprites['item_box' + str(_)].visible = False
+            self.hide_item()
+
 
     def item_box_select(self, clear=None):
-        if self.game.player.item_box:
-            if clear:
-                sprites['item_box_select'].visible = False
-                self.item_box_selected = 0
-                self.status = 'view'
-            else:
+        if clear:
+            sprites['item_box_select'].visible = False
+            self.item_box_selected = 0
+            self.status = 'view'
+            self.hide_item()
+        else:
+            if self.game.player.item_box:
                 _item_no = self.item_box_selected % 13
                 sprites['item_box_select'].visible = True
                 sprites['item_box_select'].position = 47 + 59 * _item_no, 79
-            self.show_item(self.game.player.item_box[self.item_box_selected], self.game.player.item_equiped[self.game.player.item_box[self.item_box_selected].equiped_pos])
+                self.show_item(self.game.player.item_box[self.item_box_selected], self.game.player.item_equiped[self.game.player.item_box[self.item_box_selected].equiped_pos])
 
     # show the item for the info_layer
     def show_item(self, item, player_item):
@@ -563,6 +583,7 @@ class Info_Layer(Layer):
     def skill_select(self, _player=None, n=None):
         if n is None:
             sprites['skill_select'].visible = False
+            labels['skill_description_label'].element.text = ''
         elif n <=3:
             sprites['skill_select'].x = 45 + 45 * n
             sprites['skill_select'].visible = True
@@ -571,6 +592,7 @@ class Info_Layer(Layer):
     def skill_choose(self, n=None):
         if n is None:
             sprites['skill_choose'].visible = False
+            labels['skill_description_label'].element.text = const.SKILL_DATA[self.game.player.skill[self.skill_selected].skill_no]['description']
         elif n <=14:
             sprites['skill_choose'].x = 48 + 66 * (n % 3)
             sprites['skill_choose'].y = 379 - 45 * (n // 3)
