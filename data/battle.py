@@ -458,7 +458,7 @@ def show_hp_change(_player=None, _enemy=None, cri_dice=0, _player_dmg=0, _enemy_
             materials.front_layer.labels['player_hp_change_label'].element.y = 320
             materials.front_layer.labels['player_hp_change_label'].visible = True
             if not materials.front_layer.labels['player_hp_change_label'].are_actions_running():
-                materials.front_layer.labels['player_hp_change_label'].do(actions.MoveBy((-80,0),0.3) + actions.FadeOut(0.3) + actions.MoveBy((80,0),0.3))
+                materials.front_layer.labels['player_hp_change_label'].do(actions.JumpBy((-80,10),35,1,0.7) + actions.FadeOut(0.3) + actions.MoveBy((80,-10),0.3))
             else:
                 materials.front_layer.labels['player_hp_change_label'].visible = False
         elif cri_dice==2:
@@ -492,7 +492,7 @@ def show_hp_change(_player=None, _enemy=None, cri_dice=0, _player_dmg=0, _enemy_
             materials.front_layer.labels['enemy_hp_change_label'].element.y = 320
             materials.front_layer.labels['enemy_hp_change_label'].visible = True
             if not materials.front_layer.labels['enemy_hp_change_label'].are_actions_running():
-                materials.front_layer.labels['enemy_hp_change_label'].do(actions.MoveBy((80,0),0.3) + actions.FadeOut(0.3) + actions.MoveBy((-80,0),0.3))
+                materials.front_layer.labels['enemy_hp_change_label'].do(actions.JumpBy((80,10),35,1,0.7) + actions.FadeOut(0.3) + actions.MoveBy((-80,-10),0.3))
             else:
                 materials.front_layer.labels['enemy_hp_change_label'].visible = False
         elif cri_dice==2:

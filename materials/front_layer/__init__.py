@@ -60,10 +60,10 @@ labels['enemy_skill_label'] = cocos.text.Label('',
 
 labels['player_hp_change_label'] = cocos.text.Label('', 
         font_size=12,font_name='Gadugi', 
-        bold=False,color=const.DEFAULT_COLOR, x=200, y=220)
+        bold=True,color=const.DEFAULT_COLOR, x=200, y=220)
 labels['enemy_hp_change_label'] = cocos.text.Label('', 
         font_size=12,font_name='Gadugi', 
-        bold=False,color=const.DEFAULT_COLOR, x=500, y=220)
+        bold=True,color=const.DEFAULT_COLOR, x=500, y=220)
 
 sprites = {}
 

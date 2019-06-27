@@ -85,14 +85,14 @@ sprites['icon_select'] = cocos.sprite.Sprite(icon_select_image, position=(562, 1
 sprites['item_box'] = cocos.sprite.Sprite(item_box_image, position=(360, 285))
 
 
-sprites['style1'] = cocos.sprite.Sprite(attack_image, position=(330, 165))
-sprites['style2'] = cocos.sprite.Sprite(defend_image, position=(400, 165))
-sprites['style3'] = cocos.sprite.Sprite(luck_image, position=(470, 165))
+sprites['style1'] = cocos.sprite.Sprite(attack_image, position=(330, 175))
+sprites['style2'] = cocos.sprite.Sprite(defend_image, position=(400, 175))
+sprites['style3'] = cocos.sprite.Sprite(luck_image, position=(470, 175))
 sprites['attack_style'] = cocos.sprite.Sprite(attack_style_image[0], position=(400, 115))
 
-sprites['style1'].scale = 0.3 
-sprites['style2'].scale = 0.3 
-sprites['style3'].scale = 0.3 
+#sprites['style1'].scale = 1 
+#sprites['style2'].scale = 1 
+#sprites['style3'].scale = 1 
 
 for _ in range(3):
     sprites['player_dice_' + str(_)] = cocos.sprite.Sprite(materials.dice_image[0], position=(370,250 + 66 * _ ))
@@ -153,8 +153,18 @@ class Main_Screen(ScrollableLayer):
     def refresh_time(self, dt):
         # the 'dt' means the time passed after the last event occured
         self.game.screen_set_focus(self.game.player.sprite.x, self.game.player.sprite.y) 
-        if materials.sprites['strike'].are_actions_running() or materials.main_scr.sprites['player_sprite'].are_actions_running() or materials.main_scr.sprites['enemy_sprite'].are_actions_running():
-            return None
+        for _, _sprite in materials.sprites.items():
+            if _sprite.are_actions_running():
+                return None
+        for _, _sprite in materials.main_scr.sprites.items():
+            if _sprite.are_actions_running():
+                return None
+        for _, _label in materials.front_layer.labels.items():
+            if _label.are_actions_running():
+                return None
+
+        #if materials.sprites['strike'].are_actions_running() or materials.main_scr.sprites['player_sprite'].are_actions_running() or materials.main_scr.sprites['enemy_sprite'].are_actions_running():
+        #    return None
         if self.game.game_status == 'STARTED':
             _style = self.style_cal(self.game.style)
             if  0<= _style <= 9: 
@@ -260,7 +270,7 @@ class Main_Screen(ScrollableLayer):
                 elif 'SPACE' in key_names:
                     pass
             elif 'DOWN' in key_names:
-                #self.game.save()
+                self.game.save()
                 self.game.enemy = enemy.gen_enemy(None, None, self.game.zone, random.randrange(self.game.zone * 10 + 1, (self.game.zone + 1) * 10))
                 if self.game.enemy:
                     self.game.game_status = 'STARTED'

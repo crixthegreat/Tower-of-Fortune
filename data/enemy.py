@@ -178,7 +178,7 @@ def gen_enemy(no=None, rank=None, zone=None, level=None):
             _enemy.value['max_hp'] *= 1.5
         # the skill 23: stubborn, always have the same dice 
         if _ == 23:
-            _enemy.value['Max_Dice'] = int((_enemy.value['Max_Dice'] + _enemy.value['Min_Dice'] + 1) / 2)
+            _enemy.value['Max_Dice'] = int((_enemy.value['Max_Dice'] + 1) / 2)
             _enemy.value['Min_Dice'] = _enemy.value['Max_Dice']
     _enemy.no = no
     _enemy.hp = _enemy.value['max_hp']
