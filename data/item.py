@@ -26,6 +26,20 @@ class Item(object):
         # rare_type = [1, 5]
         self.rare_type = 1
 
+    def item_to_dict(self):
+        _affix_list = []
+        for _ in range(const.AFFIX_MAX_USED_NO):
+            _affix_list.append(self.affix[_])
+        _dict = dict(item_type=self.type,
+                main_type=self.main_type, 
+                equiped_pos=self.equiped_pos, 
+                level=self.level, 
+                name=self.name, 
+                rare_type=self.rare_type, 
+                affix_list=_affix_list
+                )
+        return _dict
+
 def gen_random_item(item_type=None, level=None, mf=None):
     """Generate a random item with item_type, level, and mf
     """

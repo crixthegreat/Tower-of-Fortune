@@ -7,6 +7,7 @@
 import sys
 import os
 import random
+import json
 import cocos
 from cocos.director import director
 from cocos.scene import Scene
@@ -14,6 +15,7 @@ from cocos.layer import Layer, ScrollingManager, ScrollableLayer
 import pyglet
 import materials 
 from materials.front_layer import show_message
+from data import const
 """i-game written by Crix 2019.06 - 2019.06 
 I-GAME is a general struction of a python cocos 2d platform game
 which has:
@@ -41,9 +43,13 @@ which has:
             start.png -- the 'start' image file
 
 
------------- A new start -----------------
-Tower of fortune (indicate to the great game Tower of fortune in iOS)
-------------------------------------------
+------------ A new start ---------------------------------
+Tower of fortune (pays homage to the following great games:
+- Tower of fortune (iOS)
+- Diablo
+- The Gambling God (FC)
+)
+----------------------------------------------------------
 """
 import pickle
 from data import const, player, item, enemy, battle, skill
@@ -119,6 +125,50 @@ class Game(object):
         self.game_status = 'END'
         director.replace(FlipY3DTransition(Scene(my_menu)))
     
+
+    def save(self):
+        
+        _player = self.player
+        
+        # turn the player's attribution into a dict
+        save_data = dict()
+
+        # load the exist player data
+        if os.path.isfile(const.SAVE_FILE):
+            with open(const.SAVE_FILE) as _file:
+                try:
+                    save_data = json.load(_file)
+                except:
+                    print('open file failed')
+
+        _item_equiped_list = []
+        _item_box_list = []
+        _skill_list = []
+        # use the item_to_dict function to turn a item object into a dictionary
+        for _ in _player.item_equiped:
+            _item_equiped_list.append(_.item_to_dict())
+        for _ in _player.item_box:
+            _item_box_list.append(_.item_to_dict())
+        # for skills, just store the N.O. of the skills
+        for _ in _player.skill:
+            _skill_list.append(_.skill_no)
+        # the name of the player is used to identify the save data
+        save_data[_player.name] = dict(
+                level=_player.level, 
+                hp=_player.hp, 
+                item_equiped=_item_equiped_list, 
+                gold=_player.gold, 
+                exp=_player.exp, 
+                zone=_player.zone, 
+                epitaph=_player.epitaph, 
+                item_box=_item_box_list, 
+                skill=_skill_list
+                )
+        with open(const.SAVE_FILE, 'w') as _file:
+            try:
+                json.dump(save_data, _file)
+            except:
+                print('write file failed')
     """ The Save & Load methods need to be rewrited
 
     def save(self):
