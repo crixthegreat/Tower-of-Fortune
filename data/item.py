@@ -40,6 +40,22 @@ class Item(object):
                 )
         return _dict
 
+def dict_to_item(item_dict):
+
+    _item = Item(item_dict['item_type'])
+    _item.main_type = item_dict['main_type']
+    _item.equiped_pos = item_dict['equiped_pos']
+    _item.level = item_dict['level']
+    _item.name = item_dict['name']
+    _item.rare_type = item_dict['rare_type']
+    _item.affix = []
+
+    
+    for _ in range(const.AFFIX_MAX_USED_NO):
+        _item.affix.append(item_dict['affix_list'][_])
+
+    return _item
+
 def gen_random_item(item_type=None, level=None, mf=None):
     """Generate a random item with item_type, level, and mf
     """

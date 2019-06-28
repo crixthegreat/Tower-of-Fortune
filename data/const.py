@@ -69,6 +69,8 @@ ATTACK_STYLE_IMG_FILE = './pic/item_box.png'
 ATTACK_IMG_FILE = './pic/attack.png'
 DEFEND_IMG_FILE = './pic/defend.png'
 LUCK_IMG_FILE = './pic/luck.png'
+SAVE_LOAD_BG_IMG_FILE = './pic/save_load_layer_bg.png'
+SELECT_BAR_IMG_FILE = './pic/select_bar.png'
 # The player affixes
 
 PLAYER_AFFIX = dict(

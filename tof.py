@@ -8,14 +8,16 @@ import sys
 import os
 import random
 import json
+import copy
 import cocos
 from cocos.director import director
 from cocos.scene import Scene
+from cocos.scenes import FlipY3DTransition
 from cocos.layer import Layer, ScrollingManager, ScrollableLayer
 import pyglet
 import materials 
 from materials.front_layer import show_message
-from data import const
+from data import const, player, skill
 """i-game written by Crix 2019.06 - 2019.06 
 I-GAME is a general struction of a python cocos 2d platform game
 which has:
@@ -51,7 +53,6 @@ Tower of fortune (pays homage to the following great games:
 )
 ----------------------------------------------------------
 """
-import pickle
 from data import const, player, item, enemy, battle, skill
 
 class Game(object):
@@ -124,6 +125,10 @@ class Game(object):
     def show_menu(self):
         self.game_status = 'END'
         director.replace(FlipY3DTransition(Scene(my_menu)))
+
+    def show_save_load(self):
+        director.replace(FlipY3DTransition(Scene(my_save_load_layer)))
+        my_save_load_layer.load_save_slot()
     
 
     def save(self):
@@ -153,13 +158,14 @@ class Game(object):
         for _ in _player.skill:
             _skill_list.append(_.skill_no)
         # the name of the player is used to identify the save data
-        save_data[_player.name] = dict(
-                level=_player.level, 
+        save_data['slot' + str(_player.save_slot)] = dict(
+                player_level=_player.level, 
                 hp=_player.hp, 
                 item_equiped=_item_equiped_list, 
                 gold=_player.gold, 
                 exp=_player.exp, 
                 zone=_player.zone, 
+                alive=_player.alive, 
                 epitaph=_player.epitaph, 
                 item_box=_item_box_list, 
                 skill=_skill_list
@@ -169,6 +175,39 @@ class Game(object):
                 json.dump(save_data, _file)
             except:
                 print('write file failed')
+
+    def load(self, save_slot):
+        _player = player.Player(materials.main_scr.sprites['player_sprite'])
+        _player.save_slot = save_slot
+        with open(const.SAVE_FILE) as _file:
+            try:
+                save_data = json.load(_file)
+            except:
+                print('load save file failed')
+                sys.exit()
+        _data = save_data['slot' + str(save_slot)]
+
+        _player.level = _data['player_level']
+        _player.hp = _data['hp']
+        _player.gold = _data['gold']
+        _player.exp = _data['exp']
+        _player.zone = _data['zone']
+        _player.alive = _data['alive']
+        _player.epitaph = _data['epitaph']
+
+        _player.skill = []
+        for _ in _data['skill']:
+            _player.skill.append(skill.Skill(_))
+
+        _player.item_equiped = []
+        for _ in _data['item_equiped']:
+            _player.item_equiped.append(item.dict_to_item(_))
+
+        _player.item_box = []
+        for _ in _data['item_box']:
+            _player.item_box.append(item.dict_to_item(_))
+
+        return _player
     """ The Save & Load methods need to be rewrited
 
     def save(self):
@@ -198,6 +237,7 @@ if __name__ == '__main__':
     front_layer = materials.front_layer.Front_Layer()
     map_layer = cocos.tiles.load('./materials/background/map.tmx')['start']
     my_info = materials.info_layer.Info_Layer(my_game)
+    my_save_load_layer = materials.save_load_layer.Save_Load_Layer(my_game)
     my_menu = materials.menu.Menu_Screen(my_game)
     my_main = materials.main_scr.Main_Screen(my_game)
     # the order of the 'add' makes sense!
