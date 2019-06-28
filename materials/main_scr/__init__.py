@@ -169,6 +169,7 @@ class Main_Screen(ScrollableLayer):
             _style = self.style_cal(self.game.style)
             if  0<= _style <= 9: 
                 _r = battle.player_attack(self.game.player, self.game.enemy, _style)
+                self.game.save()
                 materials.main_scr.sprites['style1'].visible = False
                 materials.main_scr.sprites['style2'].visible = False
                 materials.main_scr.sprites['style3'].visible = False

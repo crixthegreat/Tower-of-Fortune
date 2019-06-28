@@ -24,7 +24,7 @@ class Player(object):
         self.name = 'judy'
         self.level = 1
         self.hp = 100
-        self.sprite = sprite
+        self.sprite = sprite 
         self.vx = 0
         self.vy = 0
         # item_equiped[pos]
@@ -56,8 +56,8 @@ class Player(object):
         # 0 - not occur, 1 - occured once, 2 - occured twice, 3 - occured third times(dice explode)
         self.cri_dice = 0
         self.loot = []
-        self.x3 = 0
-        self.x4 =0
+        self.save_slot = 0
+        self.alive = True
         
     # the read-only property .value is calculated from all the items the player equiped    
     @property
