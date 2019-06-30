@@ -25,9 +25,9 @@ Now game is playable.
 - add the event of crop (reclaim the gold and all the items, including the ones in the item box and equiped, of the dead player) 
 
 ### [save_load_layer]
-- delete save slot
-- add message box for confirmation
-- gui(selected message box) for delete and enter the game
+- ~~delete save slot~~ (done)
+- ~~add message box for confirmation~~ (done)
+- ~~gui(selected message box) for delete and enter the game~~ (done)
 
 ### [skill]
 - the qualtity of the player's skills increases when level up
