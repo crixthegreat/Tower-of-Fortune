@@ -259,8 +259,9 @@ def gen_player(level):
     _player.level = level
     _player.sprite = materials.main_scr.sprites['player_sprite']
 
-    for _ in range(54):
-        _player.item_box.append(item.gen_random_item())
+    # add 54 random items to player's item box for test
+    #for _ in range(54):
+    #    _player.item_box.append(item.gen_random_item())
 
     return _player
 
