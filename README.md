@@ -12,6 +12,7 @@ Now game is playable.
 ## to do list
 
 ### [mist]
+- try the GitHub Pages
 - menu gui fix
 - main GUI fix for different events (battle, tent, corpse)
 - rewrite(or remove) the show_message
