@@ -37,4 +37,5 @@ Now the game is playable.
 - add hp change effect (Green color text going up)for hp-regen(absorb) for the player
 - skill effect(sprites) 
 
-
+### [item]
+- the affix: Hp_Absorb need to be fixed
