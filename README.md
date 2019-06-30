@@ -5,7 +5,7 @@ The Tower of fortune pays homage to the following great games:
 - The Diablo series
 - The Gambling God (FC)
 
-Now game is playable.
+Now the game is playable.
 
 ![screenshot](./pic/screenshot.png)
 
