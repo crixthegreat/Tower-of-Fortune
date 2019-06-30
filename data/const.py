@@ -9,13 +9,16 @@ import copy
 # The globel variables
 GAME_TITLE = 'MY GAME'
 PLAYER_NAME = 'crix'
-VERSION = 'alpha 0.01'
+VERSION = 'beta 0.71'
 ZONE_NAME = ['普通的森林', '中等的丛林', '困难的地牢', '噩梦的幻境', '地狱的试炼', '炼狱的折磨']
 MAX_LEN = 20
 DEFAULT_COLOR = (0, 0, 0, 255)
 GREEN_COLOR = (0,200,30,255)
 ORANGE_COLOR = (230,30,230,255)
 HIGHLIGHT_COLOR = (200, 30, 30, 255)
+# the probablity of tent-event and corpse-event (in percent)
+TENT_RATE = 5
+CORPSE_RATE = 1
 
 # used for items
 MAX_ITEM_BOX = 130
