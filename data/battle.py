@@ -344,16 +344,13 @@ def player_attack(_player, _enemy, attack_style):
             if _.round_last == 0:
                 _.reset()
 
+    _player.show_player()
+
     if _player.hp <= 0:
         return battle_result(_player, _enemy, 2)
     if _enemy.hp <= 0:
         return battle_result(_player, _enemy, 1)
 
-    #show_message('player:' + str(int(_player.hp)) + '/' + str(_player.max_hp) + const.ENEMY_DATA[_enemy.no]['enemy_name'][_enemy.zone] + str(int(_enemy.hp)) + '/'+ str(_enemy.value['max_hp']))
-    
-    _player.show_player()
-
-    
     return True
 
 # handling the battle result with _result:
@@ -427,12 +424,10 @@ def battle_result(_player, _enemy, _result):
         
         for _ in _loot_list:
             _player.loot.append(_)
-
-
-
-
         _player.cri_dice = 0
     elif _result == 2:
+        _player.alive = False
+        _player.epitaph = '在' + const.ZONE_NAME[_player.zone] + '中死于' + ' ' + const.ENEMY_RANK_NAME[_enemy.rank] + const.ENEMY_DATA[_enemy.no]['enemy_name'][_enemy.zone] + '之手'
         show_message('你死亡了！怪物在你身边发出荡笑...')
     return False
 

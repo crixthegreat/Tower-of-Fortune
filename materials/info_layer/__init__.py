@@ -409,7 +409,10 @@ class Info_Layer(Layer):
                         break
 
                 if _skill:
-                    self.game.player.skill[self.skill_selected] = _skill
+                    if self.game.player.skill:
+                        self.game.player.skill[self.skill_selected] = _skill
+                    else:
+                        self.game.player.skill.append(_skill)
                     self.skill_choose()
                     self.skill_select(self.game.player, self.skill_selected)
                     self.status = 'skill'
@@ -587,12 +590,14 @@ class Info_Layer(Layer):
         elif n <=3:
             sprites['skill_select'].x = 45 + 45 * n
             sprites['skill_select'].visible = True
-            labels['skill_description_label'].element.text = const.SKILL_DATA[_player.skill[n].skill_no]['description']
+            if _player.skill:
+                labels['skill_description_label'].element.text = const.SKILL_DATA[_player.skill[n].skill_no]['description']
 
     def skill_choose(self, n=None):
         if n is None:
             sprites['skill_choose'].visible = False
-            labels['skill_description_label'].element.text = const.SKILL_DATA[self.game.player.skill[self.skill_selected].skill_no]['description']
+            if self.game.player.skill:
+                labels['skill_description_label'].element.text = const.SKILL_DATA[self.game.player.skill[self.skill_selected].skill_no]['description']
         elif n <=14:
             sprites['skill_choose'].x = 48 + 66 * (n % 3)
             sprites['skill_choose'].y = 379 - 45 * (n // 3)

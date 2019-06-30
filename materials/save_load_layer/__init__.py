@@ -20,6 +20,9 @@ images = {}
 
 save_load_bg_image = pyglet.image.load(os.path.abspath(const.SAVE_LOAD_BG_IMG_FILE)) 
 select_bar_image = pyglet.image.load(os.path.abspath(const.SELECT_BAR_IMG_FILE)) 
+empty_image = pyglet.image.load(os.path.abspath(const.EMPTY_IMG_FILE)) 
+message_box_image = pyglet.image.load(os.path.abspath(const.MESSAGE_BOX_IMG_FILE)) 
+
 """
 time_label & best_time_label : as the name says
 """
@@ -30,16 +33,41 @@ sprites = {}
 sprites['select_bar'] = cocos.sprite.Sprite(select_bar_image, position=(150, 425))
 
 for _ in range(9):
-    sprites['player_sprite' + str(_)] = cocos.sprite.Sprite(materials.main_scr.player_image, position=(150+ _* 20, 425))
-    sprites['player_sprite' + str(_)].scale = 0.3
+    sprites['slot_sprite' + str(_)] = cocos.sprite.Sprite(materials.main_scr.player_image, position=(60 + (_ % 3) * 270, 455 - (_ // 3) * 160))
+    sprites['slot_sprite' + str(_)].scale = 0.25
 
-    """
-    labels['player_item_affix'] = cocos.text.Label('',font_size=9,
-            font_name = 'Gadugi',
-            bold=False,
-            color=const.DEFAULT_COLOR, 
-            x=648, y=480, width=200, multiline=True)
-    """
+    labels['level_label' + str(_)] = cocos.text.Label('N/A',font_size=12,
+        font_name = 'Gadugi',
+        bold=False,
+        color=const.DEFAULT_COLOR, 
+        x=130 + (_ % 3) * 270, y=455 - (_//3) * 155)
+    labels['gold_label' + str(_)] = cocos.text.Label('N/A',font_size=12,
+        font_name = 'Gadugi',
+        bold=False,
+        color=const.DEFAULT_COLOR, 
+        x=180 + (_ % 3) * 270, y=455 - (_//3) * 155)
+    labels['epitaph_label' + str(_)] = cocos.text.Label('N/A',font_size=8,
+        font_name = 'Gadugi',
+        bold=False,
+        color=const.DEFAULT_COLOR, 
+        x=130 + (_ % 3) * 270, y=430 - (_//3) * 155, width=150, multiline=True)
+
+for _ in range(9):
+    for __ in range(13):
+        sprites['item' + str(_) + str(__)] = cocos.sprite.Sprite(materials.item_image[0], position=(30 + (_ % 3) * 268 + __ * 17.2,395 - (_ // 3) * 156))
+        sprites['item' + str(_) + str(__)].visible = False
+        sprites['item' + str(_) + str(__)].scale =  0.20
+
+sprites['message_box'] = cocos.sprite.Sprite(message_box_image, position=(0, 0))
+sprites['message_box'].visible = False
+labels['message_box'] = cocos.text.Label('N/A',font_size=10,
+        font_name = 'Gadugi',
+        bold=False,
+        color=const.DEFAULT_COLOR, 
+        x=0, y=0, width=250, multiline=True)
+
+labels['message_box'].visible = False
+
 
 """
 # sprites of equiped items
@@ -60,15 +88,6 @@ class Save_Load_Layer(Layer):
         self.keys_pressed = set()
 
 
-        if hasattr(materials.save_load_layer, 'sprites'):
-            for _, _sprite in materials.save_load_layer.sprites.items():
-                self.add(_sprite)
-                #_sprite.visible = False
-
-        if hasattr(materials.save_load_layer, 'labels'):
-            for _, _label in materials.save_load_layer.labels.items():
-                self.add(_label)
-                _label.visible = False
 
 
         self.game = game
@@ -76,8 +95,22 @@ class Save_Load_Layer(Layer):
         self.status = 'view'
         self.slot_selected = 0
 
+    
+    # self.save_data stores all the saved game data(9 save slot)
+    @property
+    def save_data(self):
+        # load the exist player data
+        if os.path.isfile(const.SAVE_FILE):
+            with open(const.SAVE_FILE) as _file:
+                try:
+                    # return save_data
+                    return json.load(_file)
+                except:
+                    print('when try to get save_data, failed to open the save file')
+                    sys.exit()
+        else:
+            return None
 
-        #self.save_data = self.load_save_slot()
 
     def on_key_press(self, key, modifiers):
         """key press handler for info class
@@ -93,21 +126,16 @@ class Save_Load_Layer(Layer):
             # - continue with the saved game if the player is not dead
             if 'ENTER' in key_names:
                 # load a game
-                if ('slot' + str(self.slot_selected)) in self.save_data:
+                if self.save_data and ('slot' + str(self.slot_selected)) in self.save_data:
                     if self.save_data['slot' + str(self.slot_selected)]['alive']:
-                        self.game.player = self.game.load(self.slot_selected)
-                        self.game.player.show_player()
-                        self.game.start_game()
+                        self.show_message_box('Load this player to continue?')
                     else:
-                        print('the player is dead')
-                        sys.exit()
+                        self.show_message_box('This player is dead, you can loot the body in the game.')
                 else:
                     # start a new game
-                    self.game.player = player.gen_player(1)
-                    self.game.player.save_slot =  self.slot_selected
-                    self.game.player.show_player()
-                    self.game.player.zone = 1
-                    self.game.start_game()
+                    self.show_message_box('Start a new game with this save slot?')
+                return 1
+
             elif 'UP' in key_names:
                 self.slot_selected -= 3
                 if self.slot_selected < 0:
@@ -128,7 +156,29 @@ class Save_Load_Layer(Layer):
                 if self.slot_selected > 8:
                     self.slot_selected = 0
                 self.slot_select()
-
+        elif self.status == 'message_box':
+            if 'ENTER' in key_names:
+                # load a game
+                if self.save_data and ('slot' + str(self.slot_selected)) in self.save_data:
+                    if self.save_data['slot' + str(self.slot_selected)]['alive']:
+                        self.game.player = self.game.load(self.slot_selected)
+                        self.game.player.show_player()
+                        self.exit_save_load_layer()
+                        self.game.start_game()
+                    else:
+                        self.hide_message_box()
+                        #print('the player is dead')
+                else:
+                    # start a new game
+                    self.game.player = player.gen_player(1)
+                    self.game.player.save_slot =  self.slot_selected
+                    self.game.player.show_player()
+                    self.game.player.zone = 0
+                    self.exit_save_load_layer()
+                    self.game.start_game()
+                pass
+            elif 'SPACE' in key_names:
+                self.hide_message_box()
 
     def on_key_release(self, key, modifiers):
         # release the key_pressed set
@@ -140,23 +190,63 @@ class Save_Load_Layer(Layer):
     def draw(self):
         self.image.blit(0, 0)
 
-    # load the save files to show the 9 save slot
     # display the grave stone or the player sprites and some informations
-    def load_save_slot(self):
-        # load the exist player data
-        if os.path.isfile(const.SAVE_FILE):
-            with open(const.SAVE_FILE) as _file:
-                #try:
-                    # return save_data
-                self.save_data = json.load(_file)
-                #except:
-                    #print('open file failed')
+    def show_save_slot(self):
+        if hasattr(materials.save_load_layer, 'sprites'):
+            for _, _sprite in materials.save_load_layer.sprites.items():
+                self.add(_sprite)
+        if hasattr(materials.save_load_layer, 'labels'):
+            for _, _label in materials.save_load_layer.labels.items():
+                self.add(_label)
+        self.slot_select()
+
+        _data = self.save_data
+        for _ in range(9):
+            # show the slot that has game data
+            if _data and ('slot' + str(_)) in _data:
+                # show level hp and gold
+                labels['level_label' + str(_)].element.text = str(_data['slot' + str(_)]['player_level'])
+                labels['gold_label' + str(_)].element.text = str(int(_data['slot' + str(_)]['gold']))
+                if _data['slot' + str(_)]['alive']:
+                    sprites['slot_sprite' + str(_)].image = materials.main_scr.player_image
+                else:
+                    sprites['slot_sprite' + str(_)].image = materials.main_scr.images['rip']
+                    labels['epitaph_label' + str(_)].element.text = _data['slot' + str(_)]['epitaph']
+                
+                # show items equiped
+                for __ in range(13):
+                    _item_data = _data['slot' + str(_)]['item_equiped'][__]
+                    sprites['item' + str(_) + str(__)].image = materials.item_image[(59 - _item_data['item_type']) * 5 + _item_data['rare_type']]
+                    sprites['item' + str(_) + str(__)].visible = True
+            else:
+                sprites['slot_sprite' + str(_)].image = empty_image
+                
+    def exit_save_load_layer(self):
+        if hasattr(materials.save_load_layer, 'sprites'):
+            for _, _sprite in materials.save_load_layer.sprites.items():
+                self.remove(_sprite)
+        if hasattr(materials.save_load_layer, 'labels'):
+            for _, _label in materials.save_load_layer.labels.items():
+                self.remove(_label)
+
 
     # locate the select bar
     def slot_select(self):
         # - show the equiped item icons when a save slot is selected
-        print(self.slot_selected, 'is selected')
-        #sprites['select_bar'].position = 0, 0
+        _no = self.slot_selected
+        sprites['select_bar'].visible = True
+        sprites['select_bar'].position = 130 + (_no % 3) * 270 , 350 - 155 * (_no // 3)
 
+    def show_message_box(self, message='N/A', x=200, y=200):
+        sprites['message_box'].visible = True
+        sprites['message_box'].position = x, y
+        labels['message_box'].visible = True
+        labels['message_box'].element.text = message
+        labels['message_box'].position = x - 110, y + 5 
+        self.status = 'message_box'
 
+    def hide_message_box(self):
+        sprites['message_box'].visible = False
+        labels['message_box'].visible = False
+        self.status = 'view'
 

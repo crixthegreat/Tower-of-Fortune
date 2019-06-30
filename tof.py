@@ -77,6 +77,7 @@ class Game(object):
             materials.main_scr.sprites['player_dice_' + str(_)].visible = False
             materials.main_scr.sprites['enemy_dice_' + str(_)].visible = False
         self.player.sprite.visible = True
+        self.player.sprite.image = materials.main_scr.player_image
         self.zone = self.player.zone
         materials.front_layer.labels['zone_label'].element.text = const.ZONE_NAME[self.zone]
         director.replace(Scene(game_screen, front_layer))
@@ -128,7 +129,7 @@ class Game(object):
 
     def show_save_load(self):
         director.replace(FlipY3DTransition(Scene(my_save_load_layer)))
-        my_save_load_layer.load_save_slot()
+        my_save_load_layer.show_save_slot()
     
 
     def save(self):
@@ -208,20 +209,10 @@ class Game(object):
             _player.item_box.append(item.dict_to_item(_))
 
         return _player
-    """ The Save & Load methods need to be rewrited
-
-    def save(self):
-        with open(const.SAVE_FILE,'wb') as f:
-            pickle.dump(self.player, f, -1)
-
-    def load(self):
-        with open(const.SAVE_FILE,'rb') as f:
-            _player = pickle.load(f)
-            _player.sprite = materials.main_scr.sprites['player_sprite']
-            _player.show_player()
-            return _player
-    """
     
+    def game_over(self):
+        self.game_status = 'GAME_OVER'
+        self.player.sprite.image = materials.main_scr.images['rip']
 
 
 if __name__ == '__main__':

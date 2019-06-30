@@ -163,13 +163,11 @@ class Main_Screen(ScrollableLayer):
             if _label.are_actions_running():
                 return None
 
-        #if materials.sprites['strike'].are_actions_running() or materials.main_scr.sprites['player_sprite'].are_actions_running() or materials.main_scr.sprites['enemy_sprite'].are_actions_running():
-        #    return None
         if self.game.game_status == 'STARTED':
             _style = self.style_cal(self.game.style)
             if  0<= _style <= 9: 
+                # attack starts
                 _r = battle.player_attack(self.game.player, self.game.enemy, _style)
-                self.game.save()
                 materials.main_scr.sprites['style1'].visible = False
                 materials.main_scr.sprites['style2'].visible = False
                 materials.main_scr.sprites['style3'].visible = False
@@ -182,11 +180,16 @@ class Main_Screen(ScrollableLayer):
                         materials.main_scr.sprites['player_dice_' + str(_)].visible = False
                         materials.main_scr.sprites['enemy_dice_' + str(_)].visible = False
                     self.game.game_status = 'BATTLE_END'
+                    self.game.save()
+                    if self.game.player.hp <= 0:
+                        self.game.game_over()
                     return None
+                self.game.save()
         if self.game.game_status == 'BATTLE_END':
             materials.main_scr.sprites['enemy_sprite'].visible = True
             materials.main_scr.sprites['enemy_sprite'].image = materials.main_scr.images['rip']
             self.game.game_status = 'END'
+            self.game.player.show_player()
             self.game.show_loot()
             _loot_list = self.game.player.loot
             if _loot_list:
@@ -210,6 +213,7 @@ class Main_Screen(ScrollableLayer):
             # open the player information screen
             self.keys_pressed.clear()
             self.game.show_info()
+        # get the input of the attack style     
         elif self.game.game_status == 'STARTED':
             _round = self.game.style[0] + self.game.style[1] + self.game.style[2]
             _style = self.style_cal(self.game.style)
@@ -226,9 +230,6 @@ class Main_Screen(ScrollableLayer):
                     self.game.style[2] += 1
                     sprites['style' + str(_round + 1)].visible = True
                     sprites['style' + str(_round + 1)].image = luck_image
-
-
-
         # when the battle ends
         elif self.game.game_status == 'END':
             if self.game.player.loot:
@@ -243,7 +244,7 @@ class Main_Screen(ScrollableLayer):
                         self.game.loot_selected = 0
                     self.game.show_loot()
                 elif 'DOWN' in key_names:
-                    # get the loot
+                    # take the loot
                     if self.game.player.add_to_item_box(_loot[self.game.loot_selected]):
                         self.game.player.loot.remove(self.game.player.loot[self.game.loot_selected])
                         if self.game.loot_selected > len(self.game.player.loot) - 1:
@@ -267,7 +268,7 @@ class Main_Screen(ScrollableLayer):
                             materials.main_scr.sprites['icon_select'].x = 562 + (30 * _)
                             item.show(_loot[_], self.game.player.item_equiped[_loot[_].equiped_pos])
                             break
-                # take it to the item box
+                # not used
                 elif 'SPACE' in key_names:
                     pass
             elif 'DOWN' in key_names:
@@ -278,6 +279,11 @@ class Main_Screen(ScrollableLayer):
                     enemy.show_enemy(self.game.enemy)
                     self.game.player.loot = []
     
+        elif self.game.game_status == 'GAME_OVER':
+            if 'SPACE' in key_names:
+                # return to the menu(title) screen
+                self.keys_pressed.clear()
+                self.game.show_menu()
 
                 
     def style_cal(self, _style):

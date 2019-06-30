@@ -75,21 +75,18 @@ class Menu_Screen(Layer):
         """
         self.keys_pressed.add(key)
         key_names = [pyglet.window.key.symbol_string(k) for k in self.keys_pressed]
-        _enter_list = ['continue', 'enter', 'credit']
+        _enter_list = ['start', 'howtoplay', 'credit']
         _enter = 0
         if 'ENTER' in key_names:
             #Start the game
             self.keys_pressed.clear()
             if self.game.enter == 2:
-                director.replace(Scene(credit_layer))
                 return 1
+                director.replace(Scene(credit_layer))
             if self.game.enter == 1:
-                self.game.player = player.gen_player(60)
-                for _ in range(4):
-                    self.game.player.skill.append(skill.Skill(_))
-
-                self.game.player.show_player()
-                self.game.player.zone = 1
+                return 1
+                # how to play layer is to be added
+                self.game.show_how_to_play
             elif self.game.enter == 0:
                 self.game.show_save_load()
                 return 1
