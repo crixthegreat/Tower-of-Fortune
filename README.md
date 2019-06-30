@@ -13,7 +13,7 @@ Now game is playable.
 
 ### [mist]
 - try the GitHub Pages
-- ~~menu gui fix (done)~~
+- ~~menu gui fix~~ (done)
 - rewrite(or remove) the show_message
 - add the credit layer
 
