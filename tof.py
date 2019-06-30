@@ -152,7 +152,10 @@ class Game(object):
         _skill_list = []
         # use the item_to_dict function to turn a item object into a dictionary
         for _ in _player.item_equiped:
-            _item_equiped_list.append(_.item_to_dict())
+            if _:
+                _item_equiped_list.append(_.item_to_dict())
+            else:
+                _item_equiped_list.append(None)
         for _ in _player.item_box:
             _item_box_list.append(_.item_to_dict())
         # for skills, just store the N.O. of the skills
@@ -202,17 +205,30 @@ class Game(object):
 
         _player.item_equiped = []
         for _ in _data['item_equiped']:
-            _player.item_equiped.append(item.dict_to_item(_))
+            if _:
+                _player.item_equiped.append(item.dict_to_item(_))
+            else:
+                _player.item_equiped.append(None)
 
         _player.item_box = []
         for _ in _data['item_box']:
             _player.item_box.append(item.dict_to_item(_))
 
         return _player
+
     
     def game_over(self):
         self.game_status = 'GAME_OVER'
         self.player.sprite.image = materials.main_scr.images['rip']
+
+    # the event CORPSE, when the player can pay some money to loot the corpse 
+    def show_corpse(self):
+        pass
+    
+    # the event TENT, when the player can pay some money to recover the HP
+    # and Enchant the item
+    def show_tent(self):
+        pass
 
 
 if __name__ == '__main__':
