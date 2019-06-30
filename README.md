@@ -13,7 +13,7 @@ Now game is playable.
 
 ### [mist]
 - try the GitHub Pages
-- menu gui fix
+~~- menu gui fix (done)~~
 - rewrite(or remove) the show_message
 - add the credit layer
 
@@ -26,6 +26,7 @@ Now game is playable.
 
 ### [save_load_layer]
 - delete save slot
+- add message box for confirmation
 - gui(selected message box) for delete and enter the game
 
 ### [skill]
