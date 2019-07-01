@@ -35,6 +35,7 @@ Now the game is playable.
 
 ### [battle]
 - add hp change effect (Green color text going up)for hp-regen(absorb) for the player
+- the color of the enemy's name text varies depending on the rank
 - skill effect(sprites) 
 
 ### [item]
