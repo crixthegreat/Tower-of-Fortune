@@ -1,5 +1,5 @@
 # Tower-of-Fortune
-a rpg game with a diablo-like equipment system.
+a RPG game with a Diablo-like equipment system.
 The Tower of fortune pays homage to the following great games:
 - Tower of fortune (iOS)
 - The Diablo series
@@ -13,9 +13,10 @@ Now the game is playable.
 
 ### [mist]
 - try the GitHub Pages
-- ~~menu gui fix~~ (done)
-- rewrite(or remove) the show_message
+- ~~menu GUI fix~~ (done)
+- ~~rewrite(or remove) the show_message~~ (done)
 - add the credit layer
+- add a more attractive screenshot
 
 ### [main_scr]
 - change the ARROW-CONTROL ICONS to sprites, so we can see different indications for different events (battle, tent, corpse)
@@ -23,7 +24,7 @@ Now the game is playable.
 
 ### [game]
 - add the event of TENT (enchanting the item and healing the player)
-- add the event of crop (reclaim the gold and all the items, including the ones in the item box and equiped, of the dead player) 
+- add the event of the corpse (reclaim the gold and all the items, including the ones in the item box and equipped, of the dead player) 
 
 ### [save_load_layer]
 - ~~delete save slot~~ (done)
@@ -31,7 +32,7 @@ Now the game is playable.
 - ~~gui(selected message box) for delete and enter the game~~ (done)
 
 ### [skill]
-- the qualtity of the player's skills increases when level up
+- the quantity of the player's skills increases when leveling up
 - the display logic and GUI of skills(in info_layer) need to be fix
 
 ### [battle]
