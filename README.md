@@ -7,7 +7,7 @@ The Tower of fortune pays homage to the following great games:
 
 Now the game is playable.
 
-![screenshot](./pic/screenshot.png)
+![screenshot](./pic/sample_s.png)
 
 ## to do list
 
