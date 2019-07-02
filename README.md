@@ -21,6 +21,7 @@ Now the game is playable.
 ### [main_scr]
 - change the ARROW-CONTROL ICONS to sprites, so we can see different indications for different events (battle, tent, corpse)
 - the player can go to more zones when level-up
+- waiting for the world-map sprites drawn by Judy
 
 ### [game]
 - add the event of TENT (enchanting the item and healing the player)
