@@ -1,5 +1,5 @@
 # Tower-of-Fortune
-a RPG game with a Diablo-like equipment system.
+An RPG game with a Diablo-like equipment system.
 The Tower of fortune pays homage to the following great games:
 - Tower of fortune (iOS)
 - The Diablo series
