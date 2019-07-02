@@ -30,6 +30,7 @@ Now the game is playable.
 - ~~delete save slot~~ (done)
 - ~~add message box for confirmation~~ (done)
 - ~~gui(selected message box) for delete and enter the game~~ (done)
+- set the location of the message box
 
 ### [skill]
 - the quantity of the player's skills increases when leveling up
