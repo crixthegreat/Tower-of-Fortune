@@ -19,11 +19,12 @@ Now the game is playable.
 - add a more attractive screenshot
 
 ### [main_scr]
-- change the ARROW-CONTROL ICONS to sprites, so we can see different indications for different events (battle, tent, corpse)
+- ~~change the ARROW-CONTROL ICONS to sprites, so we can see different indications for different events (battle, tent, corpse)~~ (done)
 - the player can go to more zones when level-up
 - waiting for the world-map sprites drawn by Judy
 
 ### [game]
+- ~~every monster is able to be drawn with its own sprite image from a ZIP file~~ (GREAT!!) (DONE)
 - add the event of TENT (enchanting the item and healing the player)
 - add the event of the corpse (reclaim the gold and all the items, including the ones in the item box and equipped, of the dead player) 
 
@@ -43,4 +44,4 @@ Now the game is playable.
 - skill effect(sprites) 
 
 ### [item]
-- the affix: Hp_Absorb need to be fixed
+- ~~the affix: Hp_Absorb need to be fixed~~ (done)
