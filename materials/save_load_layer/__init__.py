@@ -64,17 +64,10 @@ labels['message_box'] = cocos.text.Label('N/A',font_size=10,
         font_name = 'Gadugi',
         bold=False,
         color=const.DEFAULT_COLOR, 
-        x=0, y=0, width=250, multiline=True)
+        x=0, y=0, width=220, multiline=True)
 
 labels['message_box'].visible = False
 
-
-"""
-# sprites of equiped items
-for n in range(13):
-    sprites['equiped_item' + str(n)] = cocos.sprite.Sprite(materials.item_image[0], position=(0,0))
-#bg_music = materials.Audio(Const.BG_MUSIC_FILE)
-"""
 
 class Save_Load_Layer(Layer):
     """the player information screen
@@ -135,6 +128,12 @@ class Save_Load_Layer(Layer):
                     # start a new game
                     self.show_message_box('Start a new game with this save slot?')
                 return 1
+            # press 'D' to delete a game save
+            elif 'D' in key_names:
+                # if the save_slot is not empty
+                if self.save_data and ('slot' + str(self.slot_selected)) in self.save_data:
+                    self.show_message_box('DELETE this SAVE DATA?')
+                    self.status = 'del_save'
 
             elif 'UP' in key_names:
                 self.slot_selected -= 3
@@ -179,6 +178,16 @@ class Save_Load_Layer(Layer):
                 pass
             elif 'SPACE' in key_names:
                 self.hide_message_box()
+        # the status for delete-save confirmation
+        elif self.status == 'del_save':
+            if 'ENTER' in key_names:
+                self.del_save(self.slot_selected)
+                self.hide_message_box()
+            elif 'SPACE' in key_names:
+                self.hide_message_box()
+
+
+            
 
     def on_key_release(self, key, modifiers):
         # release the key_pressed set
@@ -216,8 +225,9 @@ class Save_Load_Layer(Layer):
                 # show items equiped
                 for __ in range(13):
                     _item_data = _data['slot' + str(_)]['item_equiped'][__]
-                    sprites['item' + str(_) + str(__)].image = materials.item_image[(59 - _item_data['item_type']) * 5 + _item_data['rare_type']]
-                    sprites['item' + str(_) + str(__)].visible = True
+                    if _item_data:
+                        sprites['item' + str(_) + str(__)].image = materials.item_image[(59 - _item_data['item_type']) * 5 + _item_data['rare_type']]
+                        sprites['item' + str(_) + str(__)].visible = True
             else:
                 sprites['slot_sprite' + str(_)].image = empty_image
                 
@@ -238,15 +248,43 @@ class Save_Load_Layer(Layer):
         sprites['select_bar'].position = 130 + (_no % 3) * 270 , 350 - 155 * (_no // 3)
 
     def show_message_box(self, message='N/A', x=200, y=200):
+        #position=(60 + (_ % 3) * 270, 455 - (_ // 3) * 160))
+        _ = self.slot_selected
+        _x = 130 + (_ % 3) * 270
+        _y = 350 - (_ // 3) * 160
         sprites['message_box'].visible = True
-        sprites['message_box'].position = x, y
+        sprites['message_box'].position = _x, _y
         labels['message_box'].visible = True
         labels['message_box'].element.text = message
-        labels['message_box'].position = x - 110, y + 5 
+        labels['message_box'].position = _x - 110, _y + 5 
         self.status = 'message_box'
 
     def hide_message_box(self):
         sprites['message_box'].visible = False
         labels['message_box'].visible = False
         self.status = 'view'
+
+    def del_save(self, save_slot):
+        _data = self.save_data
+        if 'slot' + str(save_slot) in _data:
+            del _data['slot' + str(save_slot)]
+            with open(const.SAVE_FILE, 'w') as _file:
+                try:
+                    json.dump(_data, _file)
+                except:
+                    print('write sava file failed when del a save slot')
+                    sys.exit()
+                sprites['slot_sprite' + str(save_slot)].image = empty_image
+                labels['level_label' + str(save_slot)].element.text = 'N/A'
+                labels['gold_label' + str(save_slot)].element.text = 'N/A'
+                labels['epitaph_label' + str(save_slot)].element.text = 'N/A'
+                for __ in range(13):
+                    sprites['item' + str(save_slot) + str(__)].visible = False
+        else:
+            print('del save error,there is no such save data in save file')
+            sys.exit()
+
+
+
+
 

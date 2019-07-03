@@ -69,6 +69,27 @@ class Game(object):
         self.style = [0, 0, 0]
         self.loot_selected = 0
 
+    @property
+    def game_status(self):
+        return self._game_status
+
+    @game_status.setter
+    def game_status(self, status):
+        self._game_status = status
+        if status == 'END':
+            materials.main_scr.sprites['control'].image = materials.main_scr.main_control_image
+            materials.main_scr.sprites['control'].scale = 0.4
+            materials.main_scr.sprites['control'].position = 400, 50
+        elif status == 'STARTED':
+            materials.main_scr.sprites['control'].image = materials.main_scr.battle_control_image
+            materials.main_scr.sprites['control'].scale = 0.55
+            materials.main_scr.sprites['control'].position = 400, 65
+        elif status == 'LOOT':
+            materials.main_scr.sprites['control'].image = materials.main_scr.loot_control_image
+            materials.main_scr.sprites['control'].scale = 0.4
+            materials.main_scr.sprites['control'].position = 400, 50
+
+
     def start_game(self):
         """start the game screen and initial the game
         """

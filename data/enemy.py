@@ -8,6 +8,8 @@ import sys
 import time
 import copy
 import random
+import zipfile
+import pyglet
 from cocos import actions
 from data import const, skill
 import materials
@@ -43,7 +45,7 @@ class Enemy(object):
         _action = actions.RotateBy(-15, 0.1) + actions.RotateBy(15, 0.1)
         self.sprite.do(_action)
         materials.sprites['strike'].visible = True
-        materials.sprites['strike'].position = 600,340
+        materials.sprites['strike'].position = 650,340
         if cri_dice==1:
             materials.sprites['strike'].image = materials.gif_to_anime(const.CRITICAL_STRIKE_IMG_FILE)
             materials.sprites['strike'].do(actions.FadeOut(1.5))
@@ -70,9 +72,9 @@ def gen_enemy(no=None, rank=None, zone=None, level=None):
         else:
             rank = 0
 
-    if not zone:
+    if zone is None:
         zone = random.randrange(0,6)
-    if not level:
+    if level is None:
         level = random.randrange(1,61)
 
     #start to generate a enemy
@@ -184,7 +186,40 @@ def gen_enemy(no=None, rank=None, zone=None, level=None):
     _enemy.hp = _enemy.value['max_hp']
     materials.main_scr.sprites['enemy_sprite'].visible = True
     _enemy.sprite = materials.main_scr.sprites['enemy_sprite']
-    _enemy.sprite.image = materials.main_scr.images['enemy_image']
+    
+    # get the monster files name from monster.zip
+    with zipfile.ZipFile(const.MONSTER_ZIP_FILE) as monster_file:
+        monster_file_list = monster_file.namelist()
+    # make a dict to store the monster name and the file type of the monster files(png or gif)
+    monster_list = dict()
+    for _ in range(len(monster_file_list)):
+        monster_list[monster_file_list[_][::-1][4:][::-1]] = monster_file_list[_][::-1][:3][::-1]
+    print(monster_list)
+    _enemy_img_file = 'monster-' + str(_enemy.no) + '-' + str(_enemy.zone)
+    print('the enemy is', _enemy_img_file)
+    # if the monster's image file is included in the zip file
+    if _enemy_img_file in monster_list.keys():
+        with zipfile.ZipFile(const.MONSTER_ZIP_FILE) as monster_file:
+            print(_enemy_img_file, '@@@' , monster_list)
+            _file = _enemy_img_file + '.' + monster_list[_enemy_img_file]
+            print(_file)
+            monster_file_data = monster_file.open(_file)
+        # if the image is a png file
+        if monster_list[_enemy_img_file] == 'png':
+            _enemy.sprite.image =  pyglet.image.load('', file=monster_file_data)
+        # if the image is a gif file (anime)
+        elif monster_list[_enemy_img_file] == 'gif':
+            _anime = pyglet.image.load_animation('', file=monster_file_data)
+            _bin = pyglet.image.atlas.TextureBin()
+            _anime.add_to_texture_bin(_bin)
+            _enemy.sprite.image = _anime 
+        else:
+            print('unexpect file type when read monster image file from the zip file')
+            sys.exit()
+    else:
+        with zipfile.ZipFile(const.MONSTER_ZIP_FILE) as monster_file:
+            monster_file_data = monster_file.open(const.DEFAULT_MONSTER_IMG_FILE)
+        _enemy.sprite.image = pyglet.image.load('', file=monster_file_data) 
 
     return _enemy
 
@@ -193,7 +228,7 @@ def show_enemy(enemy):
         return None
     materials.front_layer.labels['enemy_name_label'].element.text = const.ENEMY_ATK_NAME[enemy.type[0]] + const.ENEMY_CRIDMG_NAME[enemy.type[1]] + const.ENEMY_MAXHP_NAME[enemy.type[2]] + '的' + const.ENEMY_RANK_NAME[enemy.rank] + ' ' + const.ENEMY_DATA[enemy.no]['enemy_name'][enemy.zone]
     # change the color of the name label depending on the rank of the enemy
-    materials.front_layer.labels['enemy_level_label'].element.text = str(enemy.level)
+    materials.front_layer.labels['enemy_level_label'].element.text = 'LV.' + ' ' + str(enemy.level)
     materials.front_layer.labels['enemy_hp_label'].element.text = str(int(enemy.hp)) + '/' + str(int(enemy.value['max_hp']))
     _str = ''
     for _ in enemy.skill:

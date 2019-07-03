@@ -217,6 +217,7 @@ class Info_Layer(Layer):
             self.item_box_select('clear')
             self.status == 'view'
             self.game.show_game()
+            self.game.save()
 
         if self.status == 'view':
 
@@ -290,6 +291,7 @@ class Info_Layer(Layer):
                 else:
                     self.item_box_select('clear')
                 self.show_item_box()
+                self.game.save()
             # close the item box    
             elif 'SPACE' in key_names:
                 self.item_box_select(clear=True)
@@ -305,6 +307,7 @@ class Info_Layer(Layer):
                 if self.game.player.hp > self.game.player.max_hp:
                     self.game.player.hp = self.game.player.max_hp
                 self.game.player.show_player()
+                self.game.save()
                 
 
 
@@ -417,6 +420,7 @@ class Info_Layer(Layer):
                     self.skill_select(self.game.player, self.skill_selected)
                     self.status = 'skill'
                     self.game.refresh_info()
+                    self.game.save()
 
             elif 'SPACE' in key_names:
                 self.skill_choose()

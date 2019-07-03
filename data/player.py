@@ -336,7 +336,7 @@ def dice_equal(player, enemy):
         materials.sprites['strike'].visible = True
         materials.sprites['strike'].position = 400,234
         materials.sprites['strike'].image = materials.gif_to_anime(const.EXPLODE_IMG_FILE)
-        materials.sprites['strike'].do(actions.MoveBy((0,40),1)+ actions.MoveBy((0,-40),1) + actions.FadeOut(0.5))
+        materials.sprites['strike'].do(actions.MoveBy((0,100),1.3)+ actions.MoveBy((0,-100),1.3) + actions.FadeOut(0.5))
         battle.show_hp_change(player, enemy, 2, 0-int(player.hp/2), 0-int(enemy.hp/2))
     elif player.cri_dice == 1:
         skill.show_skill(103)

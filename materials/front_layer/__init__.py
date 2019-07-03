@@ -18,12 +18,9 @@ images = {}
 time_label & best_time_label : as the name says
 """
 
-labels = dict(old_msg_box=cocos.text.Label('old message', 
+labels = dict(msg_box=cocos.text.Label('message', 
     font_size=12,font_name='Gadugi', 
-    bold=False,color=const.DEFAULT_COLOR, x=530, y=100, width= 250, multiline=True), 
-    msg_box=cocos.text.Label('message here', 
-        font_size=14,font_name='Gadugi', 
-        bold=False,color=const.DEFAULT_COLOR, x=530, y=10))
+    bold=False,color=const.DEFAULT_COLOR, x=550, y=105, width= 200, multiline=True)) 
 
 labels['zone_label'] = cocos.text.Label('',
         font_size=14,font_name='Gadugi', 
@@ -46,8 +43,8 @@ labels['player_skill_label'] = cocos.text.Label('',
         bold=False,color=const.DEFAULT_COLOR, x=30, y=515)
 
 labels['enemy_name_label'] = cocos.text.Label('Name:', 
-        font_size=10,font_name='Gadugi', 
-        bold=False,color=const.DEFAULT_COLOR, x=610, y=560)
+        font_size=11,font_name='Gadugi', 
+        bold=False,color=const.DEFAULT_COLOR, x=610, y=580, width=150, multiline=True)
 labels['enemy_level_label'] = cocos.text.Label('',
         font_size=14,font_name='Gadugi', 
         bold=False,color=const.DEFAULT_COLOR, x=640, y=540)
@@ -78,13 +75,13 @@ class Front_Layer(Layer):
         
         self.image = materials.images['front_img']
     def draw(self):
-        self.image.blit(0, 0)
+        self.image.blit(0, 5)
 
 
 
 def show_message(_msg, _type=None):
-    _list = materials.front_layer.labels['old_msg_box'].element.text + '\n' + materials.front_layer.labels['msg_box'].element.text
-    materials.front_layer.labels['msg_box'].element.text = _msg
-    if _list.count('\n') >= 7:
+    _list = materials.front_layer.labels['msg_box'].element.text + '\n' + _msg
+    #materials.front_layer.labels['msg_box'].element.text = _msg
+    if _list.count('\n') >= 5:
         _list = _list[_list.find('\n') + 1:]
-    materials.front_layer.labels['old_msg_box'].element.text = _list
+    materials.front_layer.labels['msg_box'].element.text = _list

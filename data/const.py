@@ -54,7 +54,7 @@ CRITICAL_STRIKE_IMG_FILE = './pic/critical_strike.gif'
 SUPER_STRIKE_IMG_FILE = './pic/super_strike.gif'
 EXPLODE_IMG_FILE = './pic/explode.gif'
 PLAYER_IMG_FILE = './pic/player_s.png'
-ENEMY_IMG_FILE = './pic/monster-30-1_s.png'
+ENEMY_IMG_FILE = './pic/monster-30-1.png'
 TITLE_MUSIC_FILE = './music/title.ogg'
 BG_MUSIC_FILE = './music/main.ogg'
 HIGHSCORE_MUSIC_FILE = './music/highscore.ogg'
@@ -77,8 +77,16 @@ SELECT_BAR_IMG_FILE = './pic/select_bar.png'
 # empty save slot ( a cross char)
 EMPTY_IMG_FILE = './pic/empty.png'
 MESSAGE_BOX_IMG_FILE = './pic/message_box.png'
-# The player affixes
+# sprites for control indications of different events
+BATTLE_CONTROL_IMG_FILE = './pic/battle_control.png'
+LOOT_CONTROL_IMG_FILE = './pic/loot_control.png'
+MAIN_CONTROL_IMG_FILE = './pic/main_control.png'
+# monster zip file
+MONSTER_ZIP_FILE = './pic/monster.zip'
+DEFAULT_MONSTER_IMG_FILE = 'monster-30-0.png'
 
+
+# The player affixes
 PLAYER_AFFIX = dict(
         Atk = 0,
         Def = 0,
@@ -233,6 +241,8 @@ with open(ENEMY_DATA_FILE, 'r') as f:
             ENEMY_DATA.append(copy.deepcopy(_enemy))
             
         line = f.readline()
+
+
 
 # handling the skill
 # read the skill data

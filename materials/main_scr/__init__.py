@@ -29,6 +29,10 @@ attack_image = pyglet.image.load(os.path.abspath(const.ATTACK_IMG_FILE))
 defend_image = pyglet.image.load(os.path.abspath(const.DEFEND_IMG_FILE)) 
 luck_image = pyglet.image.load(os.path.abspath(const.LUCK_IMG_FILE)) 
 
+main_control_image = pyglet.image.load(os.path.abspath(const.MAIN_CONTROL_IMG_FILE)) 
+battle_control_image = pyglet.image.load(os.path.abspath(const.BATTLE_CONTROL_IMG_FILE)) 
+loot_control_image = pyglet.image.load(os.path.abspath(const.LOOT_CONTROL_IMG_FILE)) 
+
 images['rip'] = pyglet.image.load(os.path.abspath(const.RIP_IMG_FILE)) 
 images['enemy_image'] = enemy_image
 """
@@ -39,42 +43,42 @@ labels['item_name'] = cocos.text.Label('',font_size=12,
         font_name = 'Gadugi',
         bold=True,
         color=const.HIGHLIGHT_COLOR, 
-        x=430, y=360)
+        x=430, y=370)
 labels['item_type'] = cocos.text.Label('',font_size=9,
         font_name = 'Gadugi',
         bold=False,
         color=const.DEFAULT_COLOR, 
-        x=430, y=340, width=200, multiline=True)
+        x=430, y=350, width=200, multiline=True)
 labels['item_main_affix'] = cocos.text.Label('',font_size=12,
         font_name = 'Gadugi',
         bold=True,
         color=const.HIGHLIGHT_COLOR, 
-        x=430, y=305)
+        x=430, y=315)
 labels['item_affix'] = cocos.text.Label('',font_size=9,
         font_name = 'Gadugi',
         bold=False,
         color=const.DEFAULT_COLOR, 
-        x=430, y=285, width=200, multiline=True)
+        x=430, y=295, width=200, multiline=True)
 labels['player_item_name'] = cocos.text.Label('',font_size=12,
         font_name = 'Gadugi',
         bold=True,
         color=const.HIGHLIGHT_COLOR, 
-        x=245, y=340)
+        x=245, y=350)
 labels['player_item_type'] = cocos.text.Label('',font_size=9,
         font_name = 'Gadugi',
         bold=False,
         color=const.DEFAULT_COLOR, 
-        x=245, y=320, width=200, multiline=True)
+        x=245, y=330, width=200, multiline=True)
 labels['player_item_main_affix'] = cocos.text.Label('',font_size=12,
         font_name = 'Gadugi',
         bold=True,
         color=const.HIGHLIGHT_COLOR, 
-        x=245, y=285)
+        x=245, y=295)
 labels['player_item_affix'] = cocos.text.Label('',font_size=9,
         font_name = 'Gadugi',
         bold=False,
         color=const.DEFAULT_COLOR, 
-        x=245, y=265, width=200, multiline=True)
+        x=245, y=275, width=200, multiline=True)
 
 sprites = {}
 sprites['player_sprite'] = cocos.sprite.Sprite(player_image, position=(240, 300))
@@ -82,17 +86,18 @@ sprites['enemy_sprite'] = cocos.sprite.Sprite(enemy_image, position=(630, 320))
 for _ in range(8):
     sprites['loot' + str(_)] = cocos.sprite.Sprite(player_image, position=(590 + _ * 30, 210))
 sprites['icon_select'] = cocos.sprite.Sprite(icon_select_image, position=(562, 185))
-sprites['item_box'] = cocos.sprite.Sprite(item_box_image, position=(360, 285))
+sprites['item_box'] = cocos.sprite.Sprite(item_box_image, position=(360, 295))
 
 
-sprites['style1'] = cocos.sprite.Sprite(attack_image, position=(330, 175))
-sprites['style2'] = cocos.sprite.Sprite(defend_image, position=(400, 175))
-sprites['style3'] = cocos.sprite.Sprite(luck_image, position=(470, 175))
+sprites['style1'] = cocos.sprite.Sprite(attack_image, position=(330, 180))
+sprites['style2'] = cocos.sprite.Sprite(defend_image, position=(400, 180))
+sprites['style3'] = cocos.sprite.Sprite(luck_image, position=(470, 180))
 sprites['attack_style'] = cocos.sprite.Sprite(attack_style_image[0], position=(400, 115))
 
-#sprites['style1'].scale = 1 
-#sprites['style2'].scale = 1 
-#sprites['style3'].scale = 1 
+#sprites for control indications
+sprites['control'] = cocos.sprite.Sprite(main_control_image, position=(400, 55))
+sprites['control'].scale = 0.5
+
 
 for _ in range(3):
     sprites['player_dice_' + str(_)] = cocos.sprite.Sprite(materials.dice_image[0], position=(370,250 + 66 * _ ))
@@ -141,6 +146,9 @@ class Main_Screen(ScrollableLayer):
             for _, _label in materials.labels.items():
                 self.add(_label)
                 _label.visible = False
+
+        # control sprite is always visible
+        materials.main_scr.sprites['control'].visible = True
         # use the time interval event to calculate the time used
         self.schedule_interval(self.refresh_time, 0.1)
 
@@ -188,14 +196,18 @@ class Main_Screen(ScrollableLayer):
         if self.game.game_status == 'BATTLE_END':
             materials.main_scr.sprites['enemy_sprite'].visible = True
             materials.main_scr.sprites['enemy_sprite'].image = materials.main_scr.images['rip']
-            self.game.game_status = 'END'
-            self.game.player.show_player()
-            self.game.show_loot()
             _loot_list = self.game.player.loot
             if _loot_list:
-                #show_message('怪物掉落了些好东西')
-                #print('equip_pos:',_loot_list[0].equiped_pos)
+                self.game.game_status = 'LOOT'
+                self.game.show_loot()
                 item.show(_loot_list[0], self.game.player.item_equiped[_loot_list[0].equiped_pos])
+            else:
+                self.game.game_status = 'END'
+            self.game.player.show_player()
+        elif  self.game.game_status == 'LOOT':
+            if not self.game.player.loot:
+                self.game.game_status = 'END'
+
 
     def on_key_press(self, key, modifiers):
         # use a set(keys_pressed) to store all the keys pressed
@@ -231,7 +243,7 @@ class Main_Screen(ScrollableLayer):
                     sprites['style' + str(_round + 1)].visible = True
                     sprites['style' + str(_round + 1)].image = luck_image
         # when the battle ends
-        elif self.game.game_status == 'END':
+        elif self.game.game_status == 'LOOT':
             if self.game.player.loot:
                 _loot = self.game.player.loot
                 if 'UP' in key_names:
@@ -243,7 +255,7 @@ class Main_Screen(ScrollableLayer):
                     if self.game.loot_selected == -1:
                         self.game.loot_selected = 0
                     self.game.show_loot()
-                elif 'DOWN' in key_names:
+                elif 'DOWN' or 'ENTER'in key_names:
                     # take the loot
                     if self.game.player.add_to_item_box(_loot[self.game.loot_selected]):
                         self.game.player.loot.remove(self.game.player.loot[self.game.loot_selected])
@@ -271,13 +283,21 @@ class Main_Screen(ScrollableLayer):
                 # not used
                 elif 'SPACE' in key_names:
                     pass
-            elif 'DOWN' in key_names:
+        elif self.game.game_status == 'END':
+            _set = set(['DOWN','RIGHT','LEFT'])
+            if _set & set(key_names):
                 self.game.save()
-                self.game.enemy = enemy.gen_enemy(None, None, self.game.zone, random.randrange(self.game.zone * 10 + 1, (self.game.zone + 1) * 10))
-                if self.game.enemy:
-                    self.game.game_status = 'STARTED'
-                    enemy.show_enemy(self.game.enemy)
-                    self.game.player.loot = []
+                _r = random.randrange(1,100)
+                if 1<= _r <= const.CORPSE_RATE:
+                    self.game.show_corpse()
+                elif const.CORPSE_RATE < _r <= const.CORPSE_RATE + const.TENT_RATE:
+                    self.game.show_tent()
+                else:
+                    self.game.enemy = enemy.gen_enemy(None, None, self.game.player.zone, random.randrange(self.game.zone * 10 + 1, (self.game.zone + 1) * 10))
+                    if self.game.enemy:
+                        self.game.game_status = 'STARTED'
+                        enemy.show_enemy(self.game.enemy)
+                        self.game.player.loot = []
     
         elif self.game.game_status == 'GAME_OVER':
             if 'SPACE' in key_names:
