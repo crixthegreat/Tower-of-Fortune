@@ -6,6 +6,7 @@
 
 import sys
 import os
+import zipfile
 import random
 import json
 import copy
@@ -68,6 +69,7 @@ class Game(object):
         self.zone = 0
         self.style = [0, 0, 0]
         self.loot_selected = 0
+        self.corpse = None
 
     @property
     def game_status(self):
@@ -86,6 +88,10 @@ class Game(object):
             materials.main_scr.sprites['control'].position = 400, 65
         elif status == 'LOOT':
             materials.main_scr.sprites['control'].image = materials.main_scr.loot_control_image
+            materials.main_scr.sprites['control'].scale = 0.4
+            materials.main_scr.sprites['control'].position = 400, 50
+        elif status == 'CORPSE':
+            materials.main_scr.sprites['control'].image = materials.main_scr.corpse_control_image
             materials.main_scr.sprites['control'].scale = 0.4
             materials.main_scr.sprites['control'].position = 400, 50
 
@@ -244,13 +250,59 @@ class Game(object):
 
     # the event CORPSE, when the player can pay some money to loot the corpse 
     def show_corpse(self):
-        pass
+        _no_corpse = True
+        with open(const.SAVE_FILE) as _file:
+            try:
+                save_data = json.load(_file)
+            except:
+                print('load save file failed')
+                sys.exit()
+
+        for _, _data in save_data.items():
+            if _data['zone']== self.player.zone and (not(_data['alive'])):
+                _no_corpse = False
+                # e.g self.corpse = 'slot1'
+                self.corpse = _
+                break
+
+        if _no_corpse:
+            self.show_battle()
+            return 1
+
+        
+
+        print('game changes into CORPSE status')
+        print('the COPRSE slot is ', self.corpse)
+        self.game_status = 'CORPSE'
+        with zipfile.ZipFile(const.MONSTER_ZIP_FILE) as monster_file:
+            monster_file_data = monster_file.open(const.CORPSE_EVENT_IMG_FILE)
+        materials.main_scr.sprites['enemy_sprite'].image =  pyglet.image.load('', file=monster_file_data) 
+        materials.main_scr.sprites['enemy_sprite'].visible = True
     
     # the event TENT, when the player can pay some money to recover the HP
     # and Enchant the item
     def show_tent(self):
         pass
 
+    def show_battle(self):
+        self.enemy = enemy.gen_enemy(None, None, self.player.zone, random.randrange(self.zone * 10 + 1, (self.zone + 1) * 10))
+        if self.enemy:
+            self.game_status = 'STARTED'
+            enemy.show_enemy(self.enemy)
+            self.player.loot = []
+
+    def move_on(self):
+        self.save()
+        _r = random.randrange(1,100)
+        if 1<= _r <= const.CORPSE_RATE:
+            print('now game is going to show the corpse')
+            self.show_corpse()
+        elif const.CORPSE_RATE < _r <= const.CORPSE_RATE + const.TENT_RATE:
+            self.show_tent()
+        else:
+            self.show_battle()
+
+        
 
 if __name__ == '__main__':
     msg = []

@@ -153,6 +153,9 @@ def gen_enemy(no=None, rank=None, zone=None, level=None):
         print('enemy rank error:', rank)
         sys.exit()
     
+    # set no for test
+
+    no = 29
     # now set the enemy type and confirm the Atk, CriDmg and Maxhp finally
     # firstly we set the atk
     _ = random.randrange(5)
@@ -187,28 +190,22 @@ def gen_enemy(no=None, rank=None, zone=None, level=None):
     materials.main_scr.sprites['enemy_sprite'].visible = True
     _enemy.sprite = materials.main_scr.sprites['enemy_sprite']
     
-    # get the monster files name from monster.zip
-    with zipfile.ZipFile(const.MONSTER_ZIP_FILE) as monster_file:
-        monster_file_list = monster_file.namelist()
-    # make a dict to store the monster name and the file type of the monster files(png or gif)
-    monster_list = dict()
-    for _ in range(len(monster_file_list)):
-        monster_list[monster_file_list[_][::-1][4:][::-1]] = monster_file_list[_][::-1][:3][::-1]
-    print(monster_list)
+
+    # Now, get the sprite image of the enemy from the zip file
     _enemy_img_file = 'monster-' + str(_enemy.no) + '-' + str(_enemy.zone)
-    print('the enemy is', _enemy_img_file)
+    #print('the enemy is', _enemy_img_file)
     # if the monster's image file is included in the zip file
-    if _enemy_img_file in monster_list.keys():
+    if _enemy_img_file in const.MONSTER_FILE.keys():
         with zipfile.ZipFile(const.MONSTER_ZIP_FILE) as monster_file:
-            print(_enemy_img_file, '@@@' , monster_list)
-            _file = _enemy_img_file + '.' + monster_list[_enemy_img_file]
-            print(_file)
+            #print(_enemy_img_file, '@@@' , monster_list)
+            _file = _enemy_img_file + '.' + const.MONSTER_FILE[_enemy_img_file]
+            #print(_file)
             monster_file_data = monster_file.open(_file)
         # if the image is a png file
-        if monster_list[_enemy_img_file] == 'png':
+        if const.MONSTER_FILE[_enemy_img_file] == 'png':
             _enemy.sprite.image =  pyglet.image.load('', file=monster_file_data)
         # if the image is a gif file (anime)
-        elif monster_list[_enemy_img_file] == 'gif':
+        elif const.MONSTER_FILE[_enemy_img_file] == 'gif':
             _anime = pyglet.image.load_animation('', file=monster_file_data)
             _bin = pyglet.image.atlas.TextureBin()
             _anime.add_to_texture_bin(_bin)
@@ -220,6 +217,8 @@ def gen_enemy(no=None, rank=None, zone=None, level=None):
         with zipfile.ZipFile(const.MONSTER_ZIP_FILE) as monster_file:
             monster_file_data = monster_file.open(const.DEFAULT_MONSTER_IMG_FILE)
         _enemy.sprite.image = pyglet.image.load('', file=monster_file_data) 
+
+    _enemy.sprite.anchor=_enemy.sprite.width / 2,0
 
     return _enemy
 

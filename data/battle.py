@@ -14,7 +14,7 @@ from cocos import actions
 
 def player_attack(_player, _enemy, attack_style):
     """calculate the attack action
-    attack_style = [0,8] means the 9 kind of attack styles
+    attack_style = [0,9] means the 10 kind of attack styles
     """
     #for _ in range(3):
     #    materials.main_scr.sprites['player_dice_' + str(_)].visible = False
@@ -35,7 +35,7 @@ def player_attack(_player, _enemy, attack_style):
     _regen = _player.value['HpRegen']
 
     # special handling for '神鬼奇谋'
-    if attack_style == 8 and _max_dice < 9:
+    if attack_style == 9 and _max_dice < 9:
         _max_dice += 1
     
     # The skill has 3 types:
