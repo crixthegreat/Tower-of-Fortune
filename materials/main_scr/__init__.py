@@ -5,7 +5,10 @@
 #codetime: 2019/5/28 17:03:36
 """THE MAIN SCREEN DEFINITION FILE
 """
+import sys
 import os
+import json
+import copy
 from data import const, player, enemy, skill, battle, item
 import pyglet
 import cocos
@@ -32,6 +35,7 @@ luck_image = pyglet.image.load(os.path.abspath(const.LUCK_IMG_FILE))
 main_control_image = pyglet.image.load(os.path.abspath(const.MAIN_CONTROL_IMG_FILE)) 
 battle_control_image = pyglet.image.load(os.path.abspath(const.BATTLE_CONTROL_IMG_FILE)) 
 loot_control_image = pyglet.image.load(os.path.abspath(const.LOOT_CONTROL_IMG_FILE)) 
+corpse_control_image = pyglet.image.load(os.path.abspath(const.CORPSE_CONTROL_IMG_FILE)) 
 
 images['rip'] = pyglet.image.load(os.path.abspath(const.RIP_IMG_FILE)) 
 images['enemy_image'] = enemy_image
@@ -82,7 +86,7 @@ labels['player_item_affix'] = cocos.text.Label('',font_size=9,
 
 sprites = {}
 sprites['player_sprite'] = cocos.sprite.Sprite(player_image, position=(240, 300))
-sprites['enemy_sprite'] = cocos.sprite.Sprite(enemy_image, position=(630, 320))
+sprites['enemy_sprite'] = cocos.sprite.Sprite(enemy_image, position=(600, 280))
 for _ in range(8):
     sprites['loot' + str(_)] = cocos.sprite.Sprite(player_image, position=(590 + _ * 30, 210))
 sprites['icon_select'] = cocos.sprite.Sprite(icon_select_image, position=(562, 185))
@@ -286,24 +290,40 @@ class Main_Screen(ScrollableLayer):
         elif self.game.game_status == 'END':
             _set = set(['DOWN','RIGHT','LEFT'])
             if _set & set(key_names):
-                self.game.save()
-                _r = random.randrange(1,100)
-                if 1<= _r <= const.CORPSE_RATE:
-                    self.game.show_corpse()
-                elif const.CORPSE_RATE < _r <= const.CORPSE_RATE + const.TENT_RATE:
-                    self.game.show_tent()
-                else:
-                    self.game.enemy = enemy.gen_enemy(None, None, self.game.player.zone, random.randrange(self.game.zone * 10 + 1, (self.game.zone + 1) * 10))
-                    if self.game.enemy:
-                        self.game.game_status = 'STARTED'
-                        enemy.show_enemy(self.game.enemy)
-                        self.game.player.loot = []
-    
+                self.game.move_on()
+
         elif self.game.game_status == 'GAME_OVER':
             if 'SPACE' in key_names:
                 # return to the menu(title) screen
                 self.keys_pressed.clear()
                 self.game.show_menu()
+
+        elif self.game.game_status == 'CORPSE':
+            # press UP to buy all the equiped items of the dead player
+            if 'UP' in key_names:
+                _equiped_item_data = []
+                with open(const.SAVE_FILE) as _file:
+                    save_data = json.load(_file)
+                    _equiped_item_data = copy.deepcopy(save_data[self.game.corpse]['item_equiped'])
+                with open(const.SAVE_FILE, 'w') as _file:
+                    del save_data[self.game.corpse]
+                    json.dump(save_data, _file)
+                    #print('failed to load the save file and to delete the copse data and to save the file again')
+
+                for _ in _equiped_item_data:
+                    if _ and len(self.game.player.item_box) < const.MAX_ITEM_BOX:
+                        self.game.player.item_box.append(item.dict_to_item(_))
+                
+                materials.main_scr.sprites['enemy_sprite'].visible = False
+                self.game.save()
+                self.game.game_status = 'END'
+                print('looting the corpse succeed, game status changes to END')
+
+            elif 'LEFT' in key_names or 'RIGHT' in key_names:
+                self.game.move_on()
+
+
+                
 
                 
     def style_cal(self, _style):
@@ -332,6 +352,9 @@ class Main_Screen(ScrollableLayer):
                 return 1
         else:
             return 0
+
+        print('attack style calculate error!')
+        sys.exit()
 
 
     def on_key_release(self, key, modifiers):

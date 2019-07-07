@@ -6,6 +6,7 @@
 import os
 import string
 import copy
+import zipfile
 # The globel variables
 GAME_TITLE = 'MY GAME'
 PLAYER_NAME = 'crix'
@@ -18,7 +19,7 @@ ORANGE_COLOR = (230,30,230,255)
 HIGHLIGHT_COLOR = (200, 30, 30, 255)
 # the probablity of tent-event and corpse-event (in percent)
 TENT_RATE = 5
-CORPSE_RATE = 1
+CORPSE_RATE = 2
 
 # used for items
 MAX_ITEM_BOX = 130
@@ -80,11 +81,14 @@ MESSAGE_BOX_IMG_FILE = './pic/message_box.png'
 # sprites for control indications of different events
 BATTLE_CONTROL_IMG_FILE = './pic/battle_control.png'
 LOOT_CONTROL_IMG_FILE = './pic/loot_control.png'
+CORPSE_CONTROL_IMG_FILE = './pic/corpse_control.png'
 MAIN_CONTROL_IMG_FILE = './pic/main_control.png'
 # monster zip file
 MONSTER_ZIP_FILE = './pic/monster.zip'
 DEFAULT_MONSTER_IMG_FILE = 'monster-30-0.png'
 
+#  file for CORPSE-loot event
+CORPSE_EVENT_IMG_FILE = 'corpse.png'
 
 # The player affixes
 PLAYER_AFFIX = dict(
@@ -172,6 +176,15 @@ with open(ITEM_DATA_FILE, 'r') as f:
             ITEMS_DATA.append(_item)
         line = f.readline()
 #print(ITEM_TYPE_USED)
+
+# get the monster files name from monster.zip
+with zipfile.ZipFile(MONSTER_ZIP_FILE) as monster_file:
+    MONSTER_FILE_LIST = monster_file.namelist()
+
+# make a dict to store the monster name and the file type of the monster files(png or gif)
+MONSTER_FILE = dict()
+for _ in range(len(MONSTER_FILE_LIST)):
+    MONSTER_FILE[MONSTER_FILE_LIST[_][::-1][4:][::-1]] = MONSTER_FILE_LIST[_][::-1][:3][::-1]
 
 # the enemy affix
 ENEMY_RANK_NAME = ['喽啰', '精英', '头目', '首领']
