@@ -27,7 +27,7 @@ Now the game is playable.
 
 ### [game]
 - ~~every monster can be drawn with its sprite image separately  from a ZIP file~~ (GREAT!!) (DONE)
-- add the event of TENT (enchanting the item and healing the player)
+- add the event of CAMP (enchanting the item and healing the player)
 - add the event of the corpse (reclaim the gold and all the items, including the ones in the item box and equipped, of the dead player) (event added but feature completed partly)
 
 ### [save_load_layer]
