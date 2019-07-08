@@ -16,15 +16,17 @@ Now the game is playable.
 - ~~menu GUI fix~~ (done)
 - ~~rewrite(or remove) the show_message~~ (done)
 - add the credit layer
-- add a more attractive screenshot
+- ~~add a more attractive screenshot~~ (done)
+- add all the sprite image of the enemies (50% completed)
 
 ### [main_scr]
 - ~~change the ARROW-CONTROL ICONS to sprites, so we can see different indications for different events (battle, tent, corpse)~~ (done)
+- minor fix of the above icon for corpse events (scale and indications)
 - the player can go to more zones when level-up
 - waiting for the world-map sprites drawn by Judy
 
 ### [game]
-- ~~every monster is able to be drawn with its own sprite image from a ZIP file~~ (GREAT!!) (DONE)
+- ~~every monster can be drawn with its sprite image separately  from a ZIP file~~ (GREAT!!) (DONE)
 - add the event of TENT (enchanting the item and healing the player)
 - add the event of the corpse (reclaim the gold and all the items, including the ones in the item box and equipped, of the dead player) (event added but feature completed partly)
 
