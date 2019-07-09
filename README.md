@@ -7,6 +7,17 @@ The Tower of fortune pays homage to the following great games:
 
 Now the game is playable.
 
+## Game features:
+- six zones
+- 180 different enemies with unique sprites
+- 27 types for every kind of enemy
+- Normal, Elite, Little Boss and Boss types of enemies
+- random item with many affixes , over 20 types , four rarity type (Normal, Magic, Rare, Legend)
+- 15 kinds of skills for the player, 7 for the enemies
+- player can level up to 60
+- save and load games
+- the player dies! (Rogue-like) , the body can be looted
+
 ![screenshot](./pic/sample_s.png)
 
 ## to do list
