@@ -10,8 +10,8 @@ import zipfile
 # The globel variables
 GAME_TITLE = 'MY GAME'
 PLAYER_NAME = 'crix'
-VERSION = 'beta 0.71'
-ZONE_NAME = ['普通的森林', '中等的丛林', '困难的地牢', '噩梦的幻境', '地狱的试炼', '炼狱的折磨']
+VERSION = 'beta 0.91'
+ZONE_NAME = ['平静的森林', '漆黑的地牢', '远方的孤岛', '精灵的国度', '奇妙的幻境', '地狱的试炼']
 MAX_LEN = 20
 DEFAULT_COLOR = (0, 0, 0, 255)
 GREEN_COLOR = (0,200,30,255)
@@ -83,12 +83,20 @@ BATTLE_CONTROL_IMG_FILE = './pic/battle_control.png'
 LOOT_CONTROL_IMG_FILE = './pic/loot_control.png'
 CORPSE_CONTROL_IMG_FILE = './pic/corpse_control.png'
 MAIN_CONTROL_IMG_FILE = './pic/main_control.png'
+CAMP_CONTROL_IMG_FILE = './pic/camp_control.png'
 # monster zip file
 MONSTER_ZIP_FILE = './pic/monster.zip'
 DEFAULT_MONSTER_IMG_FILE = 'monster-30-0.png'
 
 #  file for CORPSE-loot event
 CORPSE_EVENT_IMG_FILE = 'corpse.png'
+
+# file for campfire event
+CAMP_EVENT_IMG_FILE = ['campfire-0.png', 'campfire-1.png', 'campfire-2.png', 'camfire-3.png', 'campfire-4.png', 'campfire-5.png']
+
+# file for background image of the zones
+# 800 x 200
+ZONE_BACK_IMG_FILES = ['background-0.jpg', 'background-1.jpg', 'background-2.jpg', 'background-3.jpg', 'background-4.jpg', 'background-5.jpg']
 
 # The player affixes
 PLAYER_AFFIX = dict(

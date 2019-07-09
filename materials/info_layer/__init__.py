@@ -30,7 +30,7 @@ labels['skill_description_label'] = cocos.text.Label('',
 labels['player_value_label'] = cocos.text.Label('', 
         font_size=12.5,font_name='Gadugi', 
         bold=False,color=const.DEFAULT_COLOR, x=295, y=562, width = 10, multiline=True)
-labels['item_box_page'] = cocos.text.Label('1/10', 
+labels['item_box_page'] = cocos.text.Label('NA/NA', 
         font_size=12,font_name='Gadugi', 
         bold=False,color=const.DEFAULT_COLOR, x=715, y=20)
 
@@ -238,7 +238,7 @@ class Info_Layer(Layer):
                 self.status = 'skill'
 
             # check the item box
-            elif 'B' in key_names and self.game.game_status == 'END':
+            elif 'B' in key_names and self.game.game_status == 'END' and self.game.player.item_box:
                 self.status = 'item_box'
                 self.item_box_selected = 0
                 self.item_box_select()
@@ -333,21 +333,7 @@ class Info_Layer(Layer):
                 self.hide_item()
                 self.status = 'view'
         elif self.status == 'skill':
-            # you get n skills when your level is:
-            # n=1, lv 1-9
-            # n=2, lv 10-20
-            # n=3, lv 21-40
-            # n=4, lv 41-60
-            _skill_no = 0
-            _lv = self.game.player.level
-            if _lv < 10:
-                _skill_no = 1
-            elif 10 <= _lv <= 20:
-                _skill_no = 2
-            elif 21 <= _lv <=40:
-                _skill_no = 3
-            elif 41 <= _lv:
-                _skill_no = 4
+            _skill_no = self.game.player.skill_quantity
             if 'LEFT' in key_names:
                 if self.skill_selected > 0:
                     self.skill_selected -= 1
@@ -407,15 +393,13 @@ class Info_Layer(Layer):
 
                 # if the player had the skill already:
                 for _ in self.game.player.skill:
-                    if _.skill_no == self.skill_chosen:
-                        _skill = None
-                        break
+                    if _:
+                        if _.skill_no == self.skill_chosen:
+                            _skill = None
+                            break
 
                 if _skill:
-                    if self.game.player.skill:
-                        self.game.player.skill[self.skill_selected] = _skill
-                    else:
-                        self.game.player.skill.append(_skill)
+                    self.game.player.skill[self.skill_selected] = _skill
                     self.skill_choose()
                     self.skill_select(self.game.player, self.skill_selected)
                     self.status = 'skill'
@@ -436,7 +420,7 @@ class Info_Layer(Layer):
                 else:
                     sprites['item_box' + str(_)].visible = True
                     sprites['item_box' + str(_)].image = materials.item_image[(59 - self.game.player.item_box[_item_no].type) * 5 + self.game.player.item_box[_item_no].rare_type]
-            labels['item_box_page'].element.text = str((self.item_box_selected // 13) + 1) + '/10'
+            labels['item_box_page'].element.text = str((self.item_box_selected // 13) + 1) + '/' + str(len(self.game.player.item_box) // 13 + 1)
         else:
             for _ in range(13):
                 sprites['item_box' + str(_)].visible = False
@@ -594,13 +578,15 @@ class Info_Layer(Layer):
         elif n <=3:
             sprites['skill_select'].x = 45 + 45 * n
             sprites['skill_select'].visible = True
-            if _player.skill:
+            if _player.skill[n]:
                 labels['skill_description_label'].element.text = const.SKILL_DATA[_player.skill[n].skill_no]['description']
+            else:
+                labels['skill_description_label'].element.text = ''
 
     def skill_choose(self, n=None):
         if n is None:
             sprites['skill_choose'].visible = False
-            if self.game.player.skill:
+            if self.game.player.skill and self.game.player.skill[self.skill_selected]:
                 labels['skill_description_label'].element.text = const.SKILL_DATA[self.game.player.skill[self.skill_selected].skill_no]['description']
         elif n <=14:
             sprites['skill_choose'].x = 48 + 66 * (n % 3)
