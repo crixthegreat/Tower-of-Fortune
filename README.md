@@ -23,6 +23,7 @@ Now the game is playable.
 - ~~change the ARROW-CONTROL ICONS to sprites, so we can see different indications for different events (battle, tent, corpse)~~ (done)
 - minor fix of the above icon for corpse events (scale and indications)
 - waiting for the world-map sprites drawn by Judy
+- add different backgroud image for different zones
 
 ### [game]
 - ~~every monster can be drawn with its sprite image separately  from a ZIP file~~ (GREAT!!) (DONE)
