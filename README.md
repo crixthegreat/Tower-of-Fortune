@@ -23,7 +23,7 @@ Now the game is playable.
 - ~~change the ARROW-CONTROL ICONS to sprites, so we can see different indications for different events (battle, tent, corpse)~~ (done)
 - minor fix of the above icon for corpse events (scale and indications)
 - waiting for the world-map sprites drawn by Judy
-- add different backgroud image for different zones
+- ~~add different backgroud image for different zones~~ (done)
 
 ### [game]
 - ~~every monster can be drawn with its sprite image separately  from a ZIP file~~ (GREAT!!) (DONE)
@@ -38,8 +38,8 @@ Now the game is playable.
 - ~~set the location of the message box~~ (done)
 
 ### [skill]
-- ~~the quantity of the player's skills increases when leveling up~~ (done, NOT COMMITED)
-- ~~the display logic and GUI of skills(in info_layer) need to be fix~~ (done, NOT COMMITED)
+- ~~the quantity of the player's skills increases when leveling up~~ (done)
+- ~~the display logic and GUI of skills(in info_layer) need to be fix~~ (done)
 
 ### [battle]
 - add hp change effect (Green color text going up)for hp-regen(absorb) for the player
