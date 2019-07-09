@@ -154,8 +154,7 @@ def gen_enemy(no=None, rank=None, zone=None, level=None):
         sys.exit()
     
     # set no for test
-
-    no = 29
+    #no = 29
     # now set the enemy type and confirm the Atk, CriDmg and Maxhp finally
     # firstly we set the atk
     _ = random.randrange(5)
@@ -218,7 +217,7 @@ def gen_enemy(no=None, rank=None, zone=None, level=None):
             monster_file_data = monster_file.open(const.DEFAULT_MONSTER_IMG_FILE)
         _enemy.sprite.image = pyglet.image.load('', file=monster_file_data) 
 
-    _enemy.sprite.anchor=_enemy.sprite.width / 2,0
+    _enemy.sprite.anchor=_enemy.sprite.width / 2, 0
 
     return _enemy
 

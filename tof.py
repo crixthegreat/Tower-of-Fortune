@@ -72,28 +72,37 @@ class Game(object):
         self.corpse = None
 
     @property
+    def max_stage(self):
+        return (self.player.level - 1) // 10
+
+    @property
     def game_status(self):
         return self._game_status
 
     @game_status.setter
     def game_status(self, status):
         self._game_status = status
+        materials.main_scr.sprites['control'].anchor = 0, 0
         if status == 'END':
+            materials.main_scr.sprites['control'].position = 400, 50
             materials.main_scr.sprites['control'].image = materials.main_scr.main_control_image
             materials.main_scr.sprites['control'].scale = 0.4
-            materials.main_scr.sprites['control'].position = 400, 50
         elif status == 'STARTED':
+            materials.main_scr.sprites['control'].position = 400, 65
             materials.main_scr.sprites['control'].image = materials.main_scr.battle_control_image
             materials.main_scr.sprites['control'].scale = 0.55
-            materials.main_scr.sprites['control'].position = 400, 65
         elif status == 'LOOT':
+            materials.main_scr.sprites['control'].position = 400, 50
             materials.main_scr.sprites['control'].image = materials.main_scr.loot_control_image
             materials.main_scr.sprites['control'].scale = 0.4
-            materials.main_scr.sprites['control'].position = 400, 50
         elif status == 'CORPSE':
+            materials.main_scr.sprites['control'].position = 400, 65
             materials.main_scr.sprites['control'].image = materials.main_scr.corpse_control_image
-            materials.main_scr.sprites['control'].scale = 0.4
-            materials.main_scr.sprites['control'].position = 400, 50
+            materials.main_scr.sprites['control'].scale = 0.55
+        elif status == 'CAMP':
+            materials.main_scr.sprites['control'].position = 400, 65
+            materials.main_scr.sprites['control'].image = materials.main_scr.camp_control_image
+            materials.main_scr.sprites['control'].scale = 0.55
 
 
     def start_game(self):
@@ -105,8 +114,7 @@ class Game(object):
             materials.main_scr.sprites['enemy_dice_' + str(_)].visible = False
         self.player.sprite.visible = True
         self.player.sprite.image = materials.main_scr.player_image
-        self.zone = self.player.zone
-        materials.front_layer.labels['zone_label'].element.text = const.ZONE_NAME[self.zone]
+        self.set_stage(self.player.zone)
         director.replace(Scene(game_screen, front_layer))
 
     def show_game(self):
@@ -187,7 +195,11 @@ class Game(object):
             _item_box_list.append(_.item_to_dict())
         # for skills, just store the N.O. of the skills
         for _ in _player.skill:
-            _skill_list.append(_.skill_no)
+            if _:
+                _skill_list.append(_.skill_no)
+            else:
+                _skill_list.append(None)
+
         # the name of the player is used to identify the save data
         save_data['slot' + str(_player.save_slot)] = dict(
                 player_level=_player.level, 
@@ -228,7 +240,10 @@ class Game(object):
 
         _player.skill = []
         for _ in _data['skill']:
-            _player.skill.append(skill.Skill(_))
+            if _ is None:
+                _player.skill.append(None)
+            else:
+                _player.skill.append(skill.Skill(_))
 
         _player.item_equiped = []
         for _ in _data['item_equiped']:
@@ -271,18 +286,26 @@ class Game(object):
 
         
 
-        print('game changes into CORPSE status')
-        print('the COPRSE slot is ', self.corpse)
+        #print('game changes into CORPSE status')
+        #print('the COPRSE slot is ', self.corpse)
         self.game_status = 'CORPSE'
         with zipfile.ZipFile(const.MONSTER_ZIP_FILE) as monster_file:
             monster_file_data = monster_file.open(const.CORPSE_EVENT_IMG_FILE)
         materials.main_scr.sprites['enemy_sprite'].image =  pyglet.image.load('', file=monster_file_data) 
         materials.main_scr.sprites['enemy_sprite'].visible = True
     
-    # the event TENT, when the player can pay some money to recover the HP
+    # the event CAMP, when the player can pay some money to recover the HP
     # and Enchant the item
-    def show_tent(self):
-        pass
+    def show_camp(self):
+        # if the HP is full then generate enemy
+        if self.player.hp >= self.player.max_hp:
+            self.show_battle()
+            return 1
+        self.game_status = 'CAMP'
+        with zipfile.ZipFile(const.MONSTER_ZIP_FILE) as monster_file:
+            monster_file_data = monster_file.open(const.CAMP_EVENT_IMG_FILE[self.player.zone])
+        materials.main_scr.sprites['enemy_sprite'].image =  pyglet.image.load('', file=monster_file_data) 
+        materials.main_scr.sprites['enemy_sprite'].visible = True
 
     def show_battle(self):
         self.enemy = enemy.gen_enemy(None, None, self.player.zone, random.randrange(self.zone * 10 + 1, (self.zone + 1) * 10))
@@ -298,10 +321,17 @@ class Game(object):
             print('now game is going to show the corpse')
             self.show_corpse()
         elif const.CORPSE_RATE < _r <= const.CORPSE_RATE + const.TENT_RATE:
-            self.show_tent()
+            self.show_camp()
         else:
             self.show_battle()
 
+    def set_stage(self, no):
+        self.player.zone = no
+        self.zone = no
+        materials.front_layer.labels['zone_label'].element.text = const.ZONE_NAME[no]
+        with zipfile.ZipFile(const.MONSTER_ZIP_FILE) as monster_file:
+            monster_file_data = monster_file.open(const.ZONE_BACK_IMG_FILES[no])
+        my_main.image =  pyglet.image.load('', file=monster_file_data) 
         
 
 if __name__ == '__main__':

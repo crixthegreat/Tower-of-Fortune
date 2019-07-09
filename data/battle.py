@@ -74,6 +74,8 @@ def player_attack(_player, _enemy, attack_style):
     # now check the skill 0: throw the dice again
     if _player_dice < _enemy_dice:
         for _ in _player.skill:
+            if _ is None:
+                continue
             if _.skill_no == 0:
                 if _.actived:
                     skill.show_skill(_.skill_no)
@@ -90,23 +92,24 @@ def player_attack(_player, _enemy, attack_style):
     # the skill 3: war cry to make enemy take the min dice!        
     # the skill 7,  
     for _ in _player.skill:
-        if _.skill_no == 3:
-            if not(_.actived) and _.test():
-                _.actived = True
-            if _.actived:
-                _enemy_dice = _enemy.value['Min_Dice']
-                skill.show_skill(_.skill_no, _enemy_dice)
-                _.round_last -= 1
-                if _.round_last == 0:
-                    _.reset()
-        elif _.skill_no == 7:
-            if not(_.actived) and _.test():
-                _.actived = True
-            if _.actived:
-                _cri_dmg = _cri_dmg * (2 - _player.hp / _player.max_hp)
-                _.round_last -= 1
-                if _.round_last == 0:
-                    _.reset()
+        if _:
+            if _.skill_no == 3:
+                if not(_.actived) and _.test():
+                    _.actived = True
+                if _.actived:
+                    _enemy_dice = _enemy.value['Min_Dice']
+                    skill.show_skill(_.skill_no, _enemy_dice)
+                    _.round_last -= 1
+                    if _.round_last == 0:
+                        _.reset()
+            elif _.skill_no == 7:
+                if not(_.actived) and _.test():
+                    _.actived = True
+                if _.actived:
+                    _cri_dmg = _cri_dmg * (2 - _player.hp / _player.max_hp)
+                    _.round_last -= 1
+                    if _.round_last == 0:
+                        _.reset()
 
     # check the skill 17: the big wall
     _big_wall = False
@@ -131,6 +134,8 @@ def player_attack(_player, _enemy, attack_style):
                 _player.show_attack()
                 _dmg = _atk * (1 - _enemy.value['Def'] / (_enemy.value['Def'] + 1500)) * (1 + (_player_dice - _enemy_dice) * 0.1)
                 for _ in _player.skill:
+                    if _ is None:
+                        continue
                     # check the skill 2: poison weapon!
                     if _.skill_no == 2:
                         if not _.actived and _.test():
@@ -159,6 +164,8 @@ def player_attack(_player, _enemy, attack_style):
                     _dmg = _dmg * (1 + _cri_dmg / 100)
                 else:
                     for _ in _player.skill:
+                        if _ is None:
+                            continue
                         # skill 1: you can do critical attacks
                         if _.skill_no == 1:
                             if not(_.actived):
@@ -230,6 +237,8 @@ def player_attack(_player, _enemy, attack_style):
                     _dmg = _dmg * 2
                     # check the skill 8 when the player got a critical attack!
                     for _ in _player.skill:
+                        if _ is None:
+                            continue
                         if _.skill_no == 8 and _.test():
                             _.actived = True
                 elif _player.cri_dice == 1:
@@ -238,6 +247,8 @@ def player_attack(_player, _enemy, attack_style):
                     _dmg = _dmg * 1.5
                     # check the skill 8 when the player got a critical attack!
                     for _ in _player.skill:
+                        if _ is None:
+                            continue
                         if _.skill_no == 8 and _.test():
                             _.actived = True
                 else:
@@ -264,6 +275,8 @@ def player_attack(_player, _enemy, attack_style):
 
                 if _player.hp <= _dmg:
                     for _ in _player.skill:
+                        if _ is None:
+                            continue
                         # check the skill 5, divine shield
                         if _.skill_no == 5:
                             if not(_.actived) and _.test():
@@ -417,6 +430,8 @@ def battle_result(_player, _enemy, _result):
             _player.level += 1
             _player.exp = 0
             _player.hp = _player.max_hp
+            _player.update_skill()
+            _player.show_player()
 
         _loot_list = []
         for _ in range(_loot_no):

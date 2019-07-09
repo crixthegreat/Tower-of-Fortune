@@ -9,6 +9,7 @@ import sys
 import os
 import json
 import copy
+import zipfile
 from data import const, player, enemy, skill, battle, item
 import pyglet
 import cocos
@@ -36,6 +37,7 @@ main_control_image = pyglet.image.load(os.path.abspath(const.MAIN_CONTROL_IMG_FI
 battle_control_image = pyglet.image.load(os.path.abspath(const.BATTLE_CONTROL_IMG_FILE)) 
 loot_control_image = pyglet.image.load(os.path.abspath(const.LOOT_CONTROL_IMG_FILE)) 
 corpse_control_image = pyglet.image.load(os.path.abspath(const.CORPSE_CONTROL_IMG_FILE)) 
+camp_control_image = pyglet.image.load(os.path.abspath(const.CAMP_CONTROL_IMG_FILE)) 
 
 images['rip'] = pyglet.image.load(os.path.abspath(const.RIP_IMG_FILE)) 
 images['enemy_image'] = enemy_image
@@ -86,7 +88,9 @@ labels['player_item_affix'] = cocos.text.Label('',font_size=9,
 
 sprites = {}
 sprites['player_sprite'] = cocos.sprite.Sprite(player_image, position=(240, 300))
-sprites['enemy_sprite'] = cocos.sprite.Sprite(enemy_image, position=(600, 280))
+sprites['enemy_sprite'] = cocos.sprite.Sprite(enemy_image, position=(640, 280))
+#sprites['enemy_sprite'].anchor = sprites['enemy_sprite'].width /2, 0
+
 for _ in range(8):
     sprites['loot' + str(_)] = cocos.sprite.Sprite(player_image, position=(590 + _ * 30, 210))
 sprites['icon_select'] = cocos.sprite.Sprite(icon_select_image, position=(562, 185))
@@ -121,6 +125,9 @@ class Main_Screen(ScrollableLayer):
         super(Main_Screen, self).__init__()
         self.game = game
         self.keys_pressed = set()
+        with zipfile.ZipFile(const.MONSTER_ZIP_FILE) as monster_file:
+            monster_file_data = monster_file.open(const.ZONE_BACK_IMG_FILES[0])
+        self.image =  pyglet.image.load('', file=monster_file_data) 
 
         if hasattr(materials.main_scr, 'sprites'):
             for _, _sprite in materials.main_scr.sprites.items():
@@ -221,6 +228,7 @@ class Main_Screen(ScrollableLayer):
             self.keys_pressed.add(key)
         key_names = [pyglet.window.key.symbol_string(k) for k in self.keys_pressed]
         # press the SPACE key to return to the title anywhere any time
+        #print(key_names)
         if 'F2' in key_names:
             # return to the menu(title) screen
             self.keys_pressed.clear()
@@ -250,34 +258,35 @@ class Main_Screen(ScrollableLayer):
         elif self.game.game_status == 'LOOT':
             if self.game.player.loot:
                 _loot = self.game.player.loot
-                if 'UP' in key_names:
+                # sell, equip or take
+                if 'UP' in key_names or 'DOWN' in key_names or 'ENTER' in key_names:
+                    # take the loot
+                    if 'DOWN' in key_names:
+                        self.game.player.add_to_item_box(_loot[self.game.loot_selected])
                     # sell the loot
-                    self.game.player.sell_item(_loot[self.game.loot_selected])
+                    elif 'UP' in key_names:
+                        self.game.player.sell_item(_loot[self.game.loot_selected])
+                    # equip the loot
+                    elif 'ENTER' in key_names:
+                        self.game.player.equip_item(_loot[self.game.loot_selected])
                     self.game.player.loot.remove(self.game.player.loot[self.game.loot_selected])
                     if self.game.loot_selected > len(self.game.player.loot) - 1:
                         self.game.loot_selected -= 1
                     if self.game.loot_selected == -1:
                         self.game.loot_selected = 0
+                    self.game.player.show_player()
                     self.game.show_loot()
-                elif 'DOWN' or 'ENTER'in key_names:
-                    # take the loot
-                    if self.game.player.add_to_item_box(_loot[self.game.loot_selected]):
-                        self.game.player.loot.remove(self.game.player.loot[self.game.loot_selected])
-                        if self.game.loot_selected > len(self.game.player.loot) - 1:
-                            self.game.loot_selected -= 1
-                        if self.game.loot_selected == -1:
-                            self.game.loot_selected = 0
-                        self.game.show_loot()
+                    self.game.save()
+                # select the next(right) loot
                 elif 'RIGHT' in key_names:
-                    # select the next(right) loot
                     for _ in range(self.game.loot_selected + 1, len(_loot)):
                         if _loot[_]:
                             self.game.loot_selected = _
                             materials.main_scr.sprites['icon_select'].x = 562 + (30 * _)
                             item.show(_loot[_], self.game.player.item_equiped[_loot[_].equiped_pos])
                             break
+                # select the left loot
                 elif 'LEFT' in key_names:
-                    # select the left loot
                     for _ in range(self.game.loot_selected -1, -1, -1):
                         if _loot[_]:
                             self.game.loot_selected = _
@@ -289,8 +298,14 @@ class Main_Screen(ScrollableLayer):
                     pass
         elif self.game.game_status == 'END':
             _set = set(['DOWN','RIGHT','LEFT'])
+            _map_set = set(['_1', '_2', '_3', '_4', '_5', '_6'])
+            _map = list(_map_set & set(key_names))
             if _set & set(key_names):
                 self.game.move_on()
+            elif _map:
+                _map_no = int(_map[0][1]) - 1
+                if _map_no <= self.game.max_stage:
+                    self.game.set_stage(_map_no)
 
         elif self.game.game_status == 'GAME_OVER':
             if 'SPACE' in key_names:
@@ -300,6 +315,7 @@ class Main_Screen(ScrollableLayer):
 
         elif self.game.game_status == 'CORPSE':
             # press UP to buy all the equiped items of the dead player
+            # now the player don't pay for the loot, to be added later
             if 'UP' in key_names:
                 _equiped_item_data = []
                 with open(const.SAVE_FILE) as _file:
@@ -322,7 +338,16 @@ class Main_Screen(ScrollableLayer):
             elif 'LEFT' in key_names or 'RIGHT' in key_names:
                 self.game.move_on()
 
-
+        elif self.game.game_status == 'CAMP':
+            # rest for 1000 * (zone + 1)
+            if 'RIGHT' in key_names or 'LEFT' in key_names:
+                self.game.move_on()
+            elif 'UP' in key_names and self.game.player.gold >= 1000 * (self.game.player.zone + 1) and self.game.player.hp < self.game.player.max_hp:
+                self.game.player.gold -= 1000 * (self.game.player.zone + 1)
+                self.game.player.hp = self.game.player.max_hp
+                self.game.player.show_player()
+                self.game.save()
+                self.game.game_status = 'END'
                 
 
                 
@@ -363,8 +388,8 @@ class Main_Screen(ScrollableLayer):
         if self.keys_pressed and key in self.keys_pressed:
             self.keys_pressed.remove(key)
 
-    #def draw(self):
-     #   self.image.blit(0, 0)
+    def draw(self):
+        self.image.blit(0, 230)
 
 
 

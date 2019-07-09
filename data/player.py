@@ -58,6 +58,7 @@ class Player(object):
         self.loot = []
         self.save_slot = 0
         self.alive = True
+
         
     # the read-only property .value is calculated from all the items the player equiped    
     @property
@@ -99,29 +100,50 @@ class Player(object):
         # 11 - the dice god; 12 - dual swing; 13 - mighty hit 
         # 14 - stantard style
         for _ in self.skill:
-            if _.skill_no == 9:
-                _v['Atk'] += _v['Def'] / 2
-            elif _.skill_no == 10:
-                _v['Def'] += _v['Atk'] / 2
-            elif _.skill_no == 11:
-                _v['MinDice'] += 1
-                if _v['MinDice'] > _v['MaxDice']:
-                    _v['MinDice'] = _v['MaxDice']
-            elif _.skill_no == 12:
-                if self.item_equiped[0].main_type == 0 and self.item_equiped[1].main_type == 0:
-                    _v['BlockValue'] += 10
-            elif _.skill_no == 13:
-                if self.item_equiped[0].main_type == 1:
-                    _v['CriDmg'] *= 2
-            elif _.skill_no == 14:
-                if self.item_equiped[0].main_type == 0 and self.item_equiped[1].main_type == 2:
-                    _v['HpRegen'] += self.level * 20 + 100
+            if _:
+                if _.skill_no == 9:
+                    _v['Atk'] += _v['Def'] / 2
+                elif _.skill_no == 10:
+                    _v['Def'] += _v['Atk'] / 2
+                elif _.skill_no == 11:
+                    _v['MinDice'] += 1
+                    if _v['MinDice'] > _v['MaxDice']:
+                        _v['MinDice'] = _v['MaxDice']
+                elif _.skill_no == 12:
+                    if self.item_equiped[0].main_type == 0 and self.item_equiped[1].main_type == 0:
+                        _v['BlockValue'] += 10
+                elif _.skill_no == 13:
+                    if self.item_equiped[0].main_type == 1:
+                        _v['CriDmg'] *= 2
+                elif _.skill_no == 14:
+                    if self.item_equiped[0].main_type == 0 and self.item_equiped[1].main_type == 2:
+                        _v['HpRegen'] += self.level * 20 + 100
         return _v
 
     # the read-only property max_hp is calculated from Vit and HpBonusRate
     @property
     def max_hp(self):
         return int(self.value['Vit'] * 35 * (1 + self.value['HpBonusRate'] / 100))
+
+    # the read-only property skill_quantity is the quantity of skills which the player has
+    # you get n skills when your level is:
+    # n=1, lv 1-9
+    # n=2, lv 10-30
+    # n=3, lv 31-50
+    # n=4, lv 51-60
+
+    @property
+    def skill_quantity(self):
+        _lv = self.level
+        if _lv < 10:
+            return 1
+        elif 10 <= _lv <= 30:
+            return 2
+        elif 31 <= _lv <50:
+            return 3
+        elif 50 <= _lv:
+            return 4
+
 
     def equip_item(self, item):
         """equip a item to the player, and if the player has a item equiped already, add it to the item box
@@ -207,9 +229,14 @@ class Player(object):
         materials.front_layer.labels['exp_label'].element.text = str(int(self.exp)) + '/' + str(int(self.level ** 3.5) + 300)
         materials.front_layer.labels['gold_label'].element.text = str(int(self.gold))
         _str = ''
-        for _ in self.skill:
-            _str += (const.SKILL_DATA[_.skill_no]['name'] + ' ' * 4)
-            materials.front_layer.labels['player_skill_label'].element.text = _str
+        for _ in range(self.skill_quantity):
+            
+            if self.skill[_]:
+                _str += const.SKILL_DATA[self.skill[_].skill_no]['name']
+            else:
+                _str += '空闲'
+            _str += ' ' * 4
+        materials.front_layer.labels['player_skill_label'].element.text = _str
 
     def show_attack(self):
         _action = actions.MoveBy((20,0), 0.1) + actions.MoveBy((-20,0), 0.1)
@@ -236,6 +263,13 @@ class Player(object):
         _price = _item.level * (_item.rare_type + 1) * 10
         self.gold += _price
         materials.front_layer.labels['gold_label'].element.text = str(int(self.gold))
+    
+    # add None to the unsettled skill slot 
+    def update_skill(self):
+        _no = len(self.skill)
+        print('now add NONE for ', self.skill_quantity - _no)
+        for _ in range(self.skill_quantity - _no):
+            self.skill.append(None)
 
 def gen_player(level):
     """generate a player who has full-set equipment 
@@ -258,7 +292,9 @@ def gen_player(level):
     _player.hp = _player.max_hp
     _player.level = level
     _player.sprite = materials.main_scr.sprites['player_sprite']
+    _player.exp = 0
 
+    _player.update_skill()
     # add 54 random items to player's item box for test
     #for _ in range(54):
     #    _player.item_box.append(item.gen_random_item())
