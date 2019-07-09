@@ -27,8 +27,8 @@ Now the game is playable.
 
 ### [game]
 - ~~every monster can be drawn with its sprite image separately  from a ZIP file~~ (GREAT!!) (DONE)
-- add the event of CAMP (enchanting the item and healing the player)
-- add the event of the corpse (reclaim the gold and all the items, including the ones in the item box and equipped, of the dead player) (event added but feature completed partly)
+- add the event of CAMP (enchanting the item and healing the player) (partly done, enchanting is not done, for lacking GUI-solution)
+- ~~add the event of the corpse (reclaim all the items equipped in the dead player)~~ (event added, but the price is not decided yet)
 
 ### [save_load_layer]
 - ~~delete save slot~~ (done)
@@ -37,8 +37,8 @@ Now the game is playable.
 - ~~set the location of the message box~~ (done)
 
 ### [skill]
-- the quantity of the player's skills increases when leveling up
-- the display logic and GUI of skills(in info_layer) need to be fix
+- ~~the quantity of the player's skills increases when leveling up~~ (done, NOT COMMITED)
+- ~~the display logic and GUI of skills(in info_layer) need to be fix~~ (done, NOT COMMITED)
 
 ### [battle]
 - add hp change effect (Green color text going up)for hp-regen(absorb) for the player
