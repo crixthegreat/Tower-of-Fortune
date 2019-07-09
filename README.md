@@ -22,13 +22,13 @@ Now the game is playable.
 ### [main_scr]
 - ~~change the ARROW-CONTROL ICONS to sprites, so we can see different indications for different events (battle, tent, corpse)~~ (done)
 - minor fix of the above icon for corpse events (scale and indications)
-- the player can go to more zones when level-up
 - waiting for the world-map sprites drawn by Judy
 
 ### [game]
 - ~~every monster can be drawn with its sprite image separately  from a ZIP file~~ (GREAT!!) (DONE)
 - add the event of CAMP (enchanting the item and healing the player) (partly done, enchanting is not done, for lacking GUI-solution)
 - ~~add the event of the corpse (reclaim all the items equipped in the dead player)~~ (event added, but the price is not decided yet)
+- the player can go to more zones when level-up (functional, but GUI is not finished)
 
 ### [save_load_layer]
 - ~~delete save slot~~ (done)
