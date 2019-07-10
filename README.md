@@ -1,5 +1,6 @@
 # Tower-of-Fortune
-An RPG game with a Diablo-like equipment system.
+
+An RPG game with a Diablo-like equipment system, written in Python with Cocos2d
 The Tower of fortune pays homage to the following great games:
 - Tower of fortune (iOS)
 - The Diablo series
