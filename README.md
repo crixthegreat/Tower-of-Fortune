@@ -41,7 +41,7 @@ Now the game is playable.
 - ~~every monster can be drawn with its sprite image separately  from a ZIP file~~ (GREAT!!) (DONE)
 - add the event of CAMP (enchanting the item and healing the player) (partly done, enchanting is not done, for lacking GUI-solution)
 - ~~add the event of the corpse (reclaim all the items equipped in the dead player)~~ (event added, but the price is not decided yet)
-- the player can go to more zones when level-up (functional, but GUI is not finished)
+- ~~the player can go to more zones when level-up~~ (done)
 
 ### [save_load_layer]
 - ~~delete save slot~~ (done)
