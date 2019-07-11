@@ -7,10 +7,18 @@ import os
 import string
 import copy
 import zipfile
+import pyglet
+
+def image_from_file(_file):
+    with zipfile.ZipFile(MONSTER_ZIP_FILE) as monster_file:
+        monster_file_data = monster_file.open(_file)
+        return  pyglet.image.load('', file=monster_file_data) 
+    
+
 # The globel variables
 GAME_TITLE = 'MY GAME'
 PLAYER_NAME = 'crix'
-VERSION = 'beta 0.91'
+VERSION = 'beta 0.93'
 ZONE_NAME = ['平静的森林', '漆黑的地牢', '远方的孤岛', '精灵的国度', '奇妙的幻境', '地狱的试炼']
 MAX_LEN = 20
 DEFAULT_COLOR = (0, 0, 0, 255)
@@ -54,8 +62,8 @@ STRIKE_IMG_FILE = './pic/strike.gif'
 CRITICAL_STRIKE_IMG_FILE = './pic/critical_strike.gif'
 SUPER_STRIKE_IMG_FILE = './pic/super_strike.gif'
 EXPLODE_IMG_FILE = './pic/explode.gif'
-PLAYER_IMG_FILE = './pic/player_s.png'
-ENEMY_IMG_FILE = './pic/monster-30-1.png'
+PLAYER_IMG_FILE = 'player_s.png'
+ENEMY_IMG_FILE = 'monster-30-1.png'
 TITLE_MUSIC_FILE = './music/title.ogg'
 BG_MUSIC_FILE = './music/main.ogg'
 HIGHSCORE_MUSIC_FILE = './music/highscore.ogg'
@@ -75,6 +83,7 @@ DEFEND_IMG_FILE = './pic/defend.png'
 LUCK_IMG_FILE = './pic/luck.png'
 SAVE_LOAD_BG_IMG_FILE = './pic/save_load_layer_bg.png'
 SELECT_BAR_IMG_FILE = './pic/select_bar.png'
+MAP_SELECT_IMG_FILE = './pic/map_select.gif'
 # empty save slot ( a cross char)
 EMPTY_IMG_FILE = './pic/empty.png'
 MESSAGE_BOX_IMG_FILE = './pic/message_box.png'
@@ -84,7 +93,7 @@ LOOT_CONTROL_IMG_FILE = './pic/loot_control.png'
 CORPSE_CONTROL_IMG_FILE = './pic/corpse_control.png'
 MAIN_CONTROL_IMG_FILE = './pic/main_control.png'
 CAMP_CONTROL_IMG_FILE = './pic/camp_control.png'
-# monster zip file
+# monsters' & other's image file
 MONSTER_ZIP_FILE = './pic/monster.zip'
 DEFAULT_MONSTER_IMG_FILE = 'monster-30-0.png'
 

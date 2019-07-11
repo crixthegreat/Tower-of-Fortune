@@ -22,8 +22,8 @@ import random
 #images = {'player_img':player_image}
 images = {}
 
-player_image = pyglet.image.load(os.path.abspath(const.PLAYER_IMG_FILE)) 
-enemy_image = pyglet.image.load(os.path.abspath(const.ENEMY_IMG_FILE)) 
+player_image = const.image_from_file(const.PLAYER_IMG_FILE) 
+enemy_image = const.image_from_file(const.ENEMY_IMG_FILE) 
 icon_select_image = pyglet.image.load(os.path.abspath(const.ICON_SELECT_IMG_FILE)) 
 item_box_image = pyglet.image.load(os.path.abspath(const.ITEM_BOX_IMG_FILE)) 
 attack_style_image = pyglet.image.ImageGrid(pyglet.image.load('./pic/attack_style.png'), 5, 2)
