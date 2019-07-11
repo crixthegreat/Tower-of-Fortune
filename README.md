@@ -31,6 +31,7 @@ Now the game is playable.
 - ~~add a more attractive screenshot~~ (done)
 - ~~add all the sprite image of the enemies~~ (98% completed, the left are waiting for Judy's painting )
 - merge all the image files into a single zip file
+- add music
 
 ### [main_scr]
 - ~~change the ARROW-CONTROL ICONS to sprites, so we can see different indications for different events (battle, tent, corpse)~~ (done)
