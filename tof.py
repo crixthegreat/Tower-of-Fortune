@@ -51,7 +51,6 @@ Tower of fortune (pays homage to the following great games:
 - Tower of fortune (iOS)
 - Diablo
 - The Gambling God (FC)
-)
 ----------------------------------------------------------
 """
 from data import const, player, item, enemy, battle, skill
@@ -62,7 +61,10 @@ class Game(object):
     def __init__(self, _player):
         self.player = _player
         self.enemy = None
-        # The game has 3 status: STARTED, END, HIGHSCORE
+        # The game has many status: 
+        # END - the battle ended, ready to move on  
+        # STARTED
+        #
         self.game_status = 'END'
         self.enter = 0
         self.msg = []
@@ -289,7 +291,7 @@ class Game(object):
         #print('game changes into CORPSE status')
         #print('the COPRSE slot is ', self.corpse)
         self.game_status = 'CORPSE'
-        with zipfile.ZipFile(const.MONSTER_ZIP_FILE) as monster_file:
+        with zipfile.ZipFile(const.GUI_ZIP_FILE) as monster_file:
             monster_file_data = monster_file.open(const.CORPSE_EVENT_IMG_FILE)
         materials.main_scr.sprites['enemy_sprite'].image =  pyglet.image.load('', file=monster_file_data) 
         materials.main_scr.sprites['enemy_sprite'].visible = True
@@ -302,7 +304,7 @@ class Game(object):
             self.show_battle()
             return 1
         self.game_status = 'CAMP'
-        with zipfile.ZipFile(const.MONSTER_ZIP_FILE) as monster_file:
+        with zipfile.ZipFile(const.GUI_ZIP_FILE) as monster_file:
             monster_file_data = monster_file.open(const.CAMP_EVENT_IMG_FILE[self.player.zone])
         materials.main_scr.sprites['enemy_sprite'].image =  pyglet.image.load('', file=monster_file_data) 
         materials.main_scr.sprites['enemy_sprite'].visible = True
@@ -329,7 +331,7 @@ class Game(object):
         self.player.zone = no
         self.zone = no
         materials.front_layer.labels['zone_label'].element.text = const.ZONE_NAME[no]
-        with zipfile.ZipFile(const.MONSTER_ZIP_FILE) as monster_file:
+        with zipfile.ZipFile(const.GUI_ZIP_FILE) as monster_file:
             monster_file_data = monster_file.open(const.ZONE_BACK_IMG_FILES[no])
         my_main.image =  pyglet.image.load('', file=monster_file_data) 
         for _ in range(self.max_stage + 1):
