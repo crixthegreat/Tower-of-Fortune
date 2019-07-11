@@ -216,7 +216,7 @@ def show(item, player_item):
         _str +=  (const.ITEM_AFFIX_CNAME[_list[_]] + ' ' + str(item.affix[_list[_]]) + '\n')
     materials.main_scr.labels['item_affix'].element.text = _str
 
-    print(item.name, item.level, const.RARE_TYPE_NAME[item.rare_type], const.MAIN_TYPE_NAME[item.main_type])
+    #print(item.name, item.level, const.RARE_TYPE_NAME[item.rare_type], const.MAIN_TYPE_NAME[item.main_type])
     
     #for _ in range(const.AFFIX_MAX_USED_NO):
     #    if item.affix[_]:

@@ -95,6 +95,7 @@ MAIN_CONTROL_IMG_FILE = './pic/main_control.png'
 CAMP_CONTROL_IMG_FILE = './pic/camp_control.png'
 # monsters' & other's image file
 MONSTER_ZIP_FILE = './pic/monster.zip'
+GUI_ZIP_FILE = './pic/gui.zip'
 DEFAULT_MONSTER_IMG_FILE = 'monster-30-0.png'
 
 #  file for CORPSE-loot event
