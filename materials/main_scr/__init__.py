@@ -125,7 +125,7 @@ class Main_Screen(ScrollableLayer):
         super(Main_Screen, self).__init__()
         self.game = game
         self.keys_pressed = set()
-        with zipfile.ZipFile(const.MONSTER_ZIP_FILE) as monster_file:
+        with zipfile.ZipFile(const.GUI_ZIP_FILE) as monster_file:
             monster_file_data = monster_file.open(const.ZONE_BACK_IMG_FILES[0])
         self.image =  pyglet.image.load('', file=monster_file_data) 
 
