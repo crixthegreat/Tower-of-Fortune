@@ -6,6 +6,7 @@
 """The front layer definition file
 """
 import os
+import zipfile
 from data import const
 import pyglet
 import cocos
@@ -63,6 +64,39 @@ labels['enemy_hp_change_label'] = cocos.text.Label('',
         bold=True,color=const.DEFAULT_COLOR, x=500, y=220)
 
 sprites = {}
+_file_name = 'number-'
+with zipfile.ZipFile(const.MONSTER_ZIP_FILE) as monster_file:
+    for _ in range(6):
+        monster_file_data = monster_file.open(_file_name + str(_ + 1) + '.png')
+        _number_file_image =  pyglet.image.load('', file=monster_file_data) 
+        sprites['number' + str(_+ 1)] = cocos.sprite.Sprite(_number_file_image, position =(10,10))
+sprites['number1'].scale = 0.35
+sprites['number2'].scale = 0.35
+sprites['number3'].scale = 0.35
+sprites['number4'].scale = 0.35
+sprites['number5'].scale = 0.35
+sprites['number6'].scale = 0.35
+
+sprites['number1'].position = 160, 100
+sprites['number2'].position = 50, 150
+sprites['number3'].position = 25, 75
+sprites['number4'].position = 100, 60
+sprites['number5'].position = 140, 160
+sprites['number6'].position = 200, 160
+
+sprites['number1'].visible = False
+sprites['number2'].visible = False
+sprites['number3'].visible = False
+sprites['number4'].visible = False
+sprites['number5'].visible = False
+sprites['number6'].visible = False
+
+
+_anime = pyglet.image.load_animation(const.MAP_SELECT_IMG_FILE)
+_bin = pyglet.image.atlas.TextureBin()
+_anime.add_to_texture_bin(_bin)
+sprites['map_select'] = cocos.sprite.Sprite(_anime, position=(30,30))
+sprites['map_select'].scale = 0.35
 
 #bg_music = materials.Audio(Const.BG_MUSIC_FILE)
 
@@ -72,6 +106,9 @@ class Front_Layer(Layer):
         if hasattr(materials.front_layer, 'labels'):
             for _, _label in materials.front_layer.labels.items():
                 self.add(_label)
+        if hasattr(materials.front_layer, 'sprites'):
+            for _, _sprite in materials.front_layer.sprites.items():
+                self.add(_sprite)
         
         self.image = materials.images['front_img']
     def draw(self):

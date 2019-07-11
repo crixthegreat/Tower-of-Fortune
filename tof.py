@@ -332,7 +332,9 @@ class Game(object):
         with zipfile.ZipFile(const.MONSTER_ZIP_FILE) as monster_file:
             monster_file_data = monster_file.open(const.ZONE_BACK_IMG_FILES[no])
         my_main.image =  pyglet.image.load('', file=monster_file_data) 
-        
+        for _ in range(self.max_stage + 1):
+            materials.front_layer.sprites['number' + str(_+1)].visible = True
+        materials.front_layer.sprites['map_select'].position = materials.front_layer.sprites['number' + str(no + 1)].position[0], materials.front_layer.sprites['number' + str(no + 1)].position[1] - 20 
 
 if __name__ == '__main__':
     msg = []

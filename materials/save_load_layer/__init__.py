@@ -169,7 +169,7 @@ class Save_Load_Layer(Layer):
                         #print('the player is dead')
                 else:
                     # start a new game
-                    self.game.player = player.gen_player(1)
+                    self.game.player = player.gen_player(23)
                     self.game.player.save_slot =  self.slot_selected
                     self.game.player.show_player()
                     self.game.player.zone = 0
