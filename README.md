@@ -29,12 +29,12 @@ Now the game is playable.
 - ~~rewrite(or remove) the show_message~~ (done)
 - add the credit layer
 - ~~add a more attractive screenshot~~ (done)
-- add all the sprite image of the enemies (50% completed)
+- ~~add all the sprite image of the enemies~~ (98% completed, the left are waiting for Judy's painting )
 
 ### [main_scr]
 - ~~change the ARROW-CONTROL ICONS to sprites, so we can see different indications for different events (battle, tent, corpse)~~ (done)
-- minor fix of the above icon for corpse events (scale and indications)
-- waiting for the world-map sprites drawn by Judy
+- ~~minor fix of the above icon for corpse events (scale and indications)~~
+- ~~waiting for the world-map sprites drawn by Judy~~( done, used a map from ArtStation)
 - ~~add different backgroud image for different zones~~ (done)
 
 ### [game]
