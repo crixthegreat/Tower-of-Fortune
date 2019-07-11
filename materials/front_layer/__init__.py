@@ -65,7 +65,7 @@ labels['enemy_hp_change_label'] = cocos.text.Label('',
 
 sprites = {}
 _file_name = 'number-'
-with zipfile.ZipFile(const.MONSTER_ZIP_FILE) as monster_file:
+with zipfile.ZipFile(const.GUI_ZIP_FILE) as monster_file:
     for _ in range(6):
         monster_file_data = monster_file.open(_file_name + str(_ + 1) + '.png')
         _number_file_image =  pyglet.image.load('', file=monster_file_data) 
