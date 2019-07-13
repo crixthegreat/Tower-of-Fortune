@@ -28,7 +28,7 @@ labels = dict(version_label=cocos.text.Label(const.VERSION,
 
 t2_seq = pyglet.image.Animation.from_image_sequence(images['t2_anime'], 0.5, True)
 
-sprites = {'start_sprite':materials.gen_anime_sprite('./pic/start.png', 3, 1, 0.5, True, 440, 270)}
+sprites = {'start_sprite':materials.gen_anime_sprite(const.START_ARROW_IMG_FILE, 3, 1, 0.5, True, 440, 270)}
 #'t2_sprite':cocos.sprite.Sprite(t2_seq, position=(650, 400))}
 
 bg_music = materials.Audio(const.TITLE_MUSIC_FILE)

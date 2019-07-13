@@ -327,7 +327,7 @@ class Game(object):
         #print('game changes into CORPSE status')
         #print('the COPRSE slot is ', self.corpse)
         self.game_status = 'CORPSE'
-        materials.main_scr.sprites['enemy_sprite'].image = const.image_from_gui_file(const.CORPSE_EVENT_IMG_FILE)
+        materials.main_scr.sprites['enemy_sprite'].image = const.image_from_file(const.CORPSE_EVENT_IMG_FILE, const.GUI_ZIP_FILE)
         materials.main_scr.sprites['enemy_sprite'].visible = True
     
     def show_camp(self):
@@ -339,7 +339,7 @@ class Game(object):
             self.show_battle()
             return 1
         self.game_status = 'CAMP'
-        materials.main_scr.sprites['enemy_sprite'].image = const.image_from_gui_file(const.CAMP_EVENT_IMG_FILE[self.player.zone])
+        materials.main_scr.sprites['enemy_sprite'].image = const.image_from_file(const.CAMP_EVENT_IMG_FILES[self.player.zone], const.GUI_ZIP_FILE)
         materials.main_scr.sprites['enemy_sprite'].visible = True
 
     def show_battle(self):

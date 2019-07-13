@@ -13,21 +13,25 @@ import pyglet
 
 # The globel variables
 GAME_TITLE = 'MY GAME'
+# not used
 PLAYER_NAME = 'crix'
 VERSION = 'beta 0.93'
 ZONE_NAME = ['平静的森林', '漆黑的地牢', '远方的孤岛', '精灵的国度', '奇妙的幻境', '地狱的试炼']
+# not used
 MAX_LEN = 20
 DEFAULT_COLOR = (0, 0, 0, 255)
 GREEN_COLOR = (0,200,30,255)
 ORANGE_COLOR = (230,30,230,255)
+# RED color
 HIGHLIGHT_COLOR = (200, 30, 30, 255)
-# the probablity of tent-event and corpse-event (in percent)
+# the probablity of tent(camp)-event and corpse-event (in percent)
 TENT_RATE = 5
 CORPSE_RATE = 2
 
 # used for items
 MAX_ITEM_BOX = 130
 LEGEND_DROP_RATE = 2
+# set items is not added yet
 SET_DROP_RATE = 2
 RARE_DROP_RATE = 100
 MAGIC_DROP_RATE = 1500
@@ -37,6 +41,7 @@ RARE_TYPE_NORMAL = 0
 RARE_TYPE_MAGIC = 1
 RARE_TYPE_RARE = 2
 RARE_TYPE_LEGEND = 3
+# the divinity items is not added yet
 RARE_TYPE_DIVINITY = 4
 RARE_TYPE_NAME = ['普通', '魔法', '稀有' ,'传说', '神圣']
 MAIN_TYPE_NAME = ['单手武器', '双手武器', '副手武器', '头', '肩', '颈', '胸', '手腕', '手', '腰', '腿', '脚', '手指']
@@ -49,8 +54,15 @@ ITEM_DATA_FILE = './data/item.csv'
 SKILL_DATA_FILE = './data/skill.csv'
 ENEMY_DATA_FILE = './data/enemy.csv'
 ATTACK_STYLE_FILE = './data/attack_style.csv'
+# the game save file
 SAVE_FILE = './data/save.tof'
 
+# The image files are dealt(import to image object) by image_from_file method
+# there files was packed into monster.zip and gui.zip
+# the image file can be static images(jpg/png files) or animations(gif files)
+# which are identified and handled automatically
+# the extention name of the file need not be specified
+# Though the merged png files to be cut into grids are dealt one by one
 BACKGROUND_IMG_FILE = 'bg'
 FRONT_IMG_FILE = 'front'
 INFO_LAYER_IMG_FILE = 'info_layer'
@@ -60,12 +72,7 @@ SUPER_STRIKE_IMG_FILE = 'super_strike'
 EXPLODE_IMG_FILE = 'explode'
 PLAYER_IMG_FILE = 'player_s'
 ENEMY_IMG_FILE = 'monster-30-1'
-TITLE_MUSIC_FILE = './music/title.ogg'
-BG_MUSIC_FILE = './music/main.ogg'
-HIGHSCORE_MUSIC_FILE = './music/highscore.ogg'
 MAP_FILE = './materials/background/map.tmx'
-ITEM_IMG_FILE = './pic/item.png'
-DICE_IMG_FILE = './pic/dice.png'
 RIP_IMG_FILE = 'rip'
 ICON_SELECT_IMG_FILE = 'icon_select'
 ITEM_SELECT_IMG_FILE = 'item_select'
@@ -73,7 +80,6 @@ SKILL_SELECT_IMG_FILE = 'skill_select'
 ITEM_BOX_IMG_FILE = 'item_box'
 SINGLE_ITEM_BOX_IMG_FILE = 'single_item_box'
 SINGLE_EQUIPED_ITEM_BOX_IMG_FILE = 'single_equiped_item_box'
-ATTACK_STYLE_IMG_FILE = './pic/attack_style.png'
 ATTACK_IMG_FILE = 'attack'
 DEFEND_IMG_FILE = 'defend'
 LUCK_IMG_FILE = 'luck'
@@ -89,20 +95,30 @@ LOOT_CONTROL_IMG_FILE = 'loot_control'
 CORPSE_CONTROL_IMG_FILE = 'corpse_control'
 MAIN_CONTROL_IMG_FILE = 'main_control'
 CAMP_CONTROL_IMG_FILE = 'camp_control'
+DEFAULT_MONSTER_IMG_FILE = 'monster-30-0'
+#  file for CORPSE-loot event
+CORPSE_EVENT_IMG_FILE = 'corpse'
+# file for campfire event
+CAMP_EVENT_IMG_FILES = ['campfire-0', 'campfire-1', 'campfire-2', 'camfire-3', 'campfire-4', 'campfire-5']
+# file for background image of the zones
+# with the size of 800 x 200
+ZONE_BACK_IMG_FILES = ['background-0', 'background-1', 'background-2', 'background-3', 'background-4', 'background-5']
+
 # monsters' & other's image file
 MONSTER_ZIP_FILE = './pic/monster.zip'
 GUI_ZIP_FILE = './pic/gui.zip'
-DEFAULT_MONSTER_IMG_FILE = 'monster-30-0'
 
-#  file for CORPSE-loot event
-CORPSE_EVENT_IMG_FILE = 'corpse.png'
+# the 4 image files below are merged image file to be cut into grids
+# which are dealt one by one without methods
+ITEM_IMG_FILE = './pic/item.png'
+DICE_IMG_FILE = './pic/dice.png'
+ATTACK_STYLE_IMG_FILE = './pic/attack_style.png'
+START_ARROW_IMG_FILE = './pic/start.png'
 
-# file for campfire event
-CAMP_EVENT_IMG_FILE = ['campfire-0.png', 'campfire-1.png', 'campfire-2.png', 'camfire-3.png', 'campfire-4.png', 'campfire-5.png']
-
-# file for background image of the zones
-# 800 x 200
-ZONE_BACK_IMG_FILES = ['background-0', 'background-1', 'background-2', 'background-3', 'background-4', 'background-5']
+# the music files
+TITLE_MUSIC_FILE = './music/title.ogg'
+BG_MUSIC_FILE = './music/main.ogg'
+HIGHSCORE_MUSIC_FILE = './music/highscore.ogg'
 
 # The player affixes
 PLAYER_AFFIX = dict(
@@ -130,7 +146,7 @@ PLAYER_AFFIX = dict(
         X5 = 0)
 
 
-# Read item data
+# Read the data of the items
 ITEMS_DATA = []
 _line = []
 _item = {}
@@ -228,7 +244,7 @@ NORMAL_MHP = 8500
 ELITE_CRIDMG = 50
 NORMAL_CRIDMG = 0
 
-# Read item data
+# Read enemy data
 ENEMY_DATA = []
 _line = []
 _enemy = {'enemy_name':[], 'Atk':0, 'CriDmg':0, 'max_hp':0}
@@ -324,20 +340,19 @@ with open(ATTACK_STYLE_FILE, 'r') as f:
         ATTACK_STYLE_DATA.append(copy.deepcopy(_style))
         line = f.readline()
     #print(ITEM_TYPE_USED)
-if __name__ == '__main__':
-    for _ in ATTACK_STYLE_DATA:
-        print (_)
 
 
 def image_from_file(_file, image_file=MONSTER_ZIP_FILE):
     """get a image object from a zip file
-    By now, image_file can be MONSTER_ZIP_FILE or GUI_ZIP_FILE
+    By now, there are two image-file package: MONSTER_ZIP_FILE and GUI_ZIP_FILE
     _file is the main name of image file, NO extentions
     """
+    # read a single file from the zip file
     with zipfile.ZipFile(image_file) as _image_file:
         image_file_data = _image_file.open(_file + '.' + FILE_TYPE[_file])
     # check the file is whether a gif file or not    
     if FILE_TYPE[_file]=='gif':
+        # the standard gif handling process
         _anime = pyglet.image.load_animation('', file=image_file_data)
         _bin = pyglet.image.atlas.TextureBin()
         _anime.add_to_texture_bin(_bin)
@@ -345,12 +360,11 @@ def image_from_file(_file, image_file=MONSTER_ZIP_FILE):
     elif FILE_TYPE[_file]=='png' or FILE_TYPE[_file]=='jpg':
         return  pyglet.image.load('', file=image_file_data) 
     else:
+        # By now, only gif, png and jpg files can be read
         print('when get image from file, UNKNOWN file type for ', FILE_TYPE[image_file])
         sys.exit()
-    
-def image_from_gui_file(_file):
-    """get a image object from the gui zip file
-    """
-    with zipfile.ZipFile(GUI_ZIP_FILE) as gui_file:
-        gui_file_data = gui_file.open(_file)
-        return  pyglet.image.load('', file=gui_file_data) 
+
+# for test    
+if __name__ == '__main__':
+    for _ in ATTACK_STYLE_DATA:
+        print (_)
