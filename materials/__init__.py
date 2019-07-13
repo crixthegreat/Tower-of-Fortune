@@ -71,8 +71,7 @@ def show_alpha(_str, pos_x=100, pos_y=400):
 mixer.init()
 cocos.director.director.init(width=800, height=600, caption=const.GAME_TITLE)
 
-bg_file = os.path.abspath(const.BACKGROUND_IMG_FILE)
-bg_img = pyglet.image.load(bg_file) 
+bg_img = const.image_from_file(const.BACKGROUND_IMG_FILE, const.GUI_ZIP_FILE)
 
 #load the alphabet to alpha_image
 alpha_image = []
@@ -80,38 +79,39 @@ alpha_image = pyglet.image.ImageGrid(pyglet.image.load('./pic/alpha.png'), 2, 27
 
 item_image = pyglet.image.ImageGrid(pyglet.image.load(const.ITEM_IMG_FILE), 60, 5)
 dice_image = pyglet.image.ImageGrid(pyglet.image.load(const.DICE_IMG_FILE), 5, 2)
-front_image = pyglet.image.load(const.FRONT_IMG_FILE) 
-info_layer_image = pyglet.image.load(const.INFO_LAYER_IMG_FILE) 
+front_image = const.image_from_file(const.FRONT_IMG_FILE, const.GUI_ZIP_FILE) 
+info_layer_image = const.image_from_file(const.INFO_LAYER_IMG_FILE, const.GUI_ZIP_FILE) 
 
 images = {'alpha_image':alpha_image, 'bg_img':bg_img, 'item_image':item_image, 'dice_image':dice_image, 'front_img':front_image, 'info_layer_img':info_layer_image}
 
 
 
 
-def gif_to_anime(_file):
-    _anime = pyglet.image.load_animation(_file)
-    _bin = pyglet.image.atlas.TextureBin()
-    _anime.add_to_texture_bin(_bin)
-    return _anime
+#def gif_to_anime(_file):
+#    _anime = pyglet.image.load_animation(_file)
+#    _bin = pyglet.image.atlas.TextureBin()
+#    _anime.add_to_texture_bin(_bin)
+#    return _anime
 
-def gif_to_sprite(_file, _scale=1):
-    _anime = gif_to_anime(_file)
-    return cocos.sprite.Sprite(_anime, position =(600,300), scale = _scale)
+#def gif_to_sprite(_file, _scale=1):
+#    _anime = gif_to_anime(_file)
+#    return cocos.sprite.Sprite(_anime, position =(600,300), scale = _scale)
 
 
-strike_anime = pyglet.image.load_animation(const.STRIKE_IMG_FILE)
-strike_bin = pyglet.image.atlas.TextureBin()
-strike_anime.add_to_texture_bin(strike_bin)
-strike_anime = pyglet.image.load_animation(const.STRIKE_IMG_FILE)
-strike_bin = pyglet.image.atlas.TextureBin()
-strike_anime.add_to_texture_bin(strike_bin)
+#strike_anime = pyglet.image.load_animation(const.STRIKE_IMG_FILE)
+#strike_bin = pyglet.image.atlas.TextureBin()
+#strike_anime.add_to_texture_bin(strike_bin)
+#strike_anime = pyglet.image.load_animation(const.STRIKE_IMG_FILE)
+#strike_bin = pyglet.image.atlas.TextureBin()
+#strike_anime.add_to_texture_bin(strike_bin)
 
 #sprites = {'alpha_str' + str(_):cocos.sprite.Sprite(alpha_image[_], position=(0, 0)) for _ in range(const.MAX_LEN)}
 sprites = {}
 sprites['item'] = cocos.sprite.Sprite(item_image[0], position = (400,335))
 sprites['player_item'] = cocos.sprite.Sprite(item_image[0], position = (220,315))
-sprites['strike'] = gif_to_sprite(const.STRIKE_IMG_FILE, 0.7)
-sprites['explode'] = gif_to_sprite(const.EXPLODE_IMG_FILE, 2)
+sprites['strike'] = cocos.sprite.Sprite(const.image_from_file(const.STRIKE_IMG_FILE, const.GUI_ZIP_FILE), position=(600,300), scale=0.7)
+
+sprites['explode'] =  cocos.sprite.Sprite(const.image_from_file(const.EXPLODE_IMG_FILE, const.GUI_ZIP_FILE), position=(600,300), scale=2)
 
 
 import materials.background

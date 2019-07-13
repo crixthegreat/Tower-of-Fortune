@@ -18,10 +18,10 @@ import materials
 
 images = {}
 
-save_load_bg_image = pyglet.image.load(os.path.abspath(const.SAVE_LOAD_BG_IMG_FILE)) 
-select_bar_image = pyglet.image.load(os.path.abspath(const.SELECT_BAR_IMG_FILE)) 
-empty_image = pyglet.image.load(os.path.abspath(const.EMPTY_IMG_FILE)) 
-message_box_image = pyglet.image.load(os.path.abspath(const.MESSAGE_BOX_IMG_FILE)) 
+save_load_bg_image = const.image_from_file(const.SAVE_LOAD_BG_IMG_FILE, const.GUI_ZIP_FILE) 
+select_bar_image = const.image_from_file(const.SELECT_BAR_IMG_FILE, const.GUI_ZIP_FILE) 
+empty_image = const.image_from_file(const.EMPTY_IMG_FILE, const.GUI_ZIP_FILE) 
+message_box_image = const.image_from_file(const.MESSAGE_BOX_IMG_FILE, const.GUI_ZIP_FILE) 
 
 """
 time_label & best_time_label : as the name says

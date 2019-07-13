@@ -16,8 +16,8 @@ import materials
 
 images = {}
 
-single_item_box_image = pyglet.image.load(os.path.abspath(const.SINGLE_ITEM_BOX_IMG_FILE)) 
-single_equiped_item_box_image = pyglet.image.load(os.path.abspath(const.SINGLE_EQUIPED_ITEM_BOX_IMG_FILE)) 
+single_item_box_image = const.image_from_file(const.SINGLE_ITEM_BOX_IMG_FILE, const.GUI_ZIP_FILE) 
+single_equiped_item_box_image = const.image_from_file(const.SINGLE_EQUIPED_ITEM_BOX_IMG_FILE, const.GUI_ZIP_FILE) 
 """
 time_label & best_time_label : as the name says
 """
@@ -77,8 +77,8 @@ labels['player_item_affix'] = cocos.text.Label('',font_size=9,
         x=648, y=480, width=200, multiline=True)
 
 
-skill_select_image = pyglet.image.load(os.path.abspath(const.SKILL_SELECT_IMG_FILE)) 
-item_select_image =  pyglet.image.load(os.path.abspath(const.ITEM_SELECT_IMG_FILE)) 
+skill_select_image = const.image_from_file(const.SKILL_SELECT_IMG_FILE, const.GUI_ZIP_FILE) 
+item_select_image =  const.image_from_file(const.ITEM_SELECT_IMG_FILE, const.GUI_ZIP_FILE) 
 
 sprites = {}
 
