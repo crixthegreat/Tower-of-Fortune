@@ -63,18 +63,28 @@ class Game(object):
         self.enemy = None
         # The game has many status: 
         # END - the battle ended, ready to move on  
-        # STARTED
-        #
+        # STARTED - battle started
+        # LOOT - battle ended with something dropped
+        # CAMP - moved to a camp
+        # CORPSE - moved to a corpse of dead player
         self.game_status = 'END'
+        # not used ??
         self.enter = 0
+        # not used ??
         self.msg = []
         self.zone = 0
+        # the attack style 
         self.style = [0, 0, 0]
         self.loot_selected = 0
+        # stores the dead player's SAVE SLOT number
         self.corpse = None
 
     @property
     def max_stage(self):
+        """self.max_stage =
+            the most difficult stage where the player can go to
+            namely 0, 1, 2, 3, 4, 5
+        """
         return (self.player.level - 1) // 10
 
     @property
@@ -83,6 +93,9 @@ class Game(object):
 
     @game_status.setter
     def game_status(self, status):
+        """game_status setter method
+        is used to set the control-direction-sprites depending on the game status
+        """
         self._game_status = status
         materials.main_scr.sprites['control'].anchor = 0, 0
         if status == 'END':
@@ -120,11 +133,14 @@ class Game(object):
         director.replace(Scene(game_screen, front_layer))
 
     def show_game(self):
-
+        """method to return to the game screen
+        """
         director.replace(Scene(game_screen, front_layer))
         self.player.show_player()
 
     def show_loot(self):
+        """show the items dropped by the enemy
+        """
         item.hide()
         materials.main_scr.sprites['icon_select'].visible = False
         for _ in range(8):
@@ -137,17 +153,22 @@ class Game(object):
                 materials.main_scr.sprites['loot' + str(_)].image = materials.item_image[(59-_loot[_].type) * 5 + _loot[_].rare_type]
             materials.main_scr.sprites['icon_select'].visible = True
             materials.main_scr.sprites['icon_select'].x = 562 + (30 * self.loot_selected)
-
+            # use the item box to show the item dropped and comparing the corresponding item equipped 
             item.show(self.player.loot[self.loot_selected], self.player.item_equiped[self.player.loot[self.loot_selected].equiped_pos])
 
     def show_info(self):
         """display the screen of player information
+        (where you check the skills, item equipped and the item-box)
         """
         my_info.status = 'view'
         director.replace(Scene(my_info))
         self.refresh_info()
 
     def refresh_info(self):
+        """update all the data of the info layer 
+        """
+        # the info layer and the main_scr share the same labels of the player's data
+        # so the method player.show_player affects both layer 
         self.player.show_player()
         # show the value of the player
         my_info.show_player_value()
@@ -158,19 +179,26 @@ class Game(object):
         my_info.show_item_box()
 
     def screen_set_focus(self, x, y):
+        """not used in this game
+        """
         game_screen.set_focus(self.player.sprite.x, self.player.sprite.y)
     
     def show_menu(self):
+        """as the name says
+        """
         self.game_status = 'END'
         director.replace(FlipY3DTransition(Scene(my_menu)))
 
     def show_save_load(self):
+        """as the name says
+        """
         director.replace(FlipY3DTransition(Scene(my_save_load_layer)))
         my_save_load_layer.show_save_slot()
     
 
     def save(self):
-        
+        """save the game(player)
+        """
         _player = self.player
         
         # turn the player's attribution into a dict
@@ -189,20 +217,22 @@ class Game(object):
         _skill_list = []
         # use the item_to_dict function to turn a item object into a dictionary
         for _ in _player.item_equiped:
+            # the off-hand item can be nothing
             if _:
                 _item_equiped_list.append(_.item_to_dict())
             else:
                 _item_equiped_list.append(None)
         for _ in _player.item_box:
             _item_box_list.append(_.item_to_dict())
-        # for skills, just store the N.O. of the skills
+        # for skills, just store the Number of the skills
         for _ in _player.skill:
+            # the player's skill list can also contains None (when the skill is not assigned)
             if _:
                 _skill_list.append(_.skill_no)
             else:
                 _skill_list.append(None)
 
-        # the name of the player is used to identify the save data
+        # the KEY of the save_data dictionary is the 'slotX' (X is 0 ~ 8)
         save_data['slot' + str(_player.save_slot)] = dict(
                 player_level=_player.level, 
                 hp=_player.hp, 
@@ -219,19 +249,24 @@ class Game(object):
             try:
                 json.dump(save_data, _file)
             except:
-                print('write file failed')
+                print('write file failed when saveing the game')
+                sys.exit()
 
     def load(self, save_slot):
+        """Load the game
+        from the specific save slot
+        """
         _player = player.Player(materials.main_scr.sprites['player_sprite'])
         _player.save_slot = save_slot
         with open(const.SAVE_FILE) as _file:
             try:
                 save_data = json.load(_file)
             except:
-                print('load save file failed')
+                print('read save file failed when loading the game')
                 sys.exit()
-        _data = save_data['slot' + str(save_slot)]
 
+        _data = save_data['slot' + str(save_slot)]
+        # load the property
         _player.level = _data['player_level']
         _player.hp = _data['hp']
         _player.gold = _data['gold']
@@ -239,14 +274,14 @@ class Game(object):
         _player.zone = _data['zone']
         _player.alive = _data['alive']
         _player.epitaph = _data['epitaph']
-
+        # load the skills ('s number)
         _player.skill = []
         for _ in _data['skill']:
             if _ is None:
                 _player.skill.append(None)
             else:
                 _player.skill.append(skill.Skill(_))
-
+        # load the items with item.dict_to_item() method
         _player.item_equiped = []
         for _ in _data['item_equiped']:
             if _:
@@ -262,54 +297,54 @@ class Game(object):
 
     
     def game_over(self):
+        """as the names says
+        """
         self.game_status = 'GAME_OVER'
         self.player.sprite.image = materials.main_scr.images['rip']
 
-    # the event CORPSE, when the player can pay some money to loot the corpse 
     def show_corpse(self):
+        """the event CORPSE, 
+        where the player can pay some money to loot the corpse 
+        """
         _no_corpse = True
         with open(const.SAVE_FILE) as _file:
             try:
                 save_data = json.load(_file)
             except:
-                print('load save file failed')
+                print('failed to read save file when checking whether there is corpses in the zone')
                 sys.exit()
-
+        # check whether there is corpses in the zone
         for _, _data in save_data.items():
             if _data['zone']== self.player.zone and (not(_data['alive'])):
                 _no_corpse = False
                 # e.g self.corpse = 'slot1'
                 self.corpse = _
                 break
-
         if _no_corpse:
             self.show_battle()
             return 1
 
-        
-
         #print('game changes into CORPSE status')
         #print('the COPRSE slot is ', self.corpse)
         self.game_status = 'CORPSE'
-        with zipfile.ZipFile(const.GUI_ZIP_FILE) as monster_file:
-            monster_file_data = monster_file.open(const.CORPSE_EVENT_IMG_FILE)
-        materials.main_scr.sprites['enemy_sprite'].image =  pyglet.image.load('', file=monster_file_data) 
+        materials.main_scr.sprites['enemy_sprite'].image = const.image_from_gui_file(const.CORPSE_EVENT_IMG_FILE)
         materials.main_scr.sprites['enemy_sprite'].visible = True
     
-    # the event CAMP, when the player can pay some money to recover the HP
-    # and Enchant the item
     def show_camp(self):
-        # if the HP is full then generate enemy
+        """ the event CAMP, when the player can pay some money to recover the HP
+        and Enchant the item
+        """
+        # if the HP is full, generating a enemy insteadly
         if self.player.hp >= self.player.max_hp:
             self.show_battle()
             return 1
         self.game_status = 'CAMP'
-        with zipfile.ZipFile(const.GUI_ZIP_FILE) as monster_file:
-            monster_file_data = monster_file.open(const.CAMP_EVENT_IMG_FILE[self.player.zone])
-        materials.main_scr.sprites['enemy_sprite'].image =  pyglet.image.load('', file=monster_file_data) 
+        materials.main_scr.sprites['enemy_sprite'].image = const.image_from_gui_file(const.CAMP_EVENT_IMG_FILE[self.player.zone])
         materials.main_scr.sprites['enemy_sprite'].visible = True
 
     def show_battle(self):
+        """start the battle with enemy
+        """
         self.enemy = enemy.gen_enemy(None, None, self.player.zone, random.randrange(self.zone * 10 + 1, (self.zone + 1) * 10))
         if self.enemy:
             self.game_status = 'STARTED'
@@ -317,10 +352,12 @@ class Game(object):
             self.player.loot = []
 
     def move_on(self):
+        ''' the player moves to the next location 
+        '''
         self.save()
         _r = random.randrange(1,100)
         if 1<= _r <= const.CORPSE_RATE:
-            print('now game is going to show the corpse')
+            #print('now game is going to show the corpse')
             self.show_corpse()
         elif const.CORPSE_RATE < _r <= const.CORPSE_RATE + const.TENT_RATE:
             self.show_camp()
@@ -328,12 +365,13 @@ class Game(object):
             self.show_battle()
 
     def set_stage(self, no):
+        '''set the current stage
+        '''
         self.player.zone = no
         self.zone = no
         materials.front_layer.labels['zone_label'].element.text = const.ZONE_NAME[no]
-        with zipfile.ZipFile(const.GUI_ZIP_FILE) as monster_file:
-            monster_file_data = monster_file.open(const.ZONE_BACK_IMG_FILES[no])
-        my_main.image =  pyglet.image.load('', file=monster_file_data) 
+        my_main.image = const.image_from_file(const.ZONE_BACK_IMG_FILES[no], const.GUI_ZIP_FILE)
+        # display the stage numbers to indicate the zones where the player can go to
         for _ in range(self.max_stage + 1):
             materials.front_layer.sprites['number' + str(_+1)].visible = True
         materials.front_layer.sprites['map_select'].position = materials.front_layer.sprites['number' + str(no + 1)].position[0], materials.front_layer.sprites['number' + str(no + 1)].position[1] - 20 

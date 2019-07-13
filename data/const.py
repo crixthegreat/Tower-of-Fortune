@@ -3,17 +3,13 @@
 #Code by Crix @ crixthegreat@gmail.com
 #https://github.com/crixthegreat/
 #codetime: 2019/6/5 12:10:57
+import sys
 import os
 import string
 import copy
 import zipfile
 import pyglet
 
-def image_from_file(_file):
-    with zipfile.ZipFile(MONSTER_ZIP_FILE) as monster_file:
-        monster_file_data = monster_file.open(_file)
-        return  pyglet.image.load('', file=monster_file_data) 
-    
 
 # The globel variables
 GAME_TITLE = 'MY GAME'
@@ -55,48 +51,48 @@ ENEMY_DATA_FILE = './data/enemy.csv'
 ATTACK_STYLE_FILE = './data/attack_style.csv'
 SAVE_FILE = './data/save.tof'
 
-BACKGROUND_IMG_FILE = './pic/bg.png'
-FRONT_IMG_FILE = './pic/front.png'
-INFO_LAYER_IMG_FILE = './pic/info_layer.png'
-STRIKE_IMG_FILE = './pic/strike.gif'
-CRITICAL_STRIKE_IMG_FILE = './pic/critical_strike.gif'
-SUPER_STRIKE_IMG_FILE = './pic/super_strike.gif'
-EXPLODE_IMG_FILE = './pic/explode.gif'
-PLAYER_IMG_FILE = 'player_s.png'
-ENEMY_IMG_FILE = 'monster-30-1.png'
+BACKGROUND_IMG_FILE = 'bg'
+FRONT_IMG_FILE = 'front'
+INFO_LAYER_IMG_FILE = 'info_layer'
+STRIKE_IMG_FILE = 'strike'
+CRITICAL_STRIKE_IMG_FILE = 'critical_strike'
+SUPER_STRIKE_IMG_FILE = 'super_strike'
+EXPLODE_IMG_FILE = 'explode'
+PLAYER_IMG_FILE = 'player_s'
+ENEMY_IMG_FILE = 'monster-30-1'
 TITLE_MUSIC_FILE = './music/title.ogg'
 BG_MUSIC_FILE = './music/main.ogg'
 HIGHSCORE_MUSIC_FILE = './music/highscore.ogg'
 MAP_FILE = './materials/background/map.tmx'
 ITEM_IMG_FILE = './pic/item.png'
 DICE_IMG_FILE = './pic/dice.png'
-RIP_IMG_FILE = './pic/rip.png'
-ICON_SELECT_IMG_FILE = './pic/icon_select.png'
-ITEM_SELECT_IMG_FILE = './pic/item_select.png'
-SKILL_SELECT_IMG_FILE = './pic/skill_select.png'
-ITEM_BOX_IMG_FILE = './pic/item_box.png'
-SINGLE_ITEM_BOX_IMG_FILE = './pic/single_item_box.png'
-SINGLE_EQUIPED_ITEM_BOX_IMG_FILE = './pic/single_equiped_item_box.png'
-ATTACK_STYLE_IMG_FILE = './pic/item_box.png'
-ATTACK_IMG_FILE = './pic/attack.png'
-DEFEND_IMG_FILE = './pic/defend.png'
-LUCK_IMG_FILE = './pic/luck.png'
-SAVE_LOAD_BG_IMG_FILE = './pic/save_load_layer_bg.png'
-SELECT_BAR_IMG_FILE = './pic/select_bar.png'
-MAP_SELECT_IMG_FILE = './pic/map_select.gif'
+RIP_IMG_FILE = 'rip'
+ICON_SELECT_IMG_FILE = 'icon_select'
+ITEM_SELECT_IMG_FILE = 'item_select'
+SKILL_SELECT_IMG_FILE = 'skill_select'
+ITEM_BOX_IMG_FILE = 'item_box'
+SINGLE_ITEM_BOX_IMG_FILE = 'single_item_box'
+SINGLE_EQUIPED_ITEM_BOX_IMG_FILE = 'single_equiped_item_box'
+ATTACK_STYLE_IMG_FILE = './pic/attack_style.png'
+ATTACK_IMG_FILE = 'attack'
+DEFEND_IMG_FILE = 'defend'
+LUCK_IMG_FILE = 'luck'
+SAVE_LOAD_BG_IMG_FILE = 'save_load_layer_bg'
+SELECT_BAR_IMG_FILE = 'select_bar'
+MAP_SELECT_IMG_FILE = 'map_select'
 # empty save slot ( a cross char)
-EMPTY_IMG_FILE = './pic/empty.png'
-MESSAGE_BOX_IMG_FILE = './pic/message_box.png'
+EMPTY_IMG_FILE = 'empty'
+MESSAGE_BOX_IMG_FILE = 'message_box'
 # sprites for control indications of different events
-BATTLE_CONTROL_IMG_FILE = './pic/battle_control.png'
-LOOT_CONTROL_IMG_FILE = './pic/loot_control.png'
-CORPSE_CONTROL_IMG_FILE = './pic/corpse_control.png'
-MAIN_CONTROL_IMG_FILE = './pic/main_control.png'
-CAMP_CONTROL_IMG_FILE = './pic/camp_control.png'
+BATTLE_CONTROL_IMG_FILE = 'battle_control'
+LOOT_CONTROL_IMG_FILE = 'loot_control'
+CORPSE_CONTROL_IMG_FILE = 'corpse_control'
+MAIN_CONTROL_IMG_FILE = 'main_control'
+CAMP_CONTROL_IMG_FILE = 'camp_control'
 # monsters' & other's image file
 MONSTER_ZIP_FILE = './pic/monster.zip'
 GUI_ZIP_FILE = './pic/gui.zip'
-DEFAULT_MONSTER_IMG_FILE = 'monster-30-0.png'
+DEFAULT_MONSTER_IMG_FILE = 'monster-30-0'
 
 #  file for CORPSE-loot event
 CORPSE_EVENT_IMG_FILE = 'corpse.png'
@@ -106,7 +102,7 @@ CAMP_EVENT_IMG_FILE = ['campfire-0.png', 'campfire-1.png', 'campfire-2.png', 'ca
 
 # file for background image of the zones
 # 800 x 200
-ZONE_BACK_IMG_FILES = ['background-0.jpg', 'background-1.jpg', 'background-2.jpg', 'background-3.jpg', 'background-4.jpg', 'background-5.jpg']
+ZONE_BACK_IMG_FILES = ['background-0', 'background-1', 'background-2', 'background-3', 'background-4', 'background-5']
 
 # The player affixes
 PLAYER_AFFIX = dict(
@@ -196,13 +192,19 @@ with open(ITEM_DATA_FILE, 'r') as f:
 #print(ITEM_TYPE_USED)
 
 # get the monster files name from monster.zip
-with zipfile.ZipFile(MONSTER_ZIP_FILE) as monster_file:
-    MONSTER_FILE_LIST = monster_file.namelist()
+with zipfile.ZipFile(MONSTER_ZIP_FILE) as _file:
+    MONSTER_FILE_LIST = _file.namelist()
+# get the gui files name from gui.zip
+with zipfile.ZipFile(GUI_ZIP_FILE) as _file:
+    GUI_FILE_LIST = _file.namelist()
 
 # make a dict to store the monster name and the file type of the monster files(png or gif)
-MONSTER_FILE = dict()
+FILE_TYPE = dict()
 for _ in range(len(MONSTER_FILE_LIST)):
-    MONSTER_FILE[MONSTER_FILE_LIST[_][::-1][4:][::-1]] = MONSTER_FILE_LIST[_][::-1][:3][::-1]
+    FILE_TYPE[MONSTER_FILE_LIST[_][::-1][4:][::-1]] = MONSTER_FILE_LIST[_][::-1][:3][::-1]
+# and the GUI file
+for _ in range(len(GUI_FILE_LIST)):
+    FILE_TYPE[GUI_FILE_LIST[_][::-1][4:][::-1]] = GUI_FILE_LIST[_][::-1][:3][::-1]
 
 # the enemy affix
 ENEMY_RANK_NAME = ['喽啰', '精英', '头目', '首领']
@@ -327,3 +329,28 @@ if __name__ == '__main__':
         print (_)
 
 
+def image_from_file(_file, image_file=MONSTER_ZIP_FILE):
+    """get a image object from a zip file
+    By now, image_file can be MONSTER_ZIP_FILE or GUI_ZIP_FILE
+    _file is the main name of image file, NO extentions
+    """
+    with zipfile.ZipFile(image_file) as _image_file:
+        image_file_data = _image_file.open(_file + '.' + FILE_TYPE[_file])
+    # check the file is whether a gif file or not    
+    if FILE_TYPE[_file]=='gif':
+        _anime = pyglet.image.load_animation('', file=image_file_data)
+        _bin = pyglet.image.atlas.TextureBin()
+        _anime.add_to_texture_bin(_bin)
+        return _anime 
+    elif FILE_TYPE[_file]=='png' or FILE_TYPE[_file]=='jpg':
+        return  pyglet.image.load('', file=image_file_data) 
+    else:
+        print('when get image from file, UNKNOWN file type for ', FILE_TYPE[image_file])
+        sys.exit()
+    
+def image_from_gui_file(_file):
+    """get a image object from the gui zip file
+    """
+    with zipfile.ZipFile(GUI_ZIP_FILE) as gui_file:
+        gui_file_data = gui_file.open(_file)
+        return  pyglet.image.load('', file=gui_file_data) 

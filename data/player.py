@@ -53,14 +53,15 @@ class Player(object):
         self.point = 0
         self.skill = []
         # cri_dice means that the equal dice occurs
-        # 0 - not occur, 1 - occured once, 2 - occured twice, 3 - occured third times(dice explode)
+        # 0 - not occur, 1 - occured once, 2 - occured twice, 3 - occured third times(dice explodes)
         self.cri_dice = 0
         self.loot = []
         self.save_slot = 0
         self.alive = True
 
         
-    # the read-only property .value is calculated from all the items the player equiped    
+    # the read-only property .value is calculated from all the items the player equiped and passive skills
+    
     @property
     def value(self):
         # use the deep copy to initialise a temp value called _v
@@ -146,7 +147,7 @@ class Player(object):
 
 
     def equip_item(self, item):
-        """equip a item to the player, and if the player has a item equiped already, add it to the item box
+        """equip a item to the player, and move the corresponding item to the item box
         """
         # main_type of the items, means the position of the item
         # 0 - single hand
@@ -154,7 +155,7 @@ class Player(object):
         # 2 - off hand
         _main_type = const.ITEMS_DATA[item.type]['main_type']
         
-        # when a single hand weapon equiped, the off hand item moves into item box
+        # when a single hand weapon equiped, the off hand item is moved into the item box
         if _main_type == 0:
             _pos = 0
             if self.item_equiped[0]:
@@ -163,27 +164,35 @@ class Player(object):
                 else:
                     self.add_to_item_box(self.item_equiped[1])
                     self.item_equiped[1] = copy.deepcopy(self.item_equiped[0])
+        # deals with the double-hand weapons 
         elif _main_type == 1:
             _pos = 0
             self.add_to_item_box(self.item_equiped[0])
             self.add_to_item_box(self.item_equiped[1])
             self.item_equiped[1] = None
+        # deals with the shiled
         elif _main_type == 2:
             _pos = 1
             self.add_to_item_box(self.item_equiped[1])
             if self.item_equiped[0].main_type == 1:
                 self.add_to_item_box(self.item_equiped[0])
                 self.item_equiped[0] = None
+        # deals with the others
         elif  3 <= _main_type  <= 11:
             _pos = item.equiped_pos
             self.add_to_item_box(self.item_equiped[_pos])
+        # deals with the rings
         elif _main_type == 12:
             _pos = 11
             self.add_to_item_box(self.item_equiped[12])
             self.item_equiped[12] = copy.deepcopy(self.item_equiped[11])
+        # now equip the item
         self.item_equiped[_pos] = item
 
     def add_to_item_box(self, item):
+        """as the name says
+        if the item box is full, the item disappear
+        """
         if item and len(self.item_box) < const.MAX_ITEM_BOX:
             self.item_box.append(item)
             return True
@@ -191,10 +200,14 @@ class Player(object):
             return False
 
     def equip_skill(self, *_skill):
+        '''equip a skill (list)
+        '''
         for _ in _skill:
             self.skill.append(skill.Skill(_))
 
     def show_dice(self, _dice, enemy=False):
+        '''show the dice sprites
+        '''
         if self.cri_dice == 0:
             if enemy:
                 materials.main_scr.sprites['enemy_dice_0'].visible = True
@@ -224,6 +237,8 @@ class Player(object):
                 materials.main_scr.sprites['player_dice_2'].image = materials.dice_image[_dice - 1]
             
     def show_player(self):
+        '''show the core data and skills of the player
+        '''
         materials.front_layer.labels['level_label'].element.text = str(self.level)
         materials.front_layer.labels['hp_label'].element.text = str(int(self.hp)) + '/' + str(self.max_hp)
         materials.front_layer.labels['exp_label'].element.text = str(int(self.exp)) + '/' + str(int(self.level ** 3.5) + 300)
@@ -239,22 +254,26 @@ class Player(object):
         materials.front_layer.labels['player_skill_label'].element.text = _str
 
     def show_attack(self):
+        '''show the attack action of the player
+        '''
         _action = actions.MoveBy((20,0), 0.1) + actions.MoveBy((-20,0), 0.1)
         self.sprite.do(_action)
 
     def show_under_attack(self, cri_dice):
+        '''show the action and the sprites when the player is attacked
+        '''
         _action = actions.RotateBy(15, 0.1) + actions.RotateBy(-15, 0.1)
         self.sprite.do(_action)
         materials.sprites['strike'].visible = True
         materials.sprites['strike'].position = 200,340
         if cri_dice==1:
-            materials.sprites['strike'].image = materials.gif_to_anime(const.CRITICAL_STRIKE_IMG_FILE)
+            materials.sprites['strike'].image = const.image_from_file(const.CRITICAL_STRIKE_IMG_FILE, const.GUI_ZIP_FILE)
             materials.sprites['strike'].do(actions.FadeOut(1.5))
         elif cri_dice==0:
-            materials.sprites['strike'].image = materials.gif_to_anime(const.STRIKE_IMG_FILE)
+            materials.sprites['strike'].image = const.image_from_file(const.STRIKE_IMG_FILE, const.GUI_ZIP_FILE)
             materials.sprites['strike'].do(actions.FadeOut(1))
         elif cri_dice==2:
-            materials.sprites['strike'].image = materials.gif_to_anime(const.SUPER_STRIKE_IMG_FILE)
+            materials.sprites['strike'].image = const.image_from_file(const.SUPER_STRIKE_IMG_FILE, const.GUI_ZIP_FILE)
             materials.sprites['strike'].do(actions.FadeOut(2.5))
 
     def sell_item(self, _item):
@@ -301,7 +320,7 @@ def gen_player(level):
 
     return _player
 
-def ran_dice(min_dice, max_dice, luc, level, enemy=None):
+def ran_dice(min_dice, max_dice, luc, level):
     """the most funny and mystical part of this game
     To get a dice number, the ran_dice method does with following steps:
     1. get the dice faces (dice_no = max - min + 1)
@@ -350,12 +369,8 @@ def ran_dice(min_dice, max_dice, luc, level, enemy=None):
     #print('raw r is:', r)
     for _ in range(dice_no):
         if  r < dice_rate[_]:
-            #print('it is', min_dice + _)
-            #if enemy:
-            #    skill.show_skill(90, min_dice + _)
-            #else:
-            #    skill.show_skill(91, min_dice + _)
             return min_dice + _
+
     print('ran dice error!')
     sys.exit()
 # player function dice explode, when equal dice happened for the third time

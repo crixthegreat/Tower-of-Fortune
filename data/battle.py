@@ -13,19 +13,15 @@ from cocos import actions
 
 
 def player_attack(_player, _enemy, attack_style):
-    """calculate the attack action
-    attack_style = [0,9] means the 10 kind of attack styles
+    """the core method of the battle which
+    deals with the attack action
+    attack_style means the 10 kind of attack styles
     """
-    #for _ in range(3):
-    #    materials.main_scr.sprites['player_dice_' + str(_)].visible = False
-    #    materials.main_scr.sprites['enemy_dice_' + str(_)].visible = False
-
-    # firstly let's check the attack style
-    
-
-    #show_message(const.ATTACK_STYLE_DATA[attack_style]['name'])
+    # set the dice range
     _min_dice = _player.value['MinDice']
     _max_dice = _player.value['MaxDice']
+
+    # check the attack styles
     _atk = _player.value['Atk'] * (1 + const.ATTACK_STYLE_DATA[attack_style]['Atk'] / 100)
     _def = _player.value['Def'] * (1 + const.ATTACK_STYLE_DATA[attack_style]['Def'] / 100)
     _luc = _player.value['Luc'] * (1 + const.ATTACK_STYLE_DATA[attack_style]['Luc'] / 100)
@@ -39,9 +35,9 @@ def player_attack(_player, _enemy, attack_style):
         _max_dice += 1
     
     # The skill has 3 types:
-    # type 1: get when be born,trigger at a rate, see the details in the player.py (Player Class - def value()) and the enemy.py
-    # type 2: get when attack the enemy at a rate, last for [round_last] rounds
-    # type 3: get when attacked by the enemy at a rate, last for [round_last] rounds
+    # type 1: passive skills, triggers at a rate, see the details in the player.py (Player Class - def value()) and the enemy.py
+    # type 2: active when attacking the enemy at a rate, last for [round_last] rounds
+    # type 3: active when attacked by the enemy at a rate, last for [round_last] rounds
 
     # check the enemy's skill list before attack
     # when casted , use the method skill.casted too
@@ -68,10 +64,10 @@ def player_attack(_player, _enemy, attack_style):
     # now throw the dice
     _player_dice = player.ran_dice(_min_dice, _max_dice, _luc, _player.level)
     _player.show_dice(_player_dice)
-    _enemy_dice =  player.ran_dice(_enemy.value['Min_Dice'], _enemy.value['Max_Dice'], _enemy.value['Luc'], _enemy.level, 1)
-    _player.show_dice(_enemy_dice,True)
+    _enemy_dice =  player.ran_dice(_enemy.value['Min_Dice'], _enemy.value['Max_Dice'], _enemy.value['Luc'], _enemy.level)
+    _player.show_dice(_enemy_dice, True)
 
-    # now check the skill 0: throw the dice again
+    # now check the skill 0: EARTHQUAKE :throw the dice again
     if _player_dice < _enemy_dice:
         for _ in _player.skill:
             if _ is None:
@@ -80,7 +76,9 @@ def player_attack(_player, _enemy, attack_style):
                 if _.actived:
                     skill.show_skill(_.skill_no)
                     _player_dice = player.ran_dice(_min_dice, _max_dice, _luc, _player.level)
-                    _enemy_dice =  player.ran_dice(_enemy.value['Min_Dice'], _enemy.value['Max_Dice'], _enemy.value['Luc'], _enemy.level, 1)
+                    _player.show_dice(_player_dice)
+                    _enemy_dice =  player.ran_dice(_enemy.value['Min_Dice'], _enemy.value['Max_Dice'], _enemy.value['Luc'], _enemy.level)
+                    _player.show_dice(_enemy_dice, True)
                     _.round_last -= 1
                     if _.round_last == 0:
                         _.reset()
@@ -98,6 +96,7 @@ def player_attack(_player, _enemy, attack_style):
                     _.actived = True
                 if _.actived:
                     _enemy_dice = _enemy.value['Min_Dice']
+                    _player.show_dice(_enemy_dice, True)
                     skill.show_skill(_.skill_no, _enemy_dice)
                     _.round_last -= 1
                     if _.round_last == 0:
@@ -124,7 +123,6 @@ def player_attack(_player, _enemy, attack_style):
     # now check the dice value between each other at last!
     if _player_dice == _enemy_dice:
         player.dice_equal(_player, _enemy)
-    
         _dmg = 0
     # now attempt to start the attack actions!
     else:
@@ -146,7 +144,7 @@ def player_attack(_player, _enemy, attack_style):
                             _.round_last -= 1
                             if _.round_last == 0:
                                 _.reset()
-                        # check the skill 8: revenge attack!
+                    # check the skill 8: revenge attack!
                     elif _.skill_no == 8 and _.actived:
                         skill.show_skill(_.skill_no)
                         _dmg = _dmg * 2

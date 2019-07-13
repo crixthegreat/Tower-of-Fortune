@@ -24,22 +24,23 @@ images = {}
 
 player_image = const.image_from_file(const.PLAYER_IMG_FILE) 
 enemy_image = const.image_from_file(const.ENEMY_IMG_FILE) 
-icon_select_image = pyglet.image.load(os.path.abspath(const.ICON_SELECT_IMG_FILE)) 
-item_box_image = pyglet.image.load(os.path.abspath(const.ITEM_BOX_IMG_FILE)) 
-attack_style_image = pyglet.image.ImageGrid(pyglet.image.load('./pic/attack_style.png'), 5, 2)
+icon_select_image = const.image_from_file(const.ICON_SELECT_IMG_FILE, const.GUI_ZIP_FILE) 
+item_box_image = const.image_from_file(const.ITEM_BOX_IMG_FILE, const.GUI_ZIP_FILE) 
+
+attack_style_image = pyglet.image.ImageGrid(pyglet.image.load(const.ATTACK_STYLE_IMG_FILE), 5, 2)
 
 
-attack_image = pyglet.image.load(os.path.abspath(const.ATTACK_IMG_FILE)) 
-defend_image = pyglet.image.load(os.path.abspath(const.DEFEND_IMG_FILE)) 
-luck_image = pyglet.image.load(os.path.abspath(const.LUCK_IMG_FILE)) 
+attack_image = const.image_from_file(const.ATTACK_IMG_FILE, const.GUI_ZIP_FILE) 
+defend_image = const.image_from_file(const.DEFEND_IMG_FILE, const.GUI_ZIP_FILE) 
+luck_image = const.image_from_file(const.LUCK_IMG_FILE, const.GUI_ZIP_FILE) 
 
-main_control_image = pyglet.image.load(os.path.abspath(const.MAIN_CONTROL_IMG_FILE)) 
-battle_control_image = pyglet.image.load(os.path.abspath(const.BATTLE_CONTROL_IMG_FILE)) 
-loot_control_image = pyglet.image.load(os.path.abspath(const.LOOT_CONTROL_IMG_FILE)) 
-corpse_control_image = pyglet.image.load(os.path.abspath(const.CORPSE_CONTROL_IMG_FILE)) 
-camp_control_image = pyglet.image.load(os.path.abspath(const.CAMP_CONTROL_IMG_FILE)) 
+main_control_image = const.image_from_file(const.MAIN_CONTROL_IMG_FILE, const.GUI_ZIP_FILE) 
+battle_control_image = const.image_from_file(const.BATTLE_CONTROL_IMG_FILE, const.GUI_ZIP_FILE) 
+loot_control_image = const.image_from_file(const.LOOT_CONTROL_IMG_FILE, const.GUI_ZIP_FILE) 
+corpse_control_image = const.image_from_file(const.CORPSE_CONTROL_IMG_FILE, const.GUI_ZIP_FILE) 
+camp_control_image = const.image_from_file(const.CAMP_CONTROL_IMG_FILE, const.GUI_ZIP_FILE) 
 
-images['rip'] = pyglet.image.load(os.path.abspath(const.RIP_IMG_FILE)) 
+images['rip'] = const.image_from_file(const.RIP_IMG_FILE, const.GUI_ZIP_FILE) 
 images['enemy_image'] = enemy_image
 """
 time_label & best_time_label : as the name says
@@ -125,9 +126,7 @@ class Main_Screen(ScrollableLayer):
         super(Main_Screen, self).__init__()
         self.game = game
         self.keys_pressed = set()
-        with zipfile.ZipFile(const.GUI_ZIP_FILE) as monster_file:
-            monster_file_data = monster_file.open(const.ZONE_BACK_IMG_FILES[0])
-        self.image =  pyglet.image.load('', file=monster_file_data) 
+        self.image = const.image_from_file(const.ZONE_BACK_IMG_FILES[0], const.GUI_ZIP_FILE)
 
         if hasattr(materials.main_scr, 'sprites'):
             for _, _sprite in materials.main_scr.sprites.items():
@@ -170,8 +169,16 @@ class Main_Screen(ScrollableLayer):
             materials.materials.main_scr.sprites['enemy_dice_' + str(_)].visible = False
 
     def refresh_time(self, dt):
+        """this is a method executed automatically every time-interval
+        if a status-change should happen after a special-effects(namely Actions) end
+        then it need be put into this method
+        """
         # the 'dt' means the time passed after the last event occured
-        self.game.screen_set_focus(self.game.player.sprite.x, self.game.player.sprite.y) 
+        
+        # the set focus method is not used in this game
+        self.game.screen_set_focus(self.game.player.sprite.x, self.game.player.sprite.y)
+        # if any actions are running (which means some effects have not ended yet)
+        # exit the method
         for _, _sprite in materials.sprites.items():
             if _sprite.are_actions_running():
                 return None
@@ -195,9 +202,6 @@ class Main_Screen(ScrollableLayer):
                 materials.main_scr.sprites['attack_style'].image = materials.main_scr.attack_style_image[_style]
                 self.game.style = [0, 0, 0]
                 if not _r:
-                    for _ in range(3):
-                        materials.main_scr.sprites['player_dice_' + str(_)].visible = False
-                        materials.main_scr.sprites['enemy_dice_' + str(_)].visible = False
                     self.game.game_status = 'BATTLE_END'
                     self.game.save()
                     if self.game.player.hp <= 0:
@@ -205,8 +209,11 @@ class Main_Screen(ScrollableLayer):
                     return None
                 self.game.save()
         if self.game.game_status == 'BATTLE_END':
+            for _ in range(3):
+                materials.main_scr.sprites['player_dice_' + str(_)].visible = False
+                materials.main_scr.sprites['enemy_dice_' + str(_)].visible = False
             materials.main_scr.sprites['enemy_sprite'].visible = True
-            materials.main_scr.sprites['enemy_sprite'].image = materials.main_scr.images['rip']
+            materials.main_scr.sprites['enemy_sprite'].image = images['rip']
             _loot_list = self.game.player.loot
             if _loot_list:
                 self.game.game_status = 'LOOT'
