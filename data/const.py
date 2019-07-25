@@ -3,7 +3,6 @@
 #Code by Crix @ crixthegreat@gmail.com
 #https://github.com/crixthegreat/
 #codetime: 2019/6/5 12:10:57
-import sys
 import os
 import string
 import copy
@@ -16,7 +15,20 @@ GAME_TITLE = 'MY GAME'
 # not used
 PLAYER_NAME = 'crix'
 VERSION = 'beta 0.93'
-ZONE_NAME = ['平静的森林', '漆黑的地牢', '远方的孤岛', '精灵的国度', '奇妙的幻境', '地狱的试炼']
+ZONE_NAME = ['平静的森林', '漆黑的地牢', '远方的孤岛', '精灵的国度', 
+        '奇妙的幻境', '地狱的试炼']
+
+# game status
+# 
+GAME_STATUS = dict(END='END', 
+        STARTED='STARTED', 
+        LOOT='LOOT', 
+        CORPSE='CORPSE', 
+        CAMP='CAMP',
+        BATTLE_END='BATTLE_END',
+        GAME_OVER='GAME_OVER'
+        )
+
 # not used
 MAX_LEN = 20
 DEFAULT_COLOR = (0, 0, 0, 255)
@@ -41,10 +53,20 @@ RARE_TYPE_NORMAL = 0
 RARE_TYPE_MAGIC = 1
 RARE_TYPE_RARE = 2
 RARE_TYPE_LEGEND = 3
+
+# ITEM_AFFIX_COUNT is to define the quantity of affixes which a item can has 
+ITEM_AFFIX_COUNT = {}
+ITEM_AFFIX_COUNT = {
+        # rate is in %
+        RARE_TYPE_NORMAL:{'min':2, 'max':2, 'rate':50},
+        RARE_TYPE_MAGIC:{'min':3, 'max':4, 'rate':40},
+        RARE_TYPE_RARE:{'min':5, 'max':6, 'rate':40},
+        RARE_TYPE_LEGEND:{'min':7, 'max':8, 'rate':30}}
 # the divinity items is not added yet
 RARE_TYPE_DIVINITY = 4
 RARE_TYPE_NAME = ['普通', '魔法', '稀有' ,'传说', '神圣']
-MAIN_TYPE_NAME = ['单手武器', '双手武器', '副手武器', '头', '肩', '颈', '胸', '手腕', '手', '腰', '腿', '脚', '手指']
+MAIN_TYPE_NAME = ['单手武器', '双手武器', '副手武器', '头', '肩', '颈', 
+        '胸', '手腕', '手', '腰', '腿', '脚', '手指']
 
 AFFIX_MAX_NO = 22 # there are 22 affixes for items
 AFFIX_MAX_USED_NO = 20 # but 20 used by now
@@ -99,10 +121,12 @@ DEFAULT_MONSTER_IMG_FILE = 'monster-30-0'
 #  file for CORPSE-loot event
 CORPSE_EVENT_IMG_FILE = 'corpse'
 # file for campfire event
-CAMP_EVENT_IMG_FILES = ['campfire-0', 'campfire-1', 'campfire-2', 'camfire-3', 'campfire-4', 'campfire-5']
+CAMP_EVENT_IMG_FILES = ['campfire-0', 'campfire-1', 'campfire-2', 
+        'campfire-3', 'campfire-4', 'campfire-5']
 # file for background image of the zones
 # with the size of 800 x 200
-ZONE_BACK_IMG_FILES = ['background-0', 'background-1', 'background-2', 'background-3', 'background-4', 'background-5']
+ZONE_BACK_IMG_FILES = ['background-0', 'background-1', 'background-2', 
+        'background-3', 'background-4', 'background-5']
 
 # monsters' & other's image file
 MONSTER_ZIP_FILE = './pic/monster.zip'
@@ -145,6 +169,13 @@ PLAYER_AFFIX = dict(
         X4 = 0,
         X5 = 0)
 
+# The skills count of the player
+SKILL_COUNT_BY_LEVEL = {}
+SKILL_COUNT_BY_LEVEL = {
+        (1,9):1,
+        (10,30):2,
+        (31,49):3,
+        (50,60):4}
 
 # Read the data of the items
 ITEMS_DATA = []
@@ -214,13 +245,16 @@ with zipfile.ZipFile(MONSTER_ZIP_FILE) as _file:
 with zipfile.ZipFile(GUI_ZIP_FILE) as _file:
     GUI_FILE_LIST = _file.namelist()
 
-# make a dict to store the monster name and the file type of the monster files(png or gif)
+# make a dict to store the monster name and 
+# the file type of the monster files(png or gif)
 FILE_TYPE = dict()
 for _ in range(len(MONSTER_FILE_LIST)):
-    FILE_TYPE[MONSTER_FILE_LIST[_][::-1][4:][::-1]] = MONSTER_FILE_LIST[_][::-1][:3][::-1]
+    FILE_TYPE[MONSTER_FILE_LIST[_][::-1][4:][::-1]] = (
+            MONSTER_FILE_LIST[_][::-1][:3][::-1])
 # and the GUI file
 for _ in range(len(GUI_FILE_LIST)):
-    FILE_TYPE[GUI_FILE_LIST[_][::-1][4:][::-1]] = GUI_FILE_LIST[_][::-1][:3][::-1]
+    FILE_TYPE[GUI_FILE_LIST[_][::-1][4:][::-1]] = (
+            GUI_FILE_LIST[_][::-1][:3][::-1])
 
 # the enemy affix
 ENEMY_RANK_NAME = ['喽啰', '精英', '头目', '首领']
@@ -237,12 +271,16 @@ ENEMY_RATE = dict(
         CHIEF_BOSS = 3, 
         BOSS = 5, 
         ELITE = 12)
-ELITE_ATK = 15000
-NORMAL_ATK = 5000
-ELITE_MHP = 20000
-NORMAL_MHP = 8500
-ELITE_CRIDMG = 50
-NORMAL_CRIDMG = 0
+ENEMY_PARAMETER = dict()
+ENEMY_PARAMETER['3'] = dict(ATK=15000, MHP=20000, CRIDMG=50, MAX_DICE=8, 
+        ATK0=100, MHP0=1000, SKILL_COUNT_BY_ZONE=[2, 2, 3, 3, 4, 4])
+ENEMY_PARAMETER['2'] = dict(ATK=15000, MHP=20000, CRIDMG=50, MAX_DICE=7, 
+        ATK0=100, MHP0=800, SKILL_COUNT_BY_ZONE=[1, 1, 2, 2, 3, 3])
+ENEMY_PARAMETER['1'] = dict(ATK=15000, MHP=20000, CRIDMG=50, MAX_DICE=6, 
+        ATK0=100, MHP0=750, SKILL_COUNT_BY_ZONE=[1, 1, 2, 2, 3, 3])
+ENEMY_PARAMETER['0'] = dict(ATK=5000, MHP=8500, CRIDMG=0, MAX_DICE=6, 
+        ATK0=30, MHP0=500, SKILL_COUNT_BY_ZONE=[0, 0, 0, 0, 0, 1])
+
 
 # Read enemy data
 ENEMY_DATA = []
@@ -361,8 +399,7 @@ def image_from_file(_file, image_file=MONSTER_ZIP_FILE):
         return  pyglet.image.load('', file=image_file_data) 
     else:
         # By now, only gif, png and jpg files can be read
-        print('when get image from file, UNKNOWN file type for ', FILE_TYPE[image_file])
-        sys.exit()
+        raise ValueError('when get image from file, UNKNOWN file type for ', FILE_TYPE[image_file])
 
 # for test    
 if __name__ == '__main__':

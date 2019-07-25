@@ -5,15 +5,12 @@
 #codetime: 2019/5/28 17:03:36
 """THE MAIN SCREEN DEFINITION FILE
 """
-import sys
-import os
 import json
 import copy
-import zipfile
-from data import const, player, enemy, skill, battle, item
+from data import const, player, enemy, battle, item
 import pyglet
 import cocos
-from cocos.layer import Layer, ScrollingManager, ScrollableLayer
+from cocos.layer import Layer, ScrollableLayer
 import materials
 import random
 
@@ -107,6 +104,15 @@ sprites['attack_style'] = cocos.sprite.Sprite(attack_style_image[0], position=(4
 sprites['control'] = cocos.sprite.Sprite(main_control_image, position=(400, 55))
 sprites['control'].scale = 0.5
 
+# parameters for the control indications
+CONTROL_PARA = dict()
+CONTROL_PARA = {
+        const.GAME_STATUS['END']:dict(position=(400, 50), image=main_control_image, scale=0.4),
+        const.GAME_STATUS['STARTED']:dict(position=(400, 65), image=battle_control_image, scale=0.55),
+        const.GAME_STATUS['LOOT']:dict(position=(400, 50), image=loot_control_image, scale=0.4),
+        const.GAME_STATUS['CORPSE']:dict(position=(400, 65), image=corpse_control_image, scale=0.55),
+        const.GAME_STATUS['CAMP']:dict(position=(400, 65), image=camp_control_image, scale=0.55)}
+
 
 for _ in range(3):
     sprites['player_dice_' + str(_)] = cocos.sprite.Sprite(materials.dice_image[0], position=(370,250 + 66 * _ ))
@@ -176,7 +182,7 @@ class Main_Screen(ScrollableLayer):
         # the 'dt' means the time passed after the last event occured
         
         # the set focus method is not used in this game
-        self.game.screen_set_focus(self.game.player.sprite.x, self.game.player.sprite.y)
+        #self.game.screen_set_focus(self.game.player.sprite.x, self.game.player.sprite.y)
         # if any actions are running (which means some effects have not ended yet)
         # exit the method
         for _, _sprite in materials.sprites.items():
@@ -189,7 +195,7 @@ class Main_Screen(ScrollableLayer):
             if _label.are_actions_running():
                 return None
 
-        if self.game.game_status == 'STARTED':
+        if self.game.game_status == const.GAME_STATUS['STARTED']:
             _style = self.style_cal(self.game.style)
             if  0<= _style <= 9: 
                 # attack starts
@@ -202,13 +208,13 @@ class Main_Screen(ScrollableLayer):
                 materials.main_scr.sprites['attack_style'].image = materials.main_scr.attack_style_image[_style]
                 self.game.style = [0, 0, 0]
                 if not _r:
-                    self.game.game_status = 'BATTLE_END'
+                    self.game.game_status = const.GAME_STATUS['BATTLE_END']
                     self.game.save()
                     if self.game.player.hp <= 0:
                         self.game.game_over()
                     return None
                 self.game.save()
-        if self.game.game_status == 'BATTLE_END':
+        if self.game.game_status == const.GAME_STATUS['BATTLE_END']:
             for _ in range(3):
                 materials.main_scr.sprites['player_dice_' + str(_)].visible = False
                 materials.main_scr.sprites['enemy_dice_' + str(_)].visible = False
@@ -216,15 +222,15 @@ class Main_Screen(ScrollableLayer):
             materials.main_scr.sprites['enemy_sprite'].image = images['rip']
             _loot_list = self.game.player.loot
             if _loot_list:
-                self.game.game_status = 'LOOT'
+                self.game.game_status = const.GAME_STATUS['LOOT']
                 self.game.show_loot()
                 item.show(_loot_list[0], self.game.player.item_equiped[_loot_list[0].equiped_pos])
             else:
-                self.game.game_status = 'END'
+                self.game.game_status = const.GAME_STATUS['END']
             self.game.player.show_player()
-        elif  self.game.game_status == 'LOOT':
+        elif  self.game.game_status == const.GAME_STATUS['LOOT']:
             if not self.game.player.loot:
-                self.game.game_status = 'END'
+                self.game.game_status = const.GAME_STATUS['END']
 
 
     def on_key_press(self, key, modifiers):
@@ -245,7 +251,7 @@ class Main_Screen(ScrollableLayer):
             self.keys_pressed.clear()
             self.game.show_info()
         # get the input of the attack style     
-        elif self.game.game_status == 'STARTED':
+        elif self.game.game_status == const.GAME_STATUS['STARTED']:
             _round = self.game.style[0] + self.game.style[1] + self.game.style[2]
             _style = self.style_cal(self.game.style)
             if _style >= 10:
@@ -262,7 +268,7 @@ class Main_Screen(ScrollableLayer):
                     sprites['style' + str(_round + 1)].visible = True
                     sprites['style' + str(_round + 1)].image = luck_image
         # when the battle ends
-        elif self.game.game_status == 'LOOT':
+        elif self.game.game_status == const.GAME_STATUS['LOOT']:
             if self.game.player.loot:
                 _loot = self.game.player.loot
                 # sell, equip or take
@@ -303,7 +309,7 @@ class Main_Screen(ScrollableLayer):
                 # not used
                 elif 'SPACE' in key_names:
                     pass
-        elif self.game.game_status == 'END':
+        elif self.game.game_status == const.GAME_STATUS['END']:
             _set = set(['DOWN','RIGHT','LEFT'])
             _map_set = set(['_1', '_2', '_3', '_4', '_5', '_6'])
             _map = list(_map_set & set(key_names))
@@ -314,13 +320,13 @@ class Main_Screen(ScrollableLayer):
                 if _map_no <= self.game.max_stage:
                     self.game.set_stage(_map_no)
 
-        elif self.game.game_status == 'GAME_OVER':
+        elif self.game.game_status == const.GAME_STATUS['GAME_OVER']:
             if 'SPACE' in key_names:
                 # return to the menu(title) screen
                 self.keys_pressed.clear()
                 self.game.show_menu()
 
-        elif self.game.game_status == 'CORPSE':
+        elif self.game.game_status == const.GAME_STATUS['CORPSE']:
             # press UP to buy all the equiped items of the dead player
             # now the player don't pay for the loot, to be added later
             if 'UP' in key_names:
@@ -339,13 +345,13 @@ class Main_Screen(ScrollableLayer):
                 
                 materials.main_scr.sprites['enemy_sprite'].visible = False
                 self.game.save()
-                self.game.game_status = 'END'
+                self.game.game_status = const.GAME_STATUS['END']
                 print('looting the corpse succeed, game status changes to END')
 
             elif 'LEFT' in key_names or 'RIGHT' in key_names:
                 self.game.move_on()
 
-        elif self.game.game_status == 'CAMP':
+        elif self.game.game_status == const.GAME_STATUS['CAMP']:
             # rest for 1000 * (zone + 1)
             if 'RIGHT' in key_names or 'LEFT' in key_names:
                 self.game.move_on()
@@ -354,7 +360,7 @@ class Main_Screen(ScrollableLayer):
                 self.game.player.hp = self.game.player.max_hp
                 self.game.player.show_player()
                 self.game.save()
-                self.game.game_status = 'END'
+                self.game.game_status = const.GAME_STATUS['END']
                 
 
                 
@@ -385,8 +391,7 @@ class Main_Screen(ScrollableLayer):
         else:
             return 0
 
-        print('attack style calculate error!')
-        sys.exit()
+        raise ValueError('attack style calculation error!')
 
 
     def on_key_release(self, key, modifiers):

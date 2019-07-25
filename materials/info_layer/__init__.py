@@ -5,12 +5,11 @@
 #codetime: 2019/5/28 17:03:36
 """The info layer definition file
 """
-import os
 import copy
 from data import const, skill, item
 import pyglet
 import cocos
-from cocos.layer import Layer, ScrollingManager, ScrollableLayer
+from cocos.layer import Layer
 import materials
 
 

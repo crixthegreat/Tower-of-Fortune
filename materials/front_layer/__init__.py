@@ -5,12 +5,10 @@
 #codetime: 2019/5/28 17:03:36
 """The front layer definition file
 """
-import os
 import zipfile
 from data import const
-import pyglet
 import cocos
-from cocos.layer import Layer, ScrollingManager, ScrollableLayer
+from cocos.layer import Layer
 import materials
 
 images = {}
@@ -21,11 +19,13 @@ time_label & best_time_label : as the name says
 
 labels = dict(msg_box=cocos.text.Label('message', 
     font_size=12,font_name='Gadugi', 
-    bold=False,color=const.DEFAULT_COLOR, x=550, y=105, width= 200, multiline=True)) 
+    bold=False,color=const.DEFAULT_COLOR, x=550, y=105, 
+    width= 200, multiline=True)) 
 
 labels['zone_label'] = cocos.text.Label('',
         font_size=14,font_name='Gadugi', 
-        bold=False,color=const.DEFAULT_COLOR, x=350, y=555, width=100, align='center')
+        bold=False,color=const.DEFAULT_COLOR, x=350, y=555, 
+        width=100, align='center')
 
 labels['level_label'] = cocos.text.Label('',
         font_size=10,font_name='Gadugi', 
@@ -45,7 +45,8 @@ labels['player_skill_label'] = cocos.text.Label('',
 
 labels['enemy_name_label'] = cocos.text.Label('Name:', 
         font_size=11,font_name='Gadugi', 
-        bold=False,color=const.DEFAULT_COLOR, x=610, y=580, width=150, multiline=True)
+        bold=False,color=const.DEFAULT_COLOR, x=610, y=580, 
+        width=150, multiline=True)
 labels['enemy_level_label'] = cocos.text.Label('',
         font_size=14,font_name='Gadugi', 
         bold=False,color=const.DEFAULT_COLOR, x=640, y=540)
@@ -66,8 +67,10 @@ labels['enemy_hp_change_label'] = cocos.text.Label('',
 sprites = {}
 _file_name = 'number-'
 for _ in range(6):
-    _number_file_image = const.image_from_file(_file_name + str(_ + 1), const.GUI_ZIP_FILE)  
-    sprites['number' + str(_+ 1)] = cocos.sprite.Sprite(_number_file_image, position =(10,10))
+    _number_file_image = const.image_from_file(_file_name + str(_ + 1), 
+            const.GUI_ZIP_FILE)  
+    sprites['number' + str(_+ 1)] = cocos.sprite.Sprite(
+            _number_file_image, position =(10,10))
     sprites['number' + str(_+ 1)].scale = 0.35
     sprites['number' + str(_+ 1)].visible = False
 
@@ -107,3 +110,16 @@ def show_message(_msg, _type=None):
     if _list.count('\n') >= 5:
         _list = _list[_list.find('\n') + 1:]
     materials.front_layer.labels['msg_box'].element.text = _list
+    
+
+def show_map_selector(n, no):
+    """locate the map selector
+    """
+    # display the stage numbers to indicate the zones where the player can go to
+    for _ in range(n + 1):
+        sprites['number' + str(_+1)].visible = True
+        sprites['map_select'].position = (
+                sprites['number' + str(no + 1)].position[0], 
+                sprites['number' + str(no + 1)].position[1] - 20) 
+
+

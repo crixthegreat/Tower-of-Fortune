@@ -3,17 +3,16 @@
 #Code by Crix @ crixthegreat@gmail.com
 #https://github.com/crixthegreat/
 #codetime: 2019/5/28 17:03:36
-import os
 from data import const
 import pyglet
 import cocos
 from cocos.director import director
 from cocos.scene import Scene
-from cocos.layer import Layer, ScrollingManager, ScrollableLayer
-from cocos.scenes import FlipY3DTransition
+from cocos.layer import Layer
+#from cocos.scenes import FlipY3DTransition
 import materials
 import random
-from data import player, skill
+#from data import skill
 
 images = {'t2_anime':[materials.alpha_image[26], materials.alpha_image[53]]}
 
