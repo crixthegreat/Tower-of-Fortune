@@ -5,14 +5,12 @@
 #codetime: 2019/5/28 17:03:36
 """The save & load layer definition file
 """
-import sys
 import os
-import copy
 import json
-from data import const, skill, item, player
+from data import const, player
 import pyglet
 import cocos
-from cocos.layer import Layer, ScrollingManager, ScrollableLayer
+from cocos.layer import Layer
 import materials
 
 
@@ -99,8 +97,7 @@ class Save_Load_Layer(Layer):
                     # return save_data
                     return json.load(_file)
                 except:
-                    print('when try to get save_data, failed to open the save file')
-                    sys.exit()
+                    raise IOError('when try to get save_data, failed to open the save file')
         else:
             return None
 
@@ -169,7 +166,7 @@ class Save_Load_Layer(Layer):
                         #print('the player is dead')
                 else:
                     # start a new game
-                    self.game.player = player.gen_player(23)
+                    self.game.player = player.gen_player(53)
                     self.game.player.save_slot =  self.slot_selected
                     self.game.player.show_player()
                     self.game.player.zone = 0
@@ -272,8 +269,7 @@ class Save_Load_Layer(Layer):
                 try:
                     json.dump(_data, _file)
                 except:
-                    print('write sava file failed when del a save slot')
-                    sys.exit()
+                    raise IOError('write sava file failed when deleting a save slot')
                 sprites['slot_sprite' + str(save_slot)].image = empty_image
                 labels['level_label' + str(save_slot)].element.text = 'N/A'
                 labels['gold_label' + str(save_slot)].element.text = 'N/A'
@@ -281,8 +277,7 @@ class Save_Load_Layer(Layer):
                 for __ in range(13):
                     sprites['item' + str(save_slot) + str(__)].visible = False
         else:
-            print('del save error,there is no such save data in save file')
-            sys.exit()
+            raise IOError('del save error,there is no such save data in save file')
 
 
 

@@ -3,23 +3,28 @@
 #Code by Crix @ crixthegreat@gmail.com
 #https://github.com/crixthegreat/
 #codetime: 2019/6/5 19:41:18
-import sys
 import random
 from data import const
 import materials
 
 class Item(object):
     """Item Class
+    This is a mimic version of diablo-equipment-system.
+    The structure of a item is defined by item.csv
     """
     # item_type = [0, 59]
     def __init__(self, item_type):
 
         # .type means the item's type 
         self.type = item_type
-        # AFFIX_MAX_USED_NO = 20
+        # AFFIX_MAX_USED_NO = 20 in this game by now
+        # set all the affix 0
+        # a item is initialised as a dummy item without any affix
         self.affix = [0 for _ in range(const.AFFIX_MAX_USED_NO)]
-        # the main type means bigger division(e.g. single-hand weapon is one of the main types, including sword, bow, harmmer and so on)
+        # the main type means bigger division(e.g. a single-hand weapon is one
+        # of the main types, which includes sword, bow, harmmer and so on)
         self.main_type = const.ITEMS_DATA[self.type]['main_type']
+        # the position where the item is equipped
         self.equiped_pos = const.ITEMS_DATA[self.type]['equiped_pos']
         self.level = 0
         self.name = const.ITEMS_DATA[self.type]['name']
@@ -27,6 +32,8 @@ class Item(object):
         self.rare_type = 1
 
     def item_to_dict(self):
+        '''Transfor a Item object to a dict for game-saving(W/R in JSON format)
+        '''
         _affix_list = []
         for _ in range(const.AFFIX_MAX_USED_NO):
             _affix_list.append(self.affix[_])
@@ -41,7 +48,8 @@ class Item(object):
         return _dict
 
 def dict_to_item(item_dict):
-
+    '''Transfor a item_dictionary to a Item object for game-loading
+    '''
     _item = Item(item_dict['item_type'])
     _item.main_type = item_dict['main_type']
     _item.equiped_pos = item_dict['equiped_pos']
@@ -50,7 +58,6 @@ def dict_to_item(item_dict):
     _item.rare_type = item_dict['rare_type']
     _item.affix = []
 
-    
     for _ in range(const.AFFIX_MAX_USED_NO):
         _item.affix.append(item_dict['affix_list'][_])
 
@@ -60,6 +67,8 @@ def gen_random_item(item_type=None, level=None, mf=None):
     """Generate a random item with item_type, level, and mf
     """
     # not all types of the items have been used
+    # the const.ITEM_TYPE_USED stores all the used item types
+    # whose name are NOT '未定'
     _list = const.ITEM_TYPE_USED
     if item_type == None:
         random.shuffle(_list)
@@ -73,7 +82,8 @@ def gen_random_item(item_type=None, level=None, mf=None):
     _item = Item(item_type)
     _item.level = level
     
-    # [0,1,...,seg_a,seg_a+1,...,seg_a+seg_b,seg_a+seg_b+1,...,seg_a+seg_b+seg_c,...]
+    # [0,1,...,seg_a,seg_a+1,...,seg_a+seg_b,seg_a+seg_b+1,...,
+    #  seg_a+seg_b+seg_c,...]
     seg_a = int((const.LEGEND_DROP_RATE + const.SET_DROP_RATE) * (1 + mf / 100))
     seg_b = int(const.RARE_DROP_RATE * (1 + mf / 100))
     seg_c = int(const.MAGIC_DROP_RATE * (1 + mf / 100))
@@ -88,32 +98,19 @@ def gen_random_item(item_type=None, level=None, mf=None):
     elif _r >= seg_a + seg_b + seg_c:
         rare_value = const.RARE_TYPE_NORMAL
     else:
-        print('rare_type error')
-        sys.exit()
+        raise ValueError('rare_type error when generating a item')
     # rare_value = [0,1,2,3]
     _item.rare_type = rare_value
-    _r = random.randrange(10)
+
+    if not(rare_value in const.ITEM_AFFIX_COUNT.keys()):
+        raise ValueError('no rare type for the rare_value: ', rare_value)
+
+    _r = random.randrange(100)
     # affix_no defines how many affix the item has
-    if rare_value == const.RARE_TYPE_LEGEND:
-        if _r < 3:
-            affix_no = 8
-        else:
-            affix_no = 7
-    elif rare_value == const.RARE_TYPE_RARE:
-        if _r < 4:
-            affix_no = 6
-        else:
-            affix_no = 5
-    elif rare_value == const.RARE_TYPE_MAGIC:
-        if _r < 4:
-            affix_no = 4
-        else:
-            affix_no = 3
-    elif rare_value == const.RARE_TYPE_NORMAL:
-        affix_no = 2
+    if _r <= const.ITEM_AFFIX_COUNT[rare_value]['rate']:
+        affix_no = const.ITEM_AFFIX_COUNT[rare_value]['max']
     else:
-        print('rare_value error')
-        sys.exit()
+        affix_no = const.ITEM_AFFIX_COUNT[rare_value]['min']
 
     # _list is used to determine the affix to be used in the item
     _list = []
@@ -122,14 +119,18 @@ def gen_random_item(item_type=None, level=None, mf=None):
         # ['affix_value'] is a list whose value is [0,1,2,3,4]
         # 1 = '×'
         # 2 = '△' and so on
-        if const.ITEMS_DATA[item_type]['affix_value'][_] != 0 and const.ITEMS_DATA[item_type]['affix_value'][_] != 1:
+        if (const.ITEMS_DATA[item_type]['affix_value'][_] != 0 
+                and const.ITEMS_DATA[item_type]['affix_value'][_] != 1):
             # now _list has all the affix index([0,19]) that can use
             _list.append(_)
-    # the affix index 5 and 17 are the 'max_dice' and 'min_dice'
+    # the affix index 5 and 17 is 'max_dice' and 'min_dice'
     if 5 in _list or 17 in _list:
-        # you can't have the dice-affix in normal and magic items
-        # you can't have it when you're unlucky either
-        if rare_value == const.RARE_TYPE_NORMAL or rare_value == const.RARE_TYPE_MAGIC or random.randrange(100) > const.SPECIAL_AFFIX_RATE:
+        # you won't have the dice-affix in normal and magic items
+        # you won't have it when you're unlucky either 
+        # (SPECIAL_AFFIX_RATE is only 20% now)
+        if (rare_value == const.RARE_TYPE_NORMAL or 
+                rare_value == const.RARE_TYPE_MAGIC or 
+                random.randrange(100) > const.SPECIAL_AFFIX_RATE):
             if 5 in _list:
                 _list.remove(5)
             if 17 in _list:
@@ -137,6 +138,7 @@ def gen_random_item(item_type=None, level=None, mf=None):
     # shuffle the _list to trim later
     random.shuffle(_list)
     # let the item always have affix whose def-value is 4 and 3
+    # so we move them headmost 
     for _ in _list:
         if const.ITEMS_DATA[item_type]['affix_value'][_] == 3:
             _list.remove(_)
@@ -148,6 +150,7 @@ def gen_random_item(item_type=None, level=None, mf=None):
     # trim the _list to affix_no(the number of affixes that the item can have)
     _list = _list[:affix_no]
     #print(_list)
+    # Now set the value for every affix
     for _ in _list:
         #print(const.ITEM_AFFIX_BASE_VALUE[_], get_affix_value(60))
         if _ in [6,7,9,11,13,14,15,19]:
@@ -155,7 +158,7 @@ def gen_random_item(item_type=None, level=None, mf=None):
             _item.affix[_] = const.ITEM_AFFIX_BASE_VALUE[_] * get_affix_value(60)
         else:
             _item.affix[_] = const.ITEM_AFFIX_BASE_VALUE[_] * get_affix_value(level)
-            # it's odd for having a affix equals 0
+            # it's odd for having a affix equal to 0
             if _item.affix[_] < 1:
                 _item.affix[_] = 1
         # make the item's main affix value bigger
@@ -177,7 +180,6 @@ def get_affix_value(level):
     return _
 
 # show the item
-# a lot of things to be done 
 def show(item, player_item):
 
     if item == None:
@@ -186,13 +188,17 @@ def show(item, player_item):
     
     materials.sprites['item'].visible = True
     materials.sprites['item'].scale = 0.6
-    materials.sprites['item'].image = materials.item_image[(59-item.type) * 5 + item.rare_type]
+    materials.sprites['item'].image = (
+            materials.item_image[(59-item.type) * 5 + item.rare_type])
     
     materials.main_scr.sprites['item_box'].visible = True
    
 
     materials.main_scr.labels['item_name'].element.text = item.name
-    materials.main_scr.labels['item_type'].element.text = 'Lv ' + str(item.level) + '\n' + const.RARE_TYPE_NAME[item.rare_type] + ' ' + const.MAIN_TYPE_NAME[item.main_type]
+    materials.main_scr.labels['item_type'].element.text = ('Lv ' + 
+            str(item.level) + '\n' + 
+            const.RARE_TYPE_NAME[item.rare_type] + ' ' + 
+            const.MAIN_TYPE_NAME[item.main_type])
     materials.main_scr.labels['item_name'].visible = True
     materials.main_scr.labels['item_type'].visible = True
     materials.main_scr.labels['item_main_affix'].visible = True
@@ -210,26 +216,28 @@ def show(item, player_item):
         if const.ITEMS_DATA[item.type]['affix_value'][_] == 4:
             _list.remove(_)
             _list = [_] + _list
-    materials.main_scr.labels['item_main_affix'].element.text = const.ITEM_AFFIX_CNAME[_list[0]] + ' ' + str(item.affix[_list[0]])
+    materials.main_scr.labels['item_main_affix'].element.text = (
+            const.ITEM_AFFIX_CNAME[_list[0]] + ' ' + 
+            str(item.affix[_list[0]]))
     _str = ''
     for _ in range(1, len(_list)):
-        _str +=  (const.ITEM_AFFIX_CNAME[_list[_]] + ' ' + str(item.affix[_list[_]]) + '\n')
+        _str +=  (const.ITEM_AFFIX_CNAME[_list[_]] + ' ' + 
+                str(item.affix[_list[_]]) + '\n')
     materials.main_scr.labels['item_affix'].element.text = _str
 
-    #print(item.name, item.level, const.RARE_TYPE_NAME[item.rare_type], const.MAIN_TYPE_NAME[item.main_type])
-    
-    #for _ in range(const.AFFIX_MAX_USED_NO):
-    #    if item.affix[_]:
-    #        print(const.ITEM_AFFIX_CNAME[_], item.affix[_])
-
     if player_item:
-
         materials.sprites['player_item'].visible = True
         materials.sprites['player_item'].scale = 0.6
-        materials.sprites['player_item'].image = materials.item_image[(59-player_item.type) * 5 + player_item.rare_type]
+        _image_no = (59 - player_item.type) * 5 + player_item.rare_type
+        materials.sprites['player_item'].image = (
+                materials.item_image[_image_no])
 
-        materials.main_scr.labels['player_item_name'].element.text = player_item.name
-        materials.main_scr.labels['player_item_type'].element.text = 'Lv ' + str(player_item.level) + '\n' + const.RARE_TYPE_NAME[player_item.rare_type] + ' ' + const.MAIN_TYPE_NAME[player_item.main_type]
+        materials.main_scr.labels['player_item_name'].element.text = (
+                player_item.name)
+        materials.main_scr.labels['player_item_type'].element.text = (
+                'Lv ' + str(player_item.level) + '\n' + 
+                const.RARE_TYPE_NAME[player_item.rare_type] + ' ' + 
+                const.MAIN_TYPE_NAME[player_item.main_type])
         materials.main_scr.labels['player_item_name'].visible = True
         materials.main_scr.labels['player_item_type'].visible = True
         materials.main_scr.labels['player_item_main_affix'].visible = True
@@ -247,12 +255,14 @@ def show(item, player_item):
             if const.ITEMS_DATA[player_item.type]['affix_value'][_] == 4:
                 _list.remove(_)
                 _list = [_] + _list
-        materials.main_scr.labels['player_item_main_affix'].element.text = const.ITEM_AFFIX_CNAME[_list[0]] + ' ' + str(player_item.affix[_list[0]])
+        materials.main_scr.labels['player_item_main_affix'].element.text = (
+                const.ITEM_AFFIX_CNAME[_list[0]] + ' ' + 
+                str(player_item.affix[_list[0]]))
         _str = ''
         for _ in range(1, len(_list)):
-            _str +=  (const.ITEM_AFFIX_CNAME[_list[_]] + ' ' + str(player_item.affix[_list[_]]) + '\n')
+            _str +=  (const.ITEM_AFFIX_CNAME[_list[_]] + ' ' + 
+                    str(player_item.affix[_list[_]]) + '\n')
         materials.main_scr.labels['player_item_affix'].element.text = _str
-        
 
 def hide():
     materials.main_scr.sprites['item_box'].visible = False

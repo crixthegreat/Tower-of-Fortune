@@ -4,7 +4,6 @@
 #https://github.com/crixthegreat/
 #codetime: 2019/6/7 13:50:35
 
-import sys
 import time
 import copy
 import random
@@ -22,6 +21,8 @@ The normal type enemys can also become elites sometimes (rank 2)
 The random rate of enemys above is defined by ENEMY_RATE
 """
 class Enemy(object):
+    """The Enemy Class
+    """
 
     def __init__(self, sprite=None):
         self.no = 0
@@ -38,36 +39,48 @@ class Enemy(object):
         self.hp = self.value['max_hp']
 
     def show_attack(self):
+        '''Show the action of enemy's attack (moves left and goes back)
+        '''
         _action = actions.MoveBy((-20,0), 0.1) + actions.MoveBy((20,0), 0.1)
         self.sprite.do(_action)
 
     def show_under_attack(self, cri_dice=False):
+        '''Show the action of enemy when attacked (shake)
+        and the corresponding strike-sprite
+        '''
         _action = actions.RotateBy(-15, 0.1) + actions.RotateBy(15, 0.1)
         self.sprite.do(_action)
-        materials.sprites['strike'].visible = True
-        materials.sprites['strike'].position = 650,340
+        _sprite = materials.sprites['strike'] 
+        _sprite.visible = True
+        _sprite.position = 650,340
         if cri_dice==1:
-            materials.sprites['strike'].image = const.image_from_file(const.CRITICAL_STRIKE_IMG_FILE, const.GUI_ZIP_FILE)
-            materials.sprites['strike'].do(actions.FadeOut(1.5))
+            _sprite.image = const.image_from_file(
+                    const.CRITICAL_STRIKE_IMG_FILE, const.GUI_ZIP_FILE)
+            _sprite.do(actions.FadeOut(1.5))
         elif cri_dice==0:
-            materials.sprites['strike'].image = const.image_from_file(const.STRIKE_IMG_FILE, const.GUI_ZIP_FILE)
-            materials.sprites['strike'].do(actions.FadeOut(1))
+            _sprite.image = const.image_from_file(
+                    const.STRIKE_IMG_FILE, const.GUI_ZIP_FILE)
+            _sprite.do(actions.FadeOut(1))
         elif cri_dice==2:
-            materials.sprites['strike'].image = const.image_from_file(const.SUPER_STRIKE_IMG_FILE, const.GUI_ZIP_FILE)
-            materials.sprites['strike'].do(actions.FadeOut(2.5))
+            _sprite.image = const.image_from_file(
+                    const.SUPER_STRIKE_IMG_FILE, const.GUI_ZIP_FILE)
+            _sprite.do(actions.FadeOut(2.5))
         
 
 def gen_enemy(no=None, rank=None, zone=None, level=None):
+    '''Generate a specific enemy
+    '''
     # check the rank of the enemy
-    if materials.main_scr.sprites['enemy_sprite'].are_actions_running():
-        return None
-    if not rank:
+    if rank is None:
         _r = random.randrange(100)
         if _r <= const.ENEMY_RATE['CHIEF_BOSS']:
             rank = 3
-        elif const.ENEMY_RATE['CHIEF_BOSS']< _r <= const.ENEMY_RATE['CHIEF_BOSS'] + const.ENEMY_RATE['BOSS']:
+        elif (const.ENEMY_RATE['CHIEF_BOSS']< _r 
+                <= const.ENEMY_RATE['CHIEF_BOSS'] + const.ENEMY_RATE['BOSS']):
             rank = 2
-        elif const.ENEMY_RATE['CHIEF_BOSS'] + const.ENEMY_RATE['BOSS'] < _r <= const.ENEMY_RATE['CHIEF_BOSS'] + const.ENEMY_RATE['BOSS'] + const.ENEMY_RATE['ELITE']:
+        elif (const.ENEMY_RATE['CHIEF_BOSS'] + const.ENEMY_RATE['BOSS'] < 
+                _r <= const.ENEMY_RATE['CHIEF_BOSS']
+                + const.ENEMY_RATE['BOSS'] + const.ENEMY_RATE['ELITE']):
             rank = 1
         else:
             rank = 0
@@ -91,86 +104,49 @@ def gen_enemy(no=None, rank=None, zone=None, level=None):
     # shuffle the list        
     random.shuffle(_enemy_skill_no_list)
     _list = []
+
+    _para = const.ENEMY_PARAMETER[str(rank)]
+    _enemy.value['Atk'] = int(level ** 2.5 / 27885 * _para['ATK']) + _para['ATK0']
+    _enemy.value['max_hp'] = int(level ** 2.5 / 27885 * _para['MHP']) + _para['MHP0']
+    _enemy.value['CriDmg'] = _para['CRIDMG']
+    _enemy.value['Max_Dice'] = _para['MAX_DICE']
+
+    _list = _enemy_skill_no_list[0:_para['SKILL_COUNT_BY_ZONE'][zone]]
     # generate a chief-boss enemy!
     if rank == 3:
         no = 0
-        _enemy.value['Atk'] = int(level ** 2.5 / 27885 * const.ELITE_ATK) + 100
-        _enemy.value['max_hp'] = int(level ** 2.5 / 27885 * const.ELITE_MHP) + 1000
-        _enemy.value['CriDmg'] = const.ELITE_CRIDMG
-        _enemy.value['Max_Dice'] = 8
-        # give the skill to the chief boss
-        if zone == 0 or zone == 1:
-            # the chief-boss has 2 skill in zone 0,1
-            _list = _enemy_skill_no_list[0:2]
-        elif zone == 2 or zone == 3:
-            # has 3 skills in zone 2,3 and so on
-            _list = _enemy_skill_no_list[0:3]
-        elif zone == 4 or zone == 5:
-            _list = _enemy_skill_no_list[0:4]
     # here come bosses !        
     elif rank == 2:
         no = random.randrange(1,3)
-        _enemy.value['Atk'] = int(level ** 2.5 / 27885 * const.ELITE_ATK) + 100
-        _enemy.value['max_hp'] = int(level ** 2.5 / 27885 * const.ELITE_MHP) + 800
-        _enemy.value['CriDmg'] = const.ELITE_CRIDMG
-        _enemy.value['Max_Dice'] = 7
-        # give the skill to the boss
-        if zone == 0 or zone == 1:
-            # the chief-boss has 1 skill in zone 0,1
-            _list = _enemy_skill_no_list[0:1]
-        elif zone == 2 or zone == 3:
-            # has 2 skills in zone 2,3 and so on
-            _list = _enemy_skill_no_list[0:2]
-        elif zone == 4 or zone == 5:
-            _list = _enemy_skill_no_list[0:3]
-
     # here come elites !        
     elif rank == 1:
         no = random.randrange(3,31)
-        _enemy.value['Atk'] = int(level ** 2.5 / 27885 * const.ELITE_ATK) + 100
-        _enemy.value['max_hp'] = int(level ** 2.5 / 27885 * const.ELITE_MHP) + 750
-        _enemy.value['CriDmg'] = const.ELITE_CRIDMG
-        _enemy.value['Max_Dice'] = 7
-
-        # give the skill to the elite
-        if zone == 0 or zone == 1:
-            # the elite has 1 skill in zone 0,1
-            _list = _enemy_skill_no_list[0:1]
-        elif zone == 2 or zone == 3:
-            # has 2 skills in zone 2,3 and so on
-            _list = _enemy_skill_no_list[0:2]
-        elif zone == 4 or zone == 5:
-            _list = _enemy_skill_no_list[0:3]
-
     # now comes the normal enemy        
     elif rank == 0:
         no = random.randrange(3,31)
-        _enemy.value['Atk'] = int(level ** 2.5 / 27885 * const.NORMAL_ATK) + 30
-        _enemy.value['max_hp'] = int(level ** 2.5 / 27885 * const.NORMAL_MHP) + 500
-        _enemy.value['CriDmg'] = const.NORMAL_CRIDMG
-        _enemy.value['Max_Dice'] = 6
     else:
-        print('enemy rank error:', rank)
-        sys.exit()
+        raise ValueError('enemy rank error:', rank)
     
     # set no for test
     #no = 29
+
     # now set the enemy type and confirm the Atk, CriDmg and Maxhp finally
     # firstly we set the atk
     _ = random.randrange(5)
     _enemy.type[0] = _
-    _enemy.value['Atk'] = _enemy.value['Atk'] * const.ENEMY_ATK_AFFIX[_] / 100 
-    _enemy.value['Atk'] = _enemy.value['Atk'] * const.ENEMY_DATA[no]['Atk'] / 100 
+    _enemy.value['Atk'] *= const.ENEMY_ATK_AFFIX[_] / 100 
+    _enemy.value['Atk'] *= const.ENEMY_DATA[no]['Atk'] / 100 
     # then we set the critical damage
     _ = random.randrange(5)
     _enemy.type[1] = _
-    _enemy.value['CriDmg'] = _enemy.value['CriDmg'] * const.ENEMY_CRIDMG_AFFIX[_] / 100 
-    _enemy.value['CriDmg'] = _enemy.value['CriDmg'] * const.ENEMY_DATA[no]['CriDmg'] / 100 
+    _enemy.value['CriDmg'] *= const.ENEMY_CRIDMG_AFFIX[_] / 100 
+    _enemy.value['CriDmg'] *= const.ENEMY_DATA[no]['CriDmg'] / 100 
     # lastly we set the max hp
     _ = random.randrange(5)
     _enemy.type[2] = _
-    _enemy.value['max_hp'] = _enemy.value['max_hp'] * const.ENEMY_MAXHP_AFFIX[_] / 100 
-    _enemy.value['max_hp'] = int(_enemy.value['max_hp'] * const.ENEMY_DATA[no]['max_hp'] / 100) 
+    _enemy.value['max_hp'] *= const.ENEMY_MAXHP_AFFIX[_] / 100 
+    _enemy.value['max_hp'] *= const.ENEMY_DATA[no]['max_hp'] / 100 
+    _enemy.value['max_hp'] = int(_enemy.value['max_hp']) 
 
     # check the enemy's passive(type 1) skills
     # other skills can be see in the battle.py
@@ -196,20 +172,32 @@ def gen_enemy(no=None, rank=None, zone=None, level=None):
     # if the monster's image file is included in the zip file
     if _enemy_img_file in const.FILE_TYPE.keys():
         _enemy.sprite.image = const.image_from_file(_enemy_img_file)
+    # if there is no corresponding sprite image file
     else:
-        _enemy.sprite.image = const.image_from_file(const.DEFAULT_MONSTER_IMG_FILE)
+        _enemy.sprite.image = const.image_from_file(
+                const.DEFAULT_MONSTER_IMG_FILE)
 
     _enemy.sprite.anchor=_enemy.sprite.width / 2, 0
 
     return _enemy
 
 def show_enemy(enemy):
+    '''show the core information and skills's name of the enemy to front_layer
+    '''
     if not enemy:
         return None
-    materials.front_layer.labels['enemy_name_label'].element.text = const.ENEMY_ATK_NAME[enemy.type[0]] + const.ENEMY_CRIDMG_NAME[enemy.type[1]] + const.ENEMY_MAXHP_NAME[enemy.type[2]] + '的' + const.ENEMY_RANK_NAME[enemy.rank] + ' ' + const.ENEMY_DATA[enemy.no]['enemy_name'][enemy.zone]
+    materials.front_layer.labels['enemy_name_label'].element.text = (
+            const.ENEMY_ATK_NAME[enemy.type[0]] + 
+            const.ENEMY_CRIDMG_NAME[enemy.type[1]] + 
+            const.ENEMY_MAXHP_NAME[enemy.type[2]] + '的' + 
+            const.ENEMY_RANK_NAME[enemy.rank] + 
+            ' ' + 
+            const.ENEMY_DATA[enemy.no]['enemy_name'][enemy.zone])
     # change the color of the name label depending on the rank of the enemy
-    materials.front_layer.labels['enemy_level_label'].element.text = 'LV.' + ' ' + str(enemy.level)
-    materials.front_layer.labels['enemy_hp_label'].element.text = str(int(enemy.hp)) + '/' + str(int(enemy.value['max_hp']))
+    materials.front_layer.labels['enemy_level_label'].element.text = ('LV.' + 
+            ' ' + str(enemy.level))
+    materials.front_layer.labels['enemy_hp_label'].element.text = (
+            str(int(enemy.hp)) + '/' + str(int(enemy.value['max_hp'])))
     _str = ''
     for _ in enemy.skill:
         _str += (const.SKILL_DATA[_.skill_no]['name'] + ' ' * 4)

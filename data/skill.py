@@ -16,6 +16,7 @@ class Skill(object):
         self.skill_no = skill_no
         self.actived = False
         self.round_last = const.SKILL_DATA[skill_no]['round_last']
+        self.round = const.SKILL_DATA[skill_no]['round_last']
 
 
     def reset(self):
