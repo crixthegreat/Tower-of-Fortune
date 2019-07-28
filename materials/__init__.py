@@ -97,6 +97,25 @@ sprites['explode'] =  cocos.sprite.Sprite(
         const.image_from_file(const.EXPLODE_IMG_FILE, const.GUI_ZIP_FILE), 
         position=(600,300), scale=2)
 
+def do_key_events(_layer, status, key_names):
+    """do the key events in all layers
+    """
+    # not all game status need handle key events
+    if not(status in _layer.key_events.keys()):
+        return None
+    # get the key tuplets of the specified status 
+    for _keys in _layer.key_events[status].keys():
+        for _key in _keys:
+            if _key in key_names:
+                # here gets the count of argument of the method
+                _n = _layer.key_events[status][_keys].__code__.co_argcount
+                if _n>1:
+                    _layer.key_events[status][_keys](_key)
+                else:
+                    # some methods have no argument
+                    _layer.key_events[status][_keys]()
+                break
+
 
 import materials.background
 import materials.main_scr

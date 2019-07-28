@@ -16,10 +16,14 @@ import materials
 
 images = {}
 
-save_load_bg_image = const.image_from_file(const.SAVE_LOAD_BG_IMG_FILE, const.GUI_ZIP_FILE) 
-select_bar_image = const.image_from_file(const.SELECT_BAR_IMG_FILE, const.GUI_ZIP_FILE) 
-empty_image = const.image_from_file(const.EMPTY_IMG_FILE, const.GUI_ZIP_FILE) 
-message_box_image = const.image_from_file(const.MESSAGE_BOX_IMG_FILE, const.GUI_ZIP_FILE) 
+save_load_bg_image = const.image_from_file(
+        const.SAVE_LOAD_BG_IMG_FILE, const.GUI_ZIP_FILE) 
+select_bar_image = const.image_from_file(
+        const.SELECT_BAR_IMG_FILE, const.GUI_ZIP_FILE) 
+empty_image = const.image_from_file(
+        const.EMPTY_IMG_FILE, const.GUI_ZIP_FILE) 
+message_box_image = const.image_from_file(
+        const.MESSAGE_BOX_IMG_FILE, const.GUI_ZIP_FILE) 
 
 """
 time_label & best_time_label : as the name says
@@ -28,10 +32,13 @@ time_label & best_time_label : as the name says
 labels = {}
 sprites = {}
 
-sprites['select_bar'] = cocos.sprite.Sprite(select_bar_image, position=(150, 425))
+sprites['select_bar'] = cocos.sprite.Sprite(
+        select_bar_image, position=(150, 425))
 
 for _ in range(9):
-    sprites['slot_sprite' + str(_)] = cocos.sprite.Sprite(materials.main_scr.player_image, position=(60 + (_ % 3) * 270, 455 - (_ // 3) * 160))
+    sprites['slot_sprite' + str(_)] = cocos.sprite.Sprite(
+            materials.main_scr.player_image, 
+            position=(60 + (_ % 3) * 270, 455 - (_ // 3) * 160))
     sprites['slot_sprite' + str(_)].scale = 0.25
 
     labels['level_label' + str(_)] = cocos.text.Label('N/A',font_size=12,
@@ -52,7 +59,9 @@ for _ in range(9):
 
 for _ in range(9):
     for __ in range(13):
-        sprites['item' + str(_) + str(__)] = cocos.sprite.Sprite(materials.item_image[0], position=(30 + (_ % 3) * 268 + __ * 17.2,395 - (_ // 3) * 156))
+        sprites['item' + str(_) + str(__)] = cocos.sprite.Sprite(
+                materials.item_image[0], 
+                position=(30 + (_ % 3) * 268 + __ * 17.2,395 - (_ // 3) * 156))
         sprites['item' + str(_) + str(__)].visible = False
         sprites['item' + str(_) + str(__)].scale =  0.20
 
@@ -77,15 +86,23 @@ class Save_Load_Layer(Layer):
         super(Save_Load_Layer, self).__init__()
 
         self.keys_pressed = set()
-
-
-
-
         self.game = game
         self.image = save_load_bg_image
         self.status = 'view'
         self.slot_selected = 0
-
+    
+        self.key_events = {
+                'view':{
+                    ('ENTER',):self.select_slot,
+                    ('D',):self.try_to_delete_save,
+                    ('UP','DOWN','LEFT','RIGHT'):self.move_save_slot_cursor},
+                'message_box':{
+                    ('ENTER',):self.confirm_message,
+                    ('SPACE',):self.hide_message_box},
+                'del_save':{
+                    ('ENTER',):self.confirm_del_save,
+                    ('SPACE',):self.hide_message_box}
+                }
     
     # self.save_data stores all the saved game data(9 save slot)
     @property
@@ -97,94 +114,89 @@ class Save_Load_Layer(Layer):
                     # return save_data
                     return json.load(_file)
                 except:
-                    raise IOError('when try to get save_data, failed to open the save file')
+                    raise IOError(
+                            'when loading save_data, failed to open the file')
         else:
             return None
+
+    def confirm_message(self):
+        # load a game
+        if (self.save_data 
+                and ('slot' + str(self.slot_selected)) in self.save_data):
+            if self.save_data['slot' + str(self.slot_selected)]['alive']:
+                self.game.player = self.game.load(self.slot_selected)
+                self.game.player.show_player()
+                self.exit_save_load_layer()
+                self.game.start_game()
+            else:
+                #print('the player is dead')
+                self.hide_message_box()
+        else:
+            # start a new game
+            self.game.player = player.gen_player(53)
+            self.game.player.save_slot =  self.slot_selected
+            self.game.player.show_player()
+            self.game.player.zone = 0
+            self.exit_save_load_layer()
+            self.game.start_game()
+
+    def confirm_del_save(self):
+        self.del_save(self.slot_selected)
+        self.hide_message_box()
+
+
+    def move_save_slot_cursor(self, key):
+        if 'UP' == key:
+            self.slot_selected -= 3
+            if self.slot_selected < 0:
+                self.slot_selected += 8
+        elif 'DOWN' == key:
+            self.slot_selected += 3
+            if self.slot_selected > 8:
+                self.slot_selected -= 9
+        elif 'LEFT' == key:
+            self.slot_selected -= 1
+            if self.slot_selected < 0:
+                self.slot_selected = 8
+        elif 'RIGHT' == key:
+            self.slot_selected += 1
+            if self.slot_selected > 8:
+                self.slot_selected = 0
+        self.slot_select()
+
+
+    def select_slot(self):
+        # load a game
+        if (self.save_data 
+                and ('slot' + str(self.slot_selected)) in self.save_data):
+            if self.save_data['slot' + str(self.slot_selected)]['alive']:
+                self.show_message_box('Load this player to continue?')
+            else:
+                self.show_message_box(
+                        'This player is dead, loot the body in the game.')
+        else:
+            # start a new game
+            self.show_message_box('Start a new game with this save slot?')
+        return 1
+
+    def try_to_delete_save(self):
+        # if the save_slot is not empty
+        if (self.save_data 
+                and ('slot' + str(self.slot_selected)) in self.save_data):
+            self.show_message_box('DELETE this SAVE DATA?')
+            self.status = 'del_save'
 
 
     def on_key_press(self, key, modifiers):
         """key press handler for info class
         """
         self.keys_pressed.add(key)
-        key_names = [pyglet.window.key.symbol_string(k) for k in self.keys_pressed]
+        key_names = [
+                pyglet.window.key.symbol_string(k) for k in self.keys_pressed]
+
+        materials.do_key_events(self, 'GLOBAL', key_names)
+        materials.do_key_events(self, self.status, key_names)
         
-        if 'SPACE' in key_names:
-            pass
-
-        if self.status == 'view':
-            # confirm the selected slot to:
-            # - continue with the saved game if the player is not dead
-            if 'ENTER' in key_names:
-                # load a game
-                if self.save_data and ('slot' + str(self.slot_selected)) in self.save_data:
-                    if self.save_data['slot' + str(self.slot_selected)]['alive']:
-                        self.show_message_box('Load this player to continue?')
-                    else:
-                        self.show_message_box('This player is dead, you can loot the body in the game.')
-                else:
-                    # start a new game
-                    self.show_message_box('Start a new game with this save slot?')
-                return 1
-            # press 'D' to delete a game save
-            elif 'D' in key_names:
-                # if the save_slot is not empty
-                if self.save_data and ('slot' + str(self.slot_selected)) in self.save_data:
-                    self.show_message_box('DELETE this SAVE DATA?')
-                    self.status = 'del_save'
-
-            elif 'UP' in key_names:
-                self.slot_selected -= 3
-                if self.slot_selected < 0:
-                    self.slot_selected += 8
-                self.slot_select()
-            elif 'DOWN' in key_names:
-                self.slot_selected += 3
-                if self.slot_selected > 8:
-                    self.slot_selected -= 9
-                self.slot_select()
-            elif 'LEFT' in key_names:
-                self.slot_selected -= 1
-                if self.slot_selected < 0:
-                    self.slot_selected = 8
-                self.slot_select()
-            elif 'RIGHT' in key_names:
-                self.slot_selected += 1
-                if self.slot_selected > 8:
-                    self.slot_selected = 0
-                self.slot_select()
-        elif self.status == 'message_box':
-            if 'ENTER' in key_names:
-                # load a game
-                if self.save_data and ('slot' + str(self.slot_selected)) in self.save_data:
-                    if self.save_data['slot' + str(self.slot_selected)]['alive']:
-                        self.game.player = self.game.load(self.slot_selected)
-                        self.game.player.show_player()
-                        self.exit_save_load_layer()
-                        self.game.start_game()
-                    else:
-                        self.hide_message_box()
-                        #print('the player is dead')
-                else:
-                    # start a new game
-                    self.game.player = player.gen_player(53)
-                    self.game.player.save_slot =  self.slot_selected
-                    self.game.player.show_player()
-                    self.game.player.zone = 0
-                    self.exit_save_load_layer()
-                    self.game.start_game()
-                pass
-            elif 'SPACE' in key_names:
-                self.hide_message_box()
-        # the status for delete-save confirmation
-        elif self.status == 'del_save':
-            if 'ENTER' in key_names:
-                self.del_save(self.slot_selected)
-                self.hide_message_box()
-            elif 'SPACE' in key_names:
-                self.hide_message_box()
-
-
-            
 
     def on_key_release(self, key, modifiers):
         # release the key_pressed set
@@ -211,19 +223,27 @@ class Save_Load_Layer(Layer):
             # show the slot that has game data
             if _data and ('slot' + str(_)) in _data:
                 # show level hp and gold
-                labels['level_label' + str(_)].element.text = str(_data['slot' + str(_)]['player_level'])
-                labels['gold_label' + str(_)].element.text = str(int(_data['slot' + str(_)]['gold']))
+                labels['level_label' + str(_)].element.text = str(
+                        _data['slot' + str(_)]['player_level'])
+                labels['gold_label' + str(_)].element.text = str(
+                        int(_data['slot' + str(_)]['gold']))
                 if _data['slot' + str(_)]['alive']:
-                    sprites['slot_sprite' + str(_)].image = materials.main_scr.player_image
+                    sprites['slot_sprite' + str(_)].image = (
+                            materials.main_scr.player_image)
                 else:
-                    sprites['slot_sprite' + str(_)].image = materials.main_scr.images['rip']
-                    labels['epitaph_label' + str(_)].element.text = _data['slot' + str(_)]['epitaph']
+                    sprites['slot_sprite' + str(_)].image = (
+                            materials.main_scr.images['rip'])
+                    labels['epitaph_label' + str(_)].element.text = (
+                            _data['slot' + str(_)]['epitaph'])
                 
                 # show items equiped
                 for __ in range(13):
                     _item_data = _data['slot' + str(_)]['item_equiped'][__]
                     if _item_data:
-                        sprites['item' + str(_) + str(__)].image = materials.item_image[(59 - _item_data['item_type']) * 5 + _item_data['rare_type']]
+                        _image_no = ((59 - _item_data['item_type']) * 5 + 
+                                _item_data['rare_type'])
+                        sprites['item' + str(_) + str(__)].image = (
+                                materials.item_image[_image_no])
                         sprites['item' + str(_) + str(__)].visible = True
             else:
                 sprites['slot_sprite' + str(_)].image = empty_image
@@ -236,13 +256,13 @@ class Save_Load_Layer(Layer):
             for _, _label in materials.save_load_layer.labels.items():
                 self.remove(_label)
 
-
     # locate the select bar
     def slot_select(self):
         # - show the equiped item icons when a save slot is selected
         _no = self.slot_selected
         sprites['select_bar'].visible = True
-        sprites['select_bar'].position = 130 + (_no % 3) * 270 , 350 - 155 * (_no // 3)
+        sprites['select_bar'].position = (
+                130 + (_no % 3) * 270 , 350 - 155 * (_no // 3))
 
     def show_message_box(self, message='N/A', x=200, y=200):
         #position=(60 + (_ % 3) * 270, 455 - (_ // 3) * 160))
@@ -269,7 +289,7 @@ class Save_Load_Layer(Layer):
                 try:
                     json.dump(_data, _file)
                 except:
-                    raise IOError('write sava file failed when deleting a save slot')
+                    raise IOError('failed to write-file when deleting a slot')
                 sprites['slot_sprite' + str(save_slot)].image = empty_image
                 labels['level_label' + str(save_slot)].element.text = 'N/A'
                 labels['gold_label' + str(save_slot)].element.text = 'N/A'
@@ -277,9 +297,7 @@ class Save_Load_Layer(Layer):
                 for __ in range(13):
                     sprites['item' + str(save_slot) + str(__)].visible = False
         else:
-            raise IOError('del save error,there is no such save data in save file')
-
-
+            raise IOError('del save error, no such save data in the save file')
 
 
 

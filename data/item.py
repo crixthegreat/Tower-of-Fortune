@@ -21,15 +21,29 @@ class Item(object):
         # set all the affix 0
         # a item is initialised as a dummy item without any affix
         self.affix = [0 for _ in range(const.AFFIX_MAX_USED_NO)]
-        # the main type means bigger division(e.g. a single-hand weapon is one
-        # of the main types, which includes sword, bow, harmmer and so on)
-        self.main_type = const.ITEMS_DATA[self.type]['main_type']
-        # the position where the item is equipped
-        self.equiped_pos = const.ITEMS_DATA[self.type]['equiped_pos']
         self.level = 0
-        self.name = const.ITEMS_DATA[self.type]['name']
         # rare_type = [1, 5]
         self.rare_type = 1
+
+    @property
+    def image_no(self):
+        return (59 - self.type) * 5 + self.rare_type
+
+    @property
+    def name(self):
+        return const.ITEMS_DATA[self.type]['name']
+
+    @property
+    def main_type(self):
+        # the main type means bigger division(e.g. a single-hand weapon is one
+        # of the main types, which includes sword, bow, harmmer and so on)
+        return const.ITEMS_DATA[self.type]['main_type']
+    @property
+    def equiped_pos(self):
+        # the position where the item is equipped
+        return const.ITEMS_DATA[self.type]['equiped_pos']
+
+
 
     def item_to_dict(self):
         '''Transfor a Item object to a dict for game-saving(W/R in JSON format)
@@ -47,14 +61,80 @@ class Item(object):
                 )
         return _dict
 
+    def type_string(self):
+        """Return the type string of the item for showing
+        """
+        return ('Lv ' + str(self.level) + '\n' + 
+                const.RARE_TYPE_NAME[self.rare_type] + ' ' + 
+                const.MAIN_TYPE_NAME[self.main_type])
+
+    def main_affix_string(self):
+        """for showing the item
+        """
+        _list = []
+        for _ in range(const.AFFIX_MAX_USED_NO):
+            if self.affix[_]:
+                _list.append(_)
+        # move the affix whose def-value is 4 and 3 to front
+        for _ in _list:
+            if const.ITEMS_DATA[self.type]['affix_value'][_] == 3:
+                _list.remove(_)
+                _list = [_] + _list
+        for _ in _list:
+            if const.ITEMS_DATA[self.type]['affix_value'][_] == 4:
+                _list.remove(_)
+                _list = [_] + _list
+        return (const.ITEM_AFFIX_CNAME[_list[0]] + ' ' + 
+                str(self.affix[_list[0]]))
+
+    def affix_string(self):
+        """for showing the item
+        """
+        _list = []
+        for _ in range(const.AFFIX_MAX_USED_NO):
+            if self.affix[_]:
+                _list.append(_)
+        # move the affix whose def-value is 4 and 3 to front
+        for _ in _list:
+            if const.ITEMS_DATA[self.type]['affix_value'][_] == 3:
+                _list.remove(_)
+                _list = [_] + _list
+        for _ in _list:
+            if const.ITEMS_DATA[self.type]['affix_value'][_] == 4:
+                _list.remove(_)
+                _list = [_] + _list
+        _str = ''
+        for _ in range(1, len(_list)):
+            _str +=  (const.ITEM_AFFIX_CNAME[_list[_]] + ' ' + 
+                    str(self.affix[_list[_]]) + '\n')
+        return _str
+
+    def show(self, image_sprite, item_box_sprite, 
+            name_label, type_label, main_affix_label, affix_label):
+        image_sprite.visible = True
+        image_sprite.scale = 0.6
+        image_sprite.image = materials.item_image[self.image_no]
+        item_box_sprite.visible = True
+
+        name_label.element.text = self.name
+        type_label.element.text = self.type_string()
+        name_label.visible = True
+        type_label.visible = True
+        main_affix_label.visible = True
+        affix_label.visible = True
+        main_affix_label.element.text = self.main_affix_string()
+        affix_label.element.text = self.affix_string()
+        
+        
+
 def dict_to_item(item_dict):
     '''Transfor a item_dictionary to a Item object for game-loading
     '''
     _item = Item(item_dict['item_type'])
-    _item.main_type = item_dict['main_type']
-    _item.equiped_pos = item_dict['equiped_pos']
+    #_item.main_type = item_dict['main_type']
+    #_item.equiped_pos = item_dict['equiped_pos']
     _item.level = item_dict['level']
-    _item.name = item_dict['name']
+    #_item.name = item_dict['name']
     _item.rare_type = item_dict['rare_type']
     _item.affix = []
 
@@ -185,84 +265,20 @@ def show(item, player_item):
     if item == None:
         print('无')
         return None
-    
-    materials.sprites['item'].visible = True
-    materials.sprites['item'].scale = 0.6
-    materials.sprites['item'].image = (
-            materials.item_image[(59-item.type) * 5 + item.rare_type])
-    
-    materials.main_scr.sprites['item_box'].visible = True
-   
-
-    materials.main_scr.labels['item_name'].element.text = item.name
-    materials.main_scr.labels['item_type'].element.text = ('Lv ' + 
-            str(item.level) + '\n' + 
-            const.RARE_TYPE_NAME[item.rare_type] + ' ' + 
-            const.MAIN_TYPE_NAME[item.main_type])
-    materials.main_scr.labels['item_name'].visible = True
-    materials.main_scr.labels['item_type'].visible = True
-    materials.main_scr.labels['item_main_affix'].visible = True
-    materials.main_scr.labels['item_affix'].visible = True
-    _list = []
-    for _ in range(const.AFFIX_MAX_USED_NO):
-        if item.affix[_]:
-            _list.append(_)
-    # move the affix whose def-value is 4 and 3 to front
-    for _ in _list:
-        if const.ITEMS_DATA[item.type]['affix_value'][_] == 3:
-            _list.remove(_)
-            _list = [_] + _list
-    for _ in _list:
-        if const.ITEMS_DATA[item.type]['affix_value'][_] == 4:
-            _list.remove(_)
-            _list = [_] + _list
-    materials.main_scr.labels['item_main_affix'].element.text = (
-            const.ITEM_AFFIX_CNAME[_list[0]] + ' ' + 
-            str(item.affix[_list[0]]))
-    _str = ''
-    for _ in range(1, len(_list)):
-        _str +=  (const.ITEM_AFFIX_CNAME[_list[_]] + ' ' + 
-                str(item.affix[_list[_]]) + '\n')
-    materials.main_scr.labels['item_affix'].element.text = _str
+    item.show(materials.sprites['item'],
+            materials.main_scr.sprites['item_box'],
+            materials.main_scr.labels['item_name'],
+            materials.main_scr.labels['item_type'],
+            materials.main_scr.labels['item_main_affix'],
+            materials.main_scr.labels['item_affix'])
 
     if player_item:
-        materials.sprites['player_item'].visible = True
-        materials.sprites['player_item'].scale = 0.6
-        _image_no = (59 - player_item.type) * 5 + player_item.rare_type
-        materials.sprites['player_item'].image = (
-                materials.item_image[_image_no])
-
-        materials.main_scr.labels['player_item_name'].element.text = (
-                player_item.name)
-        materials.main_scr.labels['player_item_type'].element.text = (
-                'Lv ' + str(player_item.level) + '\n' + 
-                const.RARE_TYPE_NAME[player_item.rare_type] + ' ' + 
-                const.MAIN_TYPE_NAME[player_item.main_type])
-        materials.main_scr.labels['player_item_name'].visible = True
-        materials.main_scr.labels['player_item_type'].visible = True
-        materials.main_scr.labels['player_item_main_affix'].visible = True
-        materials.main_scr.labels['player_item_affix'].visible = True
-        _list = []
-        for _ in range(const.AFFIX_MAX_USED_NO):
-            if player_item.affix[_]:
-                _list.append(_)
-        # move the affix whose def-value is 4 and 3 to front
-        for _ in _list:
-            if const.ITEMS_DATA[player_item.type]['affix_value'][_] == 3:
-                _list.remove(_)
-                _list = [_] + _list
-        for _ in _list:
-            if const.ITEMS_DATA[player_item.type]['affix_value'][_] == 4:
-                _list.remove(_)
-                _list = [_] + _list
-        materials.main_scr.labels['player_item_main_affix'].element.text = (
-                const.ITEM_AFFIX_CNAME[_list[0]] + ' ' + 
-                str(player_item.affix[_list[0]]))
-        _str = ''
-        for _ in range(1, len(_list)):
-            _str +=  (const.ITEM_AFFIX_CNAME[_list[_]] + ' ' + 
-                    str(player_item.affix[_list[_]]) + '\n')
-        materials.main_scr.labels['player_item_affix'].element.text = _str
+        player_item.show(materials.sprites['player_item'],
+                materials.sprites['player_item'],
+                materials.main_scr.labels['player_item_name'],
+                materials.main_scr.labels['player_item_type'],
+                materials.main_scr.labels['player_item_main_affix'],
+                materials.main_scr.labels['player_item_affix'])
 
 def hide():
     materials.main_scr.sprites['item_box'].visible = False

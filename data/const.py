@@ -379,6 +379,19 @@ with open(ATTACK_STYLE_FILE, 'r') as f:
         line = f.readline()
     #print(ITEM_TYPE_USED)
 
+# attack styles by the three cards
+STYLE_VALUE = {
+        (0,0,3):9,
+        (0,1,2):6,
+        (0,2,1):7,
+        (0,3,0):8,
+        (1,0,2):5,
+        (1,1,1):4,
+        (1,2,0):3,
+        (2,0,1):2,
+        (2,1,0):1,
+        (3,0,0):0}
+
 
 def image_from_file(_file, image_file=MONSTER_ZIP_FILE):
     """get a image object from a zip file
