@@ -29,6 +29,10 @@ class Skill(object):
             return True
         else:
             return False
+    @property
+    def description(self):
+        # description strings of the skill
+        return const.SKILL_DATA[self.skill_no]['description']
 
 # when a skill is casted
 def casted(skill_no, player=None, enemy=None):
