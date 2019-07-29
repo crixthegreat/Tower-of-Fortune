@@ -32,6 +32,7 @@ Now the game is playable.
 - ~~add all the sprite image of the enemies~~ (98% completed, the left are waiting for Judy's painting )
 - merge all the image files into a single zip file
 - add music
+- add how-to-play layer
 
 ### [main_scr]
 - ~~change the ARROW-CONTROL ICONS to sprites, so we can see different indications for different events (battle, tent, corpse)~~ (done)
@@ -56,8 +57,9 @@ Now the game is playable.
 - ~~the display logic and GUI of skills(in info_layer) need to be fix~~ (done)
 
 ### [battle]
-- add hp change effect (Green color text going up)for hp-regen(absorb) for the player
+- add hp change effect (Green color text going up) for the player when hp-regen(absorb) occurs
 - the color of the enemy's name text varies depending on the rank
+- fix the enemy's name when moves to the camp event and corpse event
 - skill effect(sprites) 
 
 ### [item]
