@@ -57,7 +57,7 @@ Now the game is playable.
 - ~~the display logic and GUI of skills(in info_layer) need to be fix~~ (done)
 
 ### [battle]
-- add hp change effect (Green color text going up) for the player when hp-regen(absorb) occurs
+- ~~add hp change effect (Green color text going up) for the player when hp-regen(absorb) occurs~~ (done)
 - the color of the enemy's name text varies depending on the rank
 - fix the enemy's name when moves to the camp event and corpse event
 - skill effect(sprites) 
