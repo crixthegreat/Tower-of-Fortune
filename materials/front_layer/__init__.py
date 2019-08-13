@@ -63,6 +63,12 @@ labels['player_hp_change_label'] = cocos.text.Label('',
 labels['enemy_hp_change_label'] = cocos.text.Label('', 
         font_size=12,font_name='Gadugi', 
         bold=True,color=const.DEFAULT_COLOR, x=500, y=220)
+labels['player_hp_regen_label'] = cocos.text.Label('', 
+        font_size=25,font_name='Gadugi', 
+        bold=True,color=const.GREEN_COLOR, x=100, y=380)
+labels['player_hp_absorb_label'] = cocos.text.Label('', 
+        font_size=25,font_name='Gadugi', 
+        bold=True,color=const.GREEN_COLOR, x=200, y=380)
 
 sprites = {}
 _file_name = 'number-'
@@ -99,9 +105,10 @@ class Front_Layer(Layer):
                 self.add(_sprite)
         
         self.image = materials.images['front_img']
+
+    
     def draw(self):
         self.image.blit(0, 5)
-
 
 
 def show_message(_msg, _type=None):

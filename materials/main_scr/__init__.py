@@ -360,6 +360,14 @@ class Main_Screen(ScrollableLayer):
             if _label.are_actions_running():
                 return None
 
+        _action_label = []
+        _action_label.append(materials.front_layer.labels['enemy_hp_change_label'])
+        _action_label.append(materials.front_layer.labels['player_hp_change_label'])
+        _action_label.append(materials.front_layer.labels['player_hp_regen_label'])
+        _action_label.append(materials.front_layer.labels['player_hp_absorb_label'])
+        for _ in _action_label:
+            _.visible = False
+
         _sprites = materials.main_scr.sprites
         if self.game.game_status == const.GAME_STATUS['STARTED']:
             _style = self.style_cal(self.game.style)

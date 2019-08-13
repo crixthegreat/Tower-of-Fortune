@@ -235,9 +235,11 @@ def gen_random_item(item_type=None, level=None, mf=None):
         #print(const.ITEM_AFFIX_BASE_VALUE[_], get_affix_value(60))
         if _ in [6,7,9,11,13,14,15,19]:
             # the affix that have fixed value
-            _item.affix[_] = const.ITEM_AFFIX_BASE_VALUE[_] * get_affix_value(60)
+            _item.affix[_] = (
+                    const.ITEM_AFFIX_BASE_VALUE[_] * get_affix_value(60))
         else:
-            _item.affix[_] = const.ITEM_AFFIX_BASE_VALUE[_] * get_affix_value(level)
+            _item.affix[_] = (
+                    const.ITEM_AFFIX_BASE_VALUE[_] * get_affix_value(level))
             # it's odd for having a affix equal to 0
             if _item.affix[_] < 1:
                 _item.affix[_] = 1

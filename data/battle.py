@@ -10,16 +10,14 @@ import materials
 from materials.front_layer import show_message
 from cocos import actions
 
-
-def player_attack(_player, _enemy, attack_style):
-    """the core method of the battle which
-    deals with the attack action
-    attack_style means the 10 kind of attack styles
+def check_style(_player, attack_style):
+    """calculate the attack style
     """
+    battle_value = dict()
+
     # set the dice range
     _min_dice = _player.value['MinDice']
     _max_dice = _player.value['MaxDice']
-
     # check the attack styles
     _atk = _player.value['Atk'] * (1 + 
             const.ATTACK_STYLE_DATA[attack_style]['Atk'] / 100)
@@ -35,6 +33,26 @@ def player_attack(_player, _enemy, attack_style):
     # special handling for '神鬼奇谋'
     if attack_style == 9 and _max_dice < 9:
         _max_dice += 1
+
+    battle_value = {"atk":_atk,
+            "def":_def,
+            "luc":_luc, 
+            "cri_dmg":_cri_dmg, 
+            "block_value":_block_value, 
+            "regen":_regen, 
+            "min_dice":_min_dice, 
+            "max_dice":_max_dice}
+
+    return battle_value
+
+def player_attack(_player, _enemy, attack_style):
+    """the core method of the battle which
+    deals with the attack action
+    attack_style means the 10 kind of attack styles
+    """
+    
+    # check the attack style
+    battle_value = check_style(_player, attack_style)
     
     # The skill has 3 types:
     # type 1: 
@@ -50,26 +68,29 @@ def player_attack(_player, _enemy, attack_style):
     for _ in _enemy.skill:
         # skill 18: make the player max_dice half
         if _.skill_no == 18 and _.actived:
-            if (_max_dice % 2):
-                _max_dice = (_max_dice + 1) / 2
+            if (battle_value["max_dice"] % 2):
+                battle_value["max_dice"] = (battle_value["max_dice"] + 1) / 2
             else:
-                _max_dice = _max_dice / 2
-            _max_dice = int(_max_dice)
-            if _max_dice < _min_dice:
-                _max_dice = _min_dice
+                battle_value["max_dice"] /= 2
+            battle_value["max_dice"] = int(battle_value["max_dice"])
+            if battle_value["max_dice"] < battle_value["min_dice"]:
+                battle_value["max_dice"] = battle_value["min_dice"]
             skill.show_skill(_.skill_no, 
                     const.ENEMY_DATA[_enemy.no]['enemy_name'][_enemy.zone])        
             _.round_last -= 1
             if _.round_last == 0:
                 _.reset()
     # hp regen
-    if _regen:
-        _player.hp += _regen
-        skill.show_skill(92, int(_regen))
+    if battle_value["regen"]:
+        _player.hp += battle_value["regen"]
+        skill.show_skill(92, int(battle_value["regen"]))
+        show_hp_increase(_player, battle_value["regen"], 0)
         if _player.hp > _player.max_hp:
             _player.hp = _player.max_hp
+
     # now throw the dice
-    _player_dice = player.ran_dice(_min_dice, _max_dice, _luc, _player.level)
+    _player_dice = player.ran_dice(battle_value["min_dice"], 
+            battle_value["max_dice"], battle_value["luc"], _player.level)
     _player.show_dice(_player_dice)
     _enemy_dice = player.ran_dice(_enemy.value['Min_Dice'], 
             _enemy.value['Max_Dice'], _enemy.value['Luc'], _enemy.level)
@@ -83,7 +104,8 @@ def player_attack(_player, _enemy, attack_style):
             if _.skill_no == 0:
                 if _.actived:
                     skill.show_skill(_.skill_no)
-                    _player_dice = player.ran_dice(_min_dice, _max_dice, _luc, 
+                    _player_dice = player.ran_dice(battle_value["min_dice"], 
+                            battle_value["max_dice"], battle_value["luc"], 
                             _player.level)
                     _player.show_dice(_player_dice)
                     _enemy_dice = player.ran_dice(_enemy.value['Min_Dice'], 
@@ -116,7 +138,8 @@ def player_attack(_player, _enemy, attack_style):
                 if not(_.actived) and _.test():
                     _.actived = True
                 if _.actived:
-                    _cri_dmg = _cri_dmg * (2 - _player.hp / _player.max_hp)
+                    battle_value["cri_dmg"] = (battle_value["cri_dmg"] * 
+                            (2 - _player.hp / _player.max_hp))
                     _.round_last -= 1
                     if _.round_last == 0:
                         _.reset()
@@ -140,8 +163,9 @@ def player_attack(_player, _enemy, attack_style):
         if _player_dice > _enemy_dice and (not _big_wall):
             # the normal attack damage value
             _player.show_attack()
-            _dmg = _atk * (1 - _enemy.value['Def'] / (_enemy.value['Def'] + 
-                1500)) * (1 + (_player_dice - _enemy_dice) * 0.1)
+            _dmg = (battle_value["atk"] * 
+                    (1 - _enemy.value['Def'] / (_enemy.value['Def'] + 1500)) * 
+                    (1 + (_player_dice - _enemy_dice) * 0.1))
             for _ in _player.skill:
                 if _ is None:
                     continue
@@ -166,11 +190,11 @@ def player_attack(_player, _enemy, attack_style):
             if _player.cri_dice == 2:
                 skill.show_skill(100)
                 # the critical and doubled attack !
-                _dmg = _dmg * (1+ _cri_dmg / 100) * 2
+                _dmg = _dmg * (1+ battle_value["cri_dmg"] / 100) * 2
             elif _player.cri_dice == 1:
                 skill.show_skill(101)
                 # the critical attack
-                _dmg = _dmg * (1 + _cri_dmg / 100)
+                _dmg = _dmg * (1 + battle_value["cri_dmg"] / 100)
             else:
                 for _ in _player.skill:
                     if _ is None:
@@ -178,11 +202,11 @@ def player_attack(_player, _enemy, attack_style):
                     # skill 1: you can do critical attacks
                     if _.skill_no == 1:
                         if not(_.actived):
-                            if _.test() and random.randrange(1,101) <= (_luc / 100 + 5):
+                            if _.test() and random.randrange(1,101) <= (battle_value["luc"] / 100 + 5):
                                 _.actived = True
                         if _.actived:
                             skill.show_skill(105)
-                            _dmg = _dmg * (1 + _cri_dmg / 100)
+                            _dmg = _dmg * (1 + battle_value["cri_dmg"] / 100)
                             _.round_last -= 1
                             if _.round_last == 0:
                                 _.reset()
@@ -206,7 +230,8 @@ def player_attack(_player, _enemy, attack_style):
                     if not _.actived and _.test():
                         _.actived = True
                     if _.actived:
-                        _back_dmg = _dmg / 2.5 * (1 - _def / (_def + 1500))
+                        _back_dmg = (_dmg / 2.5 * 
+                                (1 - battle_value["def"] / (battle_value["def"] + 1500)))
                         skill.show_skill(_.skill_no, _back_dmg)
                         _player.hp -= _back_dmg
                 # skill 21: the plague
@@ -227,22 +252,26 @@ def player_attack(_player, _enemy, attack_style):
                 _str = str(int(_enemy.hp)) +' / ' + str(int(_enemy.value['max_hp']))
                 materials.front_layer.labels['enemy_hp_label'].element.text = _str
                 _enemy.show_under_attack(_player.cri_dice)
+
+            if (_player.value['HpHit'] or _player.value['HpAbsorb']) and _dmg:
+                _ =  _player.value['HpHit'] + _player.value['HpAbsorb'] / 100 * _dmg
+                _player.hp += _
+                skill.show_skill(110)
+                show_hp_increase(_player, 0, _)
+                if _player.hp > _player.max_hp:
+                    _player.hp = _player.max_hp
+
             if _enemy.hp <= 0:
                 return battle_result(_player, _enemy, 1)
             
-            if (_player.value['HpHit'] or _player.value['HpAbsorb']) and _dmg:
-                _player.hp += _player.value['HpHit']
-                _player.hp += _player.value['HpAbsorb'] / 100 * _dmg
-                skill.show_skill(110)
-                if _player.hp > _player.max_hp:
-                    _player.hp = _player.max_hp
 
         # the enemy attack!
         elif  _player_dice < _enemy_dice and (not _big_wall):
             _enemy.show_attack()
-            _dmg = _enemy.value['Atk'] * \
-                    (1 - _def / (_def + 1500) * (1 + (_enemy_dice - _player_dice) * 0.1)) \
-                    * (1 - _player.value['ShortDistanceAtkDecreaseRate'] / 100)
+            _dmg = (_enemy.value['Atk'] * 
+                    (1 - battle_value["def"] / (battle_value["def"] + 1500)) * 
+                    (1 + (_enemy_dice - _player_dice) * 0.1) * 
+                    (1 - _player.value['ShortDistanceAtkDecreaseRate'] / 100))
             if _player.cri_dice == 2:
                 skill.show_skill(107)
                 # the critical and doubled attack !
@@ -273,15 +302,16 @@ def player_attack(_player, _enemy, attack_style):
                     if not(_.actived) and _.test():
                         _.actived = True
                     if _.actived:
-                        _block_value = _block_value * 2
+                        battle_value["block_value"] *= 2
                         skill.show_skill(_.skill_no)
-                        if random.randrange(1,101) <= _block_value:
+                        if random.randrange(1,101) <= battle_value["block_value"]:
                             _dmg = _dmg / 4
                             _shield_wall = True
                         _.round_last -= 1
                         if _.round_last == 0:
                             _.reset()
-            if not _shield_wall and _block_value and random.randrange(1,101) <= _block_value:
+            if (not _shield_wall and battle_value["block_value"] 
+                    and random.randrange(1,101) <= battle_value["block_value"]):
                 _dmg = _dmg / 2
 
 
@@ -343,7 +373,7 @@ def player_attack(_player, _enemy, attack_style):
         if _.skill_no == 16 and _.actived:
             skill.show_skill(16.5)
             _player.hp -= ((_.round - _.round_last) * 0.4 * _enemy.value['Atk'] 
-                    * ( 1 - _def / (_def + 1500)))
+                    * ( 1 - battle_value["def"] / (battle_value["def"] + 1500)))
             _.round_last -= 1
             if _.round_last == 0:
                 _.reset()
@@ -365,7 +395,7 @@ def player_attack(_player, _enemy, attack_style):
 
         if _.skill_no == 21 and _.actived:
             skill.show_skill(_.skill_no)
-            _player.hp -= 0.2 * _enemy.value['Atk'] * (1 - _def / (_def + 1500))
+            _player.hp -= 0.2 * _enemy.value['Atk'] * (1 - battle_value["def"] / (battle_value["def"] + 1500))
             _.round_last -= 1
             if _.round_last == 0:
                 _.reset()
@@ -461,6 +491,28 @@ def battle_result(_player, _enemy, _result):
         show_message('你死亡了！怪物在你身边发出荡笑...')
     return False
 
+def show_hp_increase(_player, _regen=0, _absorb=0):
+    # the hp regen/absorb visual effect
+    if _regen:
+        _label = materials.front_layer.labels['player_hp_regen_label']
+        _label.element.color = const.GREEN_COLOR
+        _label.element.text = '+ ' + str(_regen)
+        _label.visible = True
+        _label.do(actions.MoveBy((0, 60), 0.5) + actions.FadeOut(0.3) 
+                + actions.MoveBy((0, -60), 0.2))
+        return None
+
+    if _absorb:
+        _label = materials.front_layer.labels['player_hp_absorb_label']
+        _label.element.color = const.GREEN_COLOR
+        _label.element.text = '+ ' + str(int(_absorb))
+        _label.visible = True
+        _label.do(actions.JumpBy((50,30),35,1,0.7) + 
+                actions.FadeOut(0.3) + actions.MoveBy((-50,-30),0.3))
+        return None
+
+
+
 def show_hp_change(_player=None, _enemy=None, cri_dice=0, _player_dmg=0, _enemy_dmg=0):
     if _player:
         _label = materials.front_layer.labels['player_hp_change_label']
@@ -471,11 +523,8 @@ def show_hp_change(_player=None, _enemy=None, cri_dice=0, _player_dmg=0, _enemy_
             _label.element.x = 150
             _label.element.y = 320
             _label.visible = True
-            if not _label.are_actions_running():
-                _label.do(actions.MoveBy((-100,0),0.3) + actions.FadeOut(0.3) 
-                        + actions.MoveBy((100,0),0.3))
-            else:
-                _label.visible = False
+            _label.do(actions.MoveBy((-100,0),0.3) + actions.FadeOut(0.3) 
+                    + actions.MoveBy((100,0),0.3))
 
         elif cri_dice==0:
             _label.element.font_size = 26
@@ -484,11 +533,8 @@ def show_hp_change(_player=None, _enemy=None, cri_dice=0, _player_dmg=0, _enemy_
             _label.element.x = 150
             _label.element.y = 320
             _label.visible = True
-            if not _label.are_actions_running():
-                _label.do(actions.JumpBy((-80,10),35,1,0.7) + 
-                        actions.FadeOut(0.3) + actions.MoveBy((80,-10),0.3))
-            else:
-                _label.visible = False
+            _label.do(actions.JumpBy((-80,10),35,1,0.7) + 
+                    actions.FadeOut(0.3) + actions.MoveBy((80,-10),0.3))
         elif cri_dice==2:
             _label.element.font_size = 36
             _label.element.color = const.HIGHLIGHT_COLOR
@@ -496,11 +542,8 @@ def show_hp_change(_player=None, _enemy=None, cri_dice=0, _player_dmg=0, _enemy_
             _label.element.x = 150
             _label.element.y = 320
             _label.visible = True
-            if not _label.are_actions_running():
-                _label.do(actions.MoveBy((-100,0),0.3) + actions.FadeOut(0.3) 
-                        + actions.MoveBy((100,0),0.3))
-            else:
-                _label.visible = False
+            _label.do(actions.MoveBy((-100,0),0.3) + actions.FadeOut(0.3) 
+                    + actions.MoveBy((100,0),0.3))
     if _enemy:
         _label = materials.front_layer.labels['enemy_hp_change_label']
         if cri_dice==1:
@@ -510,11 +553,8 @@ def show_hp_change(_player=None, _enemy=None, cri_dice=0, _player_dmg=0, _enemy_
             _label.element.x = 600
             _label.element.y = 320
             _label.visible = True
-            if not _label.are_actions_running():
-                _label.do(actions.MoveBy((100,0),0.3) + actions.FadeOut(0.3) 
-                        + actions.MoveBy((-100,0),0.3))
-            else:
-                _label.visible = False
+            _label.do(actions.MoveBy((100,0),0.3) + actions.FadeOut(0.3) 
+                    + actions.MoveBy((-100,0),0.3))
         elif cri_dice==0:
             _label.element.font_size = 26
             _label.element.color = const.DEFAULT_COLOR
@@ -522,11 +562,8 @@ def show_hp_change(_player=None, _enemy=None, cri_dice=0, _player_dmg=0, _enemy_
             _label.element.x = 600
             _label.element.y = 320
             _label.visible = True
-            if not _label.are_actions_running():
-                _label.do(actions.JumpBy((80,10),35,1,0.7) + 
-                        actions.FadeOut(0.3) + actions.MoveBy((-80,-10),0.3))
-            else:
-                _label.visible = False
+            _label.do(actions.JumpBy((80,10),35,1,0.7) + 
+                    actions.FadeOut(0.3) + actions.MoveBy((-80,-10),0.3))
         elif cri_dice==2:
             _label.element.font_size = 36
             _label.element.color = const.HIGHLIGHT_COLOR
@@ -534,10 +571,7 @@ def show_hp_change(_player=None, _enemy=None, cri_dice=0, _player_dmg=0, _enemy_
             _label.element.x = 600
             _label.element.y = 320
             _label.visible = True
-            if not _label.are_actions_running():
-                _label.do(actions.MoveBy((100,0),0.3) + actions.FadeOut(0.3) + 
-                        actions.MoveBy((-100,0),0.3))
-            else:
-                _label.visible = False
+            _label.do(actions.MoveBy((100,0),0.3) + actions.FadeOut(0.3) + 
+                    actions.MoveBy((-100,0),0.3))
 
     return None
