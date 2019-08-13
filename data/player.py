@@ -383,8 +383,8 @@ def ran_dice(min_dice, max_dice, luc, level):
         (3) so, basically, the dice_rate of a number becomes bigger 
             when your 'luc' value is bigger.
             if you got the maxism lucky value ('max_luc'), 
-            the biggest number's rate becomes 1.6 times of base_rate, 
-            the second biggest number's rate becomes 2.0 times of base_rate, 
+            the biggest number's rate becomes 1.5 times of base_rate, 
+            the second biggest number's rate becomes 1.7 times of base_rate, 
             and so on.
         (4) when the dice_rate accumlated is bigger than 10000, 
             the left numbers' rate becomes 0, which means you won't get these 
@@ -405,7 +405,7 @@ def ran_dice(min_dice, max_dice, luc, level):
 
     # now change the every number's rate from the big number to the small number
     for _ in range(dice_no-1, -1, -1):
-        dice_rate[_] = base_rate[_] * (1 + luc /  max_luc * ((dice_no - _ - 1) * 0.4 + 0.6))
+        dice_rate[_] = base_rate[_] * (1 + luc /  max_luc * ((dice_no - _ - 1) * 0.2 + 0.5))
         if acc_rate + dice_rate[_] >= 10000:
             dice_rate[_] = 10000 - acc_rate
             break

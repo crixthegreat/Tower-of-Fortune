@@ -202,7 +202,7 @@ class Game(object):
                     save_data = json.load(_file)
                 except:
                     raise IOError(
-                            'open file failed when open the save file to get the data')
+                            'open file failed when tring to get the save data')
         
         # the KEY of the save_data dictionary is the 'slotX' (X is 0 ~ 8)
         # get the dict-format of player's data
