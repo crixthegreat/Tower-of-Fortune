@@ -12,9 +12,11 @@ from cocos.layer import Layer
 #from cocos.scenes import FlipY3DTransition
 import materials
 import random
-#from data import skill
+#from materials import color_text
 
-images = {'t2_anime':[materials.alpha_image[26], materials.alpha_image[53]]}
+images = {}
+# not used in this game
+#images = {'t2_anime':[materials.alpha_image[26], materials.alpha_image[53]]}
 
 labels = dict(version_label=cocos.text.Label(const.VERSION, 
     font_size=16,font_name='Verdana', 
@@ -75,6 +77,12 @@ class Menu_Screen(Layer):
         #director.replace(FlipY3DTransition(Scene(my_menu)))
         #self.game.show_menu()
 
+        # for the test of Color_Text object
+        #self.title_text = color_text.Color_Text('HELLO', 100, 300, 1.2, True, True)
+        #for _ in self.title_text.sprites:
+        #    self.add(_)
+
+
     def start_game(self):
         #Start the game
         self.keys_pressed.clear()
@@ -110,6 +118,10 @@ class Menu_Screen(Layer):
             else:
                 self.game.enter = 0
                 sprites['start_sprite'].y += 55 * (_entry_count - 1)
+
+        # for the test of the Color_Text object
+        #menu_list = ['start game', 'how to', 'credit']
+        #self.title_text.text = menu_list[self.game.enter]
 
 
     def on_key_press(self, key, modifiers):

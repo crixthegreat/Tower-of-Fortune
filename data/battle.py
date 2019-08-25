@@ -233,6 +233,7 @@ def player_attack(_player, _enemy, attack_style):
                         _back_dmg = (_dmg / 2.5 * 
                                 (1 - battle_value["def"] / (battle_value["def"] + 1500)))
                         skill.show_skill(_.skill_no, _back_dmg)
+                        show_hp_change(_player, None, _player.cri_dice, (0-int(_back_dmg)))
                         _player.hp -= _back_dmg
                 # skill 21: the plague
                 if _.skill_no == 21:
@@ -245,6 +246,8 @@ def player_attack(_player, _enemy, attack_style):
             # check the Elite Damage affix
             _dmg = _dmg * (1 + _player.value['EliteDamage'] / 100)
 
+            if _enemy.hp - _dmg <=0:
+                _dmg = _enemy.hp
             _enemy.hp -= _dmg
             if _dmg:
                 #show_message('怪物失去了体力：' + str(int(_dmg)))
@@ -395,7 +398,8 @@ def player_attack(_player, _enemy, attack_style):
 
         if _.skill_no == 21 and _.actived:
             skill.show_skill(_.skill_no)
-            _player.hp -= 0.2 * _enemy.value['Atk'] * (1 - battle_value["def"] / (battle_value["def"] + 1500))
+            _player.hp -= 0.2 * _enemy.value['Atk'] * (1 - battle_value["def"] 
+                    / (battle_value["def"] + 1500))
             _.round_last -= 1
             if _.round_last == 0:
                 _.reset()
