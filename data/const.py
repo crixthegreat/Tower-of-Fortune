@@ -404,12 +404,15 @@ def image_from_file(_file, image_file=MONSTER_ZIP_FILE):
     # check the file is whether a gif file or not    
     if FILE_TYPE[_file]=='gif':
         # the standard gif handling process
-        _anime = pyglet.image.load_animation('', file=image_file_data)
+        # the '1.gif' or '1.jpg' '1.png' are hint which:
+        # helps the module locate an appropriate decoder to use 
+        # based on the file extension (help message from pyglet.image.load())
+        _anime = pyglet.image.load_animation('1.gif', file=image_file_data)
         _bin = pyglet.image.atlas.TextureBin()
         _anime.add_to_texture_bin(_bin)
         return _anime 
     elif FILE_TYPE[_file]=='png' or FILE_TYPE[_file]=='jpg':
-        return  pyglet.image.load('', file=image_file_data) 
+        return  pyglet.image.load('1.' + FILE_TYPE[_file], file=image_file_data) 
     else:
         # By now, only gif, png and jpg files can be read
         raise ValueError('when get image from file, UNKNOWN file type for ', FILE_TYPE[image_file])
