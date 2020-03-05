@@ -5,6 +5,7 @@
 #codetime: 2019/6/7 22:59:49
 
 import random
+import time
 from data import const, player, item, enemy, skill
 import materials
 from materials.front_layer import show_message
@@ -29,6 +30,7 @@ def check_style(_player, attack_style):
     _cri_dmg = _player.value['CriDmg']
     _block_value = _player.value['BlockValue']
     _regen = _player.value['HpRegen']
+    _debuff_round_minus = _player.value['DebuffRoundMinus']
 
     # special handling for '神鬼奇谋'
     if attack_style == 9 and _max_dice < 9:
@@ -41,9 +43,25 @@ def check_style(_player, attack_style):
             "block_value":_block_value, 
             "regen":_regen, 
             "min_dice":_min_dice, 
-            "max_dice":_max_dice}
+            "max_dice":_max_dice, 
+            "debuff_round_minus":_debuff_round_minus
+            }
 
     return battle_value
+
+def show_buff(player, skill_no, buff_name, enemy=False):
+    if enemy:
+        start_pos = 600
+        pos_y = 240
+    else:
+        start_pos = 50
+        pos_y = 210
+    if not(skill_no in player.actived_buff):
+        player.actived_buff.append(skill_no)
+        materials.main_scr.sprites[buff_name].position = start_pos + len(player.actived_buff) * 30, pos_y
+        materials.main_scr.sprites[buff_name].visible = True
+
+
 
 def player_attack(_player, _enemy, attack_style):
     """the core method of the battle which
@@ -65,9 +83,13 @@ def player_attack(_player, _enemy, attack_style):
 
     # check the enemy's skill list before attack
     # when casted , use the method skill.casted too
+    
+    debuff_end_round = battle_value["debuff_round_minus"]
+
     for _ in _enemy.skill:
         # skill 18: make the player max_dice half
         if _.skill_no == 18 and _.actived:
+            #show_buff(_player, 18, 'buff_cripple')
             if (battle_value["max_dice"] % 2):
                 battle_value["max_dice"] = (battle_value["max_dice"] + 1) / 2
             else:
@@ -75,15 +97,13 @@ def player_attack(_player, _enemy, attack_style):
             battle_value["max_dice"] = int(battle_value["max_dice"])
             if battle_value["max_dice"] < battle_value["min_dice"]:
                 battle_value["max_dice"] = battle_value["min_dice"]
-            skill.show_skill(_.skill_no, 
-                    const.ENEMY_DATA[_enemy.no]['enemy_name'][_enemy.zone])        
-            _.round_last -= 1
-            if _.round_last == 0:
-                _.reset()
+            show_message(const.BATTLE_MESSAGE['PlayerCripple'].format( 
+                    const.ENEMY_DATA[_enemy.no]['enemy_name'][_enemy.zone])) 
+            _.check_buff(debuff_end_round)
     # hp regen
     if battle_value["regen"]:
         _player.hp += battle_value["regen"]
-        skill.show_skill(92, int(battle_value["regen"]))
+        show_message(const.BATTLE_MESSAGE['Regen'].format(int(battle_value["regen"])))
         show_hp_increase(_player, battle_value["regen"], 0)
         if _player.hp > _player.max_hp:
             _player.hp = _player.max_hp
@@ -101,23 +121,16 @@ def player_attack(_player, _enemy, attack_style):
         for _ in _player.skill:
             if _ is None:
                 continue
-            if _.skill_no == 0:
-                if _.actived:
-                    skill.show_skill(_.skill_no)
-                    _player_dice = player.ran_dice(battle_value["min_dice"], 
-                            battle_value["max_dice"], battle_value["luc"], 
-                            _player.level)
-                    _player.show_dice(_player_dice)
-                    _enemy_dice = player.ran_dice(_enemy.value['Min_Dice'], 
-                            _enemy.value['Max_Dice'], _enemy.value['Luc'], 
-                            _enemy.level)
-                    _player.show_dice(_enemy_dice, True)
-                    _.round_last -= 1
-                    if _.round_last == 0:
-                        _.reset()
-                else:
-                    if _.test():
-                        _.actived = True
+            if _.skill_no == 0 and not(_.actived) and _.test():
+                _.active()
+            if _.actived:
+                _enemy_sprite = 'enemy_dice_' + str(_player.cri_dice)
+                _player_sprite = 'player_dice_' + str(_player.cri_dice)
+                materials.main_scr.sprites[_enemy_sprite].do(actions.Blink(4, 1))
+                materials.main_scr.sprites[_player_sprite].do(actions.Blink(4, 1))
+                
+                _.check_buff()
+                return True
             
     # now check:
     # the skill 3: war cry to make enemy take the min dice!        
@@ -126,33 +139,29 @@ def player_attack(_player, _enemy, attack_style):
         if _:
             if _.skill_no == 3:
                 if not(_.actived) and _.test():
-                    _.actived = True
+                    _.active()
                 if _.actived:
                     _enemy_dice = _enemy.value['Min_Dice']
                     _player.show_dice(_enemy_dice, True)
-                    skill.show_skill(_.skill_no, _enemy_dice)
-                    _.round_last -= 1
-                    if _.round_last == 0:
-                        _.reset()
+                    show_message(const.BATTLE_MESSAGE['Warcry'])
+                    _.check_buff()
             elif _.skill_no == 7:
                 if not(_.actived) and _.test():
-                    _.actived = True
+                    _.active()
                 if _.actived:
                     battle_value["cri_dmg"] = (battle_value["cri_dmg"] * 
                             (2 - _player.hp / _player.max_hp))
-                    _.round_last -= 1
-                    if _.round_last == 0:
-                        _.reset()
+                    _.check_buff()
 
     # check the skill 17: the big wall
     _big_wall = False
     for _ in _enemy.skill:
         if _.skill_no == 17 and _.actived:
-            skill.show_skill(_.skill_no)
-            _.round_last -= 1
+            show_message(const.BATTLE_MESSAGE['Wall'])
+            #show_buff(_enemy, 17, 'buff_wall', True)
+
             _big_wall = True
-            if _.round_last == 0:
-                _.reset()
+            _.check_buff(debuff_end_round)
 
     # now check the dice value between each other at last!
     if _player_dice == _enemy_dice:
@@ -171,28 +180,22 @@ def player_attack(_player, _enemy, attack_style):
                     continue
                 # check the skill 2: poison weapon!
                 if _.skill_no == 2:
-                    if not _.actived and _.test():
-                        _.actived = True
+                    if not _.actived and _.test() and random.randrange(1,101) <= (battle_value["luc"] / 20 + 5):
+                        _.active()
                     if _.actived:
-                        skill.show_skill(_.skill_no)
                         _dmg = _dmg * 1.5
-                        _.round_last -= 1
-                        if _.round_last == 0:
-                            _.reset()
+                        _.check_buff()
                 # check the skill 8: revenge attack!
                 elif _.skill_no == 8 and _.actived:
-                    skill.show_skill(_.skill_no)
                     _dmg = _dmg * 2
-                    _.round_last -= 1
-                    if _.round_last == 0:
-                        _.reset()
+                    _.check_buff()
 
             if _player.cri_dice == 2:
-                skill.show_skill(100)
+                show_message(const.BATTLE_MESSAGE['PlayerThirdCritical'])
                 # the critical and doubled attack !
                 _dmg = _dmg * (1+ battle_value["cri_dmg"] / 100) * 2
             elif _player.cri_dice == 1:
-                skill.show_skill(101)
+                show_message(const.BATTLE_MESSAGE['PlayerDoubleCritical'])
                 # the critical attack
                 _dmg = _dmg * (1 + battle_value["cri_dmg"] / 100)
             else:
@@ -202,44 +205,38 @@ def player_attack(_player, _enemy, attack_style):
                     # skill 1: you can do critical attacks
                     if _.skill_no == 1:
                         if not(_.actived):
-                            if _.test() and random.randrange(1,101) <= (battle_value["luc"] / 100 + 5):
-                                _.actived = True
+                            if _.test() and random.randrange(1,101) <= (battle_value["luc"] / 30 + 5):
+                                _.active()
                         if _.actived:
-                            skill.show_skill(105)
                             _dmg = _dmg * (1 + battle_value["cri_dmg"] / 100)
-                            _.round_last -= 1
-                            if _.round_last == 0:
-                                _.reset()
+                            _.check_buff()
                         else:
-                            skill.show_skill(106)
+                            show_message(const.BATTLE_MESSAGE['PlayerAttack'])
 
             for _ in _enemy.skill:
                 # check the skill 15: no weapon!
                 if _.skill_no == 15 and _.actived:
-                    skill.show_skill(_.skill_no)
+                    show_message(const.BATTLE_MESSAGE['PlayerDisarmed'])
                     _dmg = 0
                 # skill 19: the shield
                 if _.skill_no == 19:
                     if not _.actived and _.test():
-                        _.actived = True
+                        _.active()
                     if _.actived:
-                        skill.show_skill(_.skill_no)
                         _dmg = 0
                 # skill 20: the bounce back attack
                 if _.skill_no == 20:
                     if not _.actived and _.test():
-                        _.actived = True
-                    if _.actived:
+                        _.active()
+                    if _.actived and _dmg:
                         _back_dmg = (_dmg / 2.5 * 
                                 (1 - battle_value["def"] / (battle_value["def"] + 1500)))
-                        skill.show_skill(_.skill_no, _back_dmg)
+                        show_message(const.BATTLE_MESSAGE['EnemyBounceAtk'].format(int(_back_dmg)))
                         show_hp_change(_player, None, _player.cri_dice, (0-int(_back_dmg)))
                         _player.hp -= _back_dmg
                 # skill 21: the plague
-                if _.skill_no == 21:
-                    if not _.actived and _.test():
-                        _.actived = True
-                        skill.show_skill(21.5)
+                if _.skill_no == 21 and not _.actived and _.test():
+                    _.active()
 
             if _player.hp <= 0:
                 return battle_result(_player, _enemy, 2)
@@ -250,7 +247,6 @@ def player_attack(_player, _enemy, attack_style):
                 _dmg = _enemy.hp
             _enemy.hp -= _dmg
             if _dmg:
-                #show_message('怪物失去了体力：' + str(int(_dmg)))
                 show_hp_change(None, _enemy, _player.cri_dice, 0, (0-int(_dmg)))
                 _str = str(int(_enemy.hp)) +' / ' + str(int(_enemy.value['max_hp']))
                 materials.front_layer.labels['enemy_hp_label'].element.text = _str
@@ -259,7 +255,7 @@ def player_attack(_player, _enemy, attack_style):
             if (_player.value['HpHit'] or _player.value['HpAbsorb']) and _dmg:
                 _ =  _player.value['HpHit'] + _player.value['HpAbsorb'] / 100 * _dmg
                 _player.hp += _
-                skill.show_skill(110)
+                show_message(const.BATTLE_MESSAGE['HpAbsorb'])
                 show_hp_increase(_player, 0, _)
                 if _player.hp > _player.max_hp:
                     _player.hp = _player.max_hp
@@ -276,7 +272,7 @@ def player_attack(_player, _enemy, attack_style):
                     (1 + (_enemy_dice - _player_dice) * 0.1) * 
                     (1 - _player.value['ShortDistanceAtkDecreaseRate'] / 100))
             if _player.cri_dice == 2:
-                skill.show_skill(107)
+                show_message(const.BATTLE_MESSAGE['EnemyCritical'])
                 # the critical and doubled attack !
                 _dmg = _dmg * 2
                 # check the skill 8 when the player got a critical attack!
@@ -284,9 +280,9 @@ def player_attack(_player, _enemy, attack_style):
                     if _ is None:
                         continue
                     if _.skill_no == 8 and _.test():
-                        _.actived = True
+                        _.active()
             elif _player.cri_dice == 1:
-                skill.show_skill(108)
+                show_message(const.BATTLE_MESSAGE['EnemyDoubleCritical'])
                 # the critical attack
                 _dmg = _dmg * 1.5
                 # check the skill 8 when the player got a critical attack!
@@ -294,25 +290,22 @@ def player_attack(_player, _enemy, attack_style):
                     if _ is None:
                         continue
                     if _.skill_no == 8 and _.test():
-                        _.actived = True
+                        _.active()
             else:
-                skill.show_skill(109)
+                show_message(const.BATTLE_MESSAGE['EnemyAttack'])
             
             _shield_wall = False
             for _ in _enemy.skill:
                 # check the skill 4: the shield wall
                 if _.skill_no == 4:
                     if not(_.actived) and _.test():
-                        _.actived = True
+                        _.active()
                     if _.actived:
                         battle_value["block_value"] *= 2
-                        skill.show_skill(_.skill_no)
                         if random.randrange(1,101) <= battle_value["block_value"]:
                             _dmg = _dmg / 4
                             _shield_wall = True
-                        _.round_last -= 1
-                        if _.round_last == 0:
-                            _.reset()
+                        _.check_buff()
             if (not _shield_wall and battle_value["block_value"] 
                     and random.randrange(1,101) <= battle_value["block_value"]):
                 _dmg = _dmg / 2
@@ -325,84 +318,63 @@ def player_attack(_player, _enemy, attack_style):
                     # check the skill 5, divine shield
                     if _.skill_no == 5:
                         if not(_.actived) and _.test():
-                            _.actived = True
+                            _.active()
                         if _.actived:
                             _dmg = 0
-                            skill.show_skill(_.skill_no)
-                            _.round_last -= 1
-                            if _.round_last == 0:
-                                _.reset()
+                            #show_buff(_player, 5, 'buff_divine_shield')
+                            _.check_buff()
                     # check the skill 6, sparking bullet
                     if _.skill_no == 6:
                         if not(_.actived) and _.test():
-                            _.actived = True
+                            _.active()
                         if _.actived:
                             _enemy.hp -= _player.hp / 4
-                            skill.show_skill(_.skill_no)
-                            _.round_last -= 1
-                            if _.round_last == 0:
-                                _.reset()
+                            show_message(const.BATTLE_MESSAGE['PlayerExplode'])
+                            _.check_buff()
 
             # check the skill 15: rob the weapon!
             # check the skill 16: set fire!
             # check the skill 17: set wall!
             # check the skill 18: diable you!
             for _ in _enemy.skill:
-                if _.skill_no == 15 and (not _.actived) and _.test():
-                    skill.show_skill(15.5)
-                    _.actived = True
-                if _.skill_no == 16 and (not _.actived) and _.test():
-                    skill.show_skill(_.skill_no)
-                    _.actived = True
-                if _.skill_no == 17 and (not _.actived) and _.test():
-                    skill.show_skill(17.5)
-                    _.actived = True
-                if _.skill_no == 18 and (not _.actived) and _.test():
-                    _str = const.ENEMY_DATA[_enemy.no]['enemy_name'][_enemy.zone]
-                    skill.show_skill(18.5, _str)
-                    _.actived = True
-                    
+                if (not _.actived) and _.test():
+                    if _.skill_no in [15,16,17]:
+                        _.active()
+                    elif _.skill_no == 18:
+                        _str = const.ENEMY_DATA[_enemy.no]['enemy_name'][_enemy.zone]
+                        show_message(const.BATTLE_MESSAGE[const.SKILL_NAME[_.skill_no]].format(_str))
+                        _.active()
 
             if _dmg:
                 _player.hp -= _dmg
                 _player.show_under_attack(_player.cri_dice)
                 show_hp_change(_player, None, _player.cri_dice, (0-int(_dmg)))
-                #show_message('你失去了体力：' +str(int(_dmg)))
 
         _player.cri_dice = 0
     
     # check the skill 15, 16, 19, 20, 21 let  the round_last + 1 
     for _ in _enemy.skill:
         if _.skill_no == 16 and _.actived:
-            skill.show_skill(16.5)
-            _player.hp -= ((_.round - _.round_last) * 0.4 * _enemy.value['Atk'] 
+            show_message(const.BATTLE_MESSAGE['PlayerInFire'])
+            #show_buff(_player, 16, 'buff_fire')
+            _skill_dmg = ((_.round - _.round_last) * 0.4 * _enemy.value['Atk'] 
                     * ( 1 - battle_value["def"] / (battle_value["def"] + 1500)))
-            _.round_last -= 1
-            if _.round_last == 0:
-                _.reset()
+            show_hp_change(_player, None, 0, (0-int(_skill_dmg)))
+            _player.hp -= _skill_dmg
+            _.check_buff(debuff_end_round)
 
-        if _.skill_no == 15 and _.actived:
-            _.round_last -= 1
-            if _.round_last == 0:
-                _.reset()
-
-        if _.skill_no == 19 and _.actived:
-            _.round_last -= 1
-            if _.round_last == 0:
-                _.reset()
-
-        if _.skill_no == 20 and _.actived:
-            _.round_last -= 1
-            if _.round_last == 0:
-                _.reset()
+        if _.actived and _.skill_no in [15, 19, 20]:
+            _.check_buff(debuff_end_round)
 
         if _.skill_no == 21 and _.actived:
-            skill.show_skill(_.skill_no)
-            _player.hp -= 0.2 * _enemy.value['Atk'] * (1 - battle_value["def"] 
-                    / (battle_value["def"] + 1500))
-            _.round_last -= 1
-            if _.round_last == 0:
-                _.reset()
+            show_message(const.BATTLE_MESSAGE['PlayerInPlague'])
+            #show_buff(_player, 21, 'buff_plague')
+            _skill_dmg = (0.2 * _enemy.value['Atk'] * 
+                    (1 - battle_value["def"] / (battle_value["def"] + 1500)))
+            show_hp_change(_player, None, 0, (0-int(_skill_dmg)))
+            _player.hp -= _skill_dmg
+
+            _.check_buff(debuff_end_round)
 
     _player.show_player()
 
@@ -417,11 +389,22 @@ def player_attack(_player, _enemy, attack_style):
 # 1 - player winned
 # 2 - enemy winned
 def battle_result(_player, _enemy, _result):
+
+    #hide all buff sfx
+    materials.main_scr.sprites[const.SKILL_NAME[18]].visible = False
+    materials.main_scr.sprites[const.SKILL_NAME[5]].visible = False
+    materials.main_scr.sprites[const.SKILL_NAME[19]].visible = False
+    materials.main_scr.sprites[const.SKILL_NAME[21]].visible = False
+    materials.main_scr.sprites[const.SKILL_NAME[16]].visible = False
+    materials.main_scr.sprites[const.SKILL_NAME[15]].visible = False
+    materials.main_scr.sprites[const.SKILL_NAME[17]].visible = False
+
+
     _loot_mf = _player.value['MagicFind']
     _loot_no = 0
     if _result == 1:
-        show_message('你击败了', 
-                const.ENEMY_DATA[_enemy.no]['enemy_name'][_enemy.zone])
+        show_message(const.BATTLE_MESSAGE['BeatEnemy'].format(
+                const.ENEMY_DATA[_enemy.no]['enemy_name'][_enemy.zone]))
         materials.main_scr.sprites['enemy_sprite'].do(actions.Blink(5,2))
 
         if _player.level - _enemy.level <= 2:
@@ -469,11 +452,11 @@ def battle_result(_player, _enemy, _result):
         
         _player.gold += _gold
         _player.exp += _exp
-        show_message('你获得了金钱 {}，经验 {}'.format(int(_gold), int(_exp)))
+        show_message(const.BATTLE_MESSAGE['GetGoldExp'].format(int(_gold), int(_exp)))
 
         _max_exp = int(_player.level ** 3.5) + 300
         if _player.exp >= _max_exp:
-            show_message('你升级了，战斗让你更加强大！')
+            show_message(const.BATTLE_MESSAGE['LevelUp'])
             _player.level += 1
             _player.exp = 0
             _player.hp = _player.max_hp
@@ -492,7 +475,7 @@ def battle_result(_player, _enemy, _result):
         _player.epitaph = ('在' + const.ZONE_NAME[_player.zone] + '中死于' + 
                 ' ' + const.ENEMY_RANK_NAME[_enemy.rank] + 
                 const.ENEMY_DATA[_enemy.no]['enemy_name'][_enemy.zone] + '之手')
-        show_message('你死亡了！怪物在你身边发出荡笑...')
+        show_message(const.BATTLE_MESSAGE['PlayerDead'])
     return False
 
 def show_hp_increase(_player, _regen=0, _absorb=0):

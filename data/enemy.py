@@ -38,6 +38,8 @@ class Enemy(object):
         self.type = [2 ,2, 2]
         self.hp = self.value['max_hp']
 
+        self.actived_buff = []
+
     def show_attack(self):
         '''Show the action of enemy's attack (moves left and goes back)
         '''

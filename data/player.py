@@ -57,6 +57,7 @@ class Player(object):
         self.save_slot = 0
         self.alive = True
 
+        self.actived_buff = []
         
     # the read-only property .value is calculated from all the items 
     # which the player equiped and passive skills
@@ -335,19 +336,19 @@ def gen_player(level):
     """generate a player who has full-set equipment 
     """
     _player = Player()
-    _player.equip_item(item.gen_random_item(0, level, 5))
-    _player.equip_item(item.gen_random_item(30, level, 5))
-    _player.equip_item(item.gen_random_item(40, level, 5))
-    _player.equip_item(item.gen_random_item(42, level, 5))
-    _player.equip_item(item.gen_random_item(43, level, 5))
-    _player.equip_item(item.gen_random_item(44, level, 5))
-    _player.equip_item(item.gen_random_item(46, level, 5))
-    _player.equip_item(item.gen_random_item(47, level, 5))
-    _player.equip_item(item.gen_random_item(48, level, 5))
-    _player.equip_item(item.gen_random_item(50, level, 5))
-    _player.equip_item(item.gen_random_item(51, level, 5))
-    _player.equip_item(item.gen_random_item(52, level, 5))
-    _player.equip_item(item.gen_random_item(52, level, 5))
+    _player.equip_item(item.gen_random_item(0, level, 500))
+    _player.equip_item(item.gen_random_item(30, level, 500))
+    _player.equip_item(item.gen_random_item(40, level, 500))
+    _player.equip_item(item.gen_random_item(42, level, 500))
+    _player.equip_item(item.gen_random_item(43, level, 500))
+    _player.equip_item(item.gen_random_item(44, level, 500))
+    _player.equip_item(item.gen_random_item(46, level, 500))
+    _player.equip_item(item.gen_random_item(47, level, 500))
+    _player.equip_item(item.gen_random_item(48, level, 500))
+    _player.equip_item(item.gen_random_item(50, level, 500))
+    _player.equip_item(item.gen_random_item(51, level, 500))
+    _player.equip_item(item.gen_random_item(52, level, 500))
+    _player.equip_item(item.gen_random_item(52, level, 500))
 
     _player.hp = _player.max_hp
     _player.level = level
@@ -427,7 +428,7 @@ def ran_dice(min_dice, max_dice, luc, level):
 # player function dice explode, when equal dice happened for the third time
 def dice_equal(player, _enemy):
     if player.cri_dice == 2:
-        skill.show_skill(102)
+        show_message(const.BATTLE_MESSAGE['DiceDueceThirdTime'])
         player.cri_dice = 0
         player.hp = player.hp / 2
         _enemy.hp = _enemy .hp / 2
@@ -448,9 +449,9 @@ def dice_equal(player, _enemy):
                 0-int(_enemy.hp/2))
         enemy.show_enemy(_enemy)
     elif player.cri_dice == 1:
-        skill.show_skill(103)
+        show_message(const.BATTLE_MESSAGE['DiceDueceTwice'])
     elif player.cri_dice == 0:
-        skill.show_skill(104)
+        show_message(const.BATTLE_MESSAGE['DiceDuece'])
     
     player.cri_dice += 1
 

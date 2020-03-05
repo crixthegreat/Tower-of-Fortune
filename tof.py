@@ -84,7 +84,8 @@ class Game(object):
             the most difficult stage where the player can go to
             namely 0, 1, 2, 3, 4, 5
         """
-        return (self.player.level - 1) // 10
+        _stage = self.player.level // 10
+        return _stage if _stage<6 else 5 
 
     @property
     def game_status(self):
@@ -111,10 +112,14 @@ class Game(object):
     def start_game(self):
         """start the game screen and initial the game
         """
-        materials.main_scr.sprites['enemy_sprite'].visible = False
-        for _ in range(3):
-            materials.main_scr.sprites['player_dice_' + str(_)].visible = False
-            materials.main_scr.sprites['enemy_dice_' + str(_)].visible = False
+        #for _ in range(3):
+        #    materials.main_scr.sprites['player_dice_' + str(_)].visible = False
+        #    materials.main_scr.sprites['enemy_dice_' + str(_)].visible = False
+
+        for _, sprite in materials.main_scr.sprites.items():
+            sprite.visible = False
+        
+        materials.main_scr.sprites['control'].visible = True
         self.player.sprite.visible = True
         self.player.sprite.image = materials.main_scr.player_image
         self.set_stage(self.player.zone)
@@ -345,5 +350,5 @@ if __name__ == '__main__':
     #game_screen.add(front_layer)
     main_scene = Scene(my_menu)
     #print ('game initialised')
-    cocos.director.director.run(main_scene)
+    director.run(main_scene)
     #print('game end')

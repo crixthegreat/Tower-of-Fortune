@@ -355,6 +355,32 @@ with open(SKILL_DATA_FILE, 'r') as f:
             SKILL_DATA.append(copy.deepcopy(_skill))
         line = f.readline()
 
+SKILL_NAME = {
+            0:'Earthquake',
+            1:'PlayerCritical',
+            2:'Bash',
+            4:'PlayerShieldWall',
+            5:'PlayerDivineShield',
+            8:'PlayerRevenge',
+            15:'EnemyCastDisarm',
+            16:'EnemyCastFire',
+            17:'EnemyCastWall',
+            18:'EnemyCastCripple',
+            19:'EnemyInShield',
+            21:'EnemyPlague'
+            }
+
+BUFF_ICON_FILE = {}
+
+BUFF_ICON_FILE['cripple'] = './pic/cripple.bmp'
+BUFF_ICON_FILE['divine_shield'] = './pic/divine_shiled.bmp'
+BUFF_ICON_FILE['plague'] = './pic/plague.bmp'
+BUFF_ICON_FILE['fire'] = './pic/fire.bmp'
+BUFF_ICON_FILE['disarm'] = './pic/disarm.bmp'
+BUFF_ICON_FILE['wall'] = './pic/wall.bmp'
+
+
+
 # read attack style file
 _style = {}
 _style = dict(attack=[], 
@@ -392,6 +418,48 @@ STYLE_VALUE = {
         (2,1,0):1,
         (3,0,0):0}
 
+BATTLE_MESSAGE = {}
+
+BATTLE_MESSAGE['Bash'] = '你狠狠的挥动了武器！'
+BATTLE_MESSAGE['Earthquake'] = '突发的地震中断了双方的动作' 
+BATTLE_MESSAGE['Warcry'] = '你大喝一声，敌人的骰子退缩了' 
+BATTLE_MESSAGE['PlayerShieldWall'] = '你的盾牌闪闪发光，就像一堵城墙！'
+BATTLE_MESSAGE['PlayerDivineShield'] = '你浑身发出神圣的光，敌人的攻击失效了...'
+BATTLE_MESSAGE['PlayerExplode'] = '你受到攻击，身边发出猛烈的爆炸，怪物受伤了！'
+BATTLE_MESSAGE['PlayerRevenge'] = '你双眼发出复仇的怒火！'
+BATTLE_MESSAGE['PlayerDisarmed'] = '你四处寻找着你的武器！'
+BATTLE_MESSAGE['EnemyCastDisarm'] = '怪物夺走了你手上的武器！'
+BATTLE_MESSAGE['EnemyCastFire'] = '怪物在你的脚下燃起恐怖的火焰！'
+BATTLE_MESSAGE['PlayerInFire'] = '你站在火焰中，受伤了！'
+BATTLE_MESSAGE['Wall'] = '一堵高墙树立在怪物与你之间...'
+BATTLE_MESSAGE['EnemyCastWall'] = '敌人召唤了一堵高高的石墙...'
+BATTLE_MESSAGE['PlayerCripple'] =  '{}让你浑身无力，扔骰子的手抖了'
+BATTLE_MESSAGE['EnemyCastCripple'] =  '{}施展神秘诅咒，你感到浑身无力...'
+BATTLE_MESSAGE['EnemyInShield'] = '怪物身上环绕着神奇的光芒...'
+BATTLE_MESSAGE['EnemyBounceAtk'] = '怪物反弹攻击，造成了伤害：{}'
+BATTLE_MESSAGE['PlayerInPlague'] = '你站在毒中，受到了伤害'
+BATTLE_MESSAGE['EnemyPlague'] = '怪物身上弥漫着瘟疫'
+
+BATTLE_MESSAGE['EnemyThrowDice'] = '怪物扔出了一个骰子：' 
+BATTLE_MESSAGE['PlayerThrowDice'] = '你扔出了一个骰子：' 
+BATTLE_MESSAGE['Regen'] = '你恢复了体力：{}' 
+BATTLE_MESSAGE['PlayerThirdCritical'] = '你施展浑身解数，发出致命一击！'
+BATTLE_MESSAGE['PlayerDoubleCritical'] = '你使出全力，发出奋力一击！'
+BATTLE_MESSAGE['DiceDueceThirdTime'] = '一声巨响，骰子爆炸了！'
+
+BATTLE_MESSAGE['DiceDueceTwice'] = '形式千钧一发！'
+BATTLE_MESSAGE['DiceDuece'] = '双方四目相对！'
+BATTLE_MESSAGE['PlayerCritical'] ='你发出了一次暴击！'
+BATTLE_MESSAGE['PlayerAttack'] = '你施展攻击'
+BATTLE_MESSAGE['EnemyCritical'] = '怪物发出致命一击！'
+BATTLE_MESSAGE['EnemyDoubleCritical'] = '怪物发出奋力一击！'
+BATTLE_MESSAGE['EnemyAttack'] = '怪物施展攻击'
+BATTLE_MESSAGE['HpAbsorb'] = '你的攻击吸收了怪物的体力'
+
+BATTLE_MESSAGE['BeatEnemy'] = '你击败了{}'
+BATTLE_MESSAGE['GetGoldExp'] = '你获得了金钱 {}，经验 {}'
+BATTLE_MESSAGE['LevelUp'] = '你升级了，战斗让你更加强大！'
+BATTLE_MESSAGE['PlayerDead'] = '你死亡了！怪物在你身边发出荡笑...'
 
 def image_from_file(_file, image_file=MONSTER_ZIP_FILE):
     """get a image object from a zip file
@@ -402,7 +470,7 @@ def image_from_file(_file, image_file=MONSTER_ZIP_FILE):
     with zipfile.ZipFile(image_file) as _image_file:
         image_file_data = _image_file.open(_file + '.' + FILE_TYPE[_file])
     # check the file is whether a gif file or not    
-    if FILE_TYPE[_file]=='gif':
+    if FILE_TYPE[_file].lower()=='gif':
         # the standard gif handling process
         # the '1.gif' or '1.jpg' '1.png' are hint which:
         # helps the module locate an appropriate decoder to use 
@@ -411,11 +479,11 @@ def image_from_file(_file, image_file=MONSTER_ZIP_FILE):
         _bin = pyglet.image.atlas.TextureBin()
         _anime.add_to_texture_bin(_bin)
         return _anime 
-    elif FILE_TYPE[_file]=='png' or FILE_TYPE[_file]=='jpg':
+    elif FILE_TYPE[_file].lower()=='png' or FILE_TYPE[_file].lower()=='jpg':
         return  pyglet.image.load('1.' + FILE_TYPE[_file], file=image_file_data) 
     else:
         # By now, only gif, png and jpg files can be read
-        raise ValueError('when get image from file, UNKNOWN file type for ', FILE_TYPE[image_file])
+        raise ValueError('when get image from file, UNKNOWN file type for ', FILE_TYPE[_file])
 
 # for test    
 if __name__ == '__main__':
