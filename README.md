@@ -18,6 +18,7 @@ Now the game is playable.
 - player can level up to 60
 - save and load games
 - the player dies! (Rogue-like) , the body can be looted
+- buff sfx (just icons now)
 
 ![screenshot](./pic/sample_s.png)
 
@@ -33,6 +34,9 @@ Now the game is playable.
 - merge all the image files into a single zip file
 - add music
 - add how-to-play layer
+- camp's name can't be shown normally
+- the right key invalid when camp
+- add formal buff sfx (gif pictures)
 
 ### [main_scr]
 - ~~change the ARROW-CONTROL ICONS to sprites, so we can see different indications for different events (battle, tent, corpse)~~ (done)
