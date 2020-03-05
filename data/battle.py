@@ -121,16 +121,17 @@ def player_attack(_player, _enemy, attack_style):
         for _ in _player.skill:
             if _ is None:
                 continue
-            if _.skill_no == 0 and not(_.actived) and _.test():
-                _.active()
-            if _.actived:
-                _enemy_sprite = 'enemy_dice_' + str(_player.cri_dice)
-                _player_sprite = 'player_dice_' + str(_player.cri_dice)
-                materials.main_scr.sprites[_enemy_sprite].do(actions.Blink(4, 1))
-                materials.main_scr.sprites[_player_sprite].do(actions.Blink(4, 1))
+            if _.skill_no == 0:
+                if not(_.actived) and _.test():
+                    _.active()
+                if _.actived:
+                    _enemy_sprite = 'enemy_dice_' + str(_player.cri_dice)
+                    _player_sprite = 'player_dice_' + str(_player.cri_dice)
+                    materials.main_scr.sprites[_enemy_sprite].do(actions.Blink(4, 1))
+                    materials.main_scr.sprites[_player_sprite].do(actions.Blink(4, 1))
                 
-                _.check_buff()
-                return True
+                    _.check_buff()
+                    return True
             
     # now check:
     # the skill 3: war cry to make enemy take the min dice!        
