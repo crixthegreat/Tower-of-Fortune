@@ -18,7 +18,7 @@ time_label & best_time_label : as the name says
 """
 
 labels = dict(msg_box=cocos.text.Label('message', 
-    font_size=12,font_name='Gadugi', 
+    font_size=11,font_name='Gadugi', 
     bold=False,color=const.DEFAULT_COLOR, x=550, y=105, 
     width= 200, multiline=True)) 
 

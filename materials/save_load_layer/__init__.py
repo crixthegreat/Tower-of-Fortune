@@ -133,7 +133,7 @@ class Save_Load_Layer(Layer):
                 self.hide_message_box()
         else:
             # start a new game
-            self.game.player = player.gen_player(53)
+            self.game.player = player.gen_player(60)
             self.game.player.save_slot =  self.slot_selected
             self.game.player.show_player()
             self.game.player.zone = 0
@@ -246,6 +246,9 @@ class Save_Load_Layer(Layer):
                                 materials.item_image[_image_no])
                         sprites['item' + str(_) + str(__)].visible = True
             else:
+                # to do:
+                # when the body have been bought in game
+                # the labels and item sprites shoud be invisible
                 sprites['slot_sprite' + str(_)].image = empty_image
                 
     def exit_save_load_layer(self):

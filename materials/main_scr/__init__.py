@@ -44,6 +44,14 @@ camp_control_image = image_from_file(
 
 images['rip'] = image_from_file(const.RIP_IMG_FILE, const.GUI_ZIP_FILE) 
 images['enemy_image'] = enemy_image
+
+images['buff_cripple'] = pyglet.image.load(const.BUFF_ICON_FILE['cripple'])
+images['buff_divine_shield'] = pyglet.image.load(const.BUFF_ICON_FILE['divine_shield'])
+images['buff_plague'] = pyglet.image.load(const.BUFF_ICON_FILE['plague'])
+images['buff_fire'] = pyglet.image.load(const.BUFF_ICON_FILE['fire'])
+images['buff_disarm'] = pyglet.image.load(const.BUFF_ICON_FILE['disarm'])
+images['buff_wall'] = pyglet.image.load(const.BUFF_ICON_FILE['wall'])
+
 """
 time_label & best_time_label : as the name says
 """
@@ -112,6 +120,15 @@ sprites['attack_style'] = cocos.sprite.Sprite(
 #sprites for control indications
 sprites['control'] = cocos.sprite.Sprite(main_control_image, position=(400, 55))
 sprites['control'].scale = 0.5
+
+#sprites for the buff of the player and the enemy
+sprites[const.SKILL_NAME[18]] = cocos.sprite.Sprite(images['buff_cripple'], position=(200, 255), scale=0.6)
+sprites[const.SKILL_NAME[5]] = cocos.sprite.Sprite(images['buff_divine_shield'], position=(200, 300), scale=0.6)
+sprites[const.SKILL_NAME[19]] = cocos.sprite.Sprite(images['buff_divine_shield'], position=(650, 300), scale=0.6)
+sprites[const.SKILL_NAME[21]] = cocos.sprite.Sprite(images['buff_plague'], position=(200, 355), scale=0.6)
+sprites[const.SKILL_NAME[16]] = cocos.sprite.Sprite(images['buff_fire'], position=(200,200), scale=0.6)
+sprites[const.SKILL_NAME[15]] = cocos.sprite.Sprite(images['buff_disarm'], position=(300,355), scale=0.6)
+sprites[const.SKILL_NAME[17]] = cocos.sprite.Sprite(images['buff_wall'], position=(550, 255), scale=0.6)
 
 # parameters for the control indications
 CONTROL_PARA = dict()
