@@ -133,7 +133,7 @@ class Save_Load_Layer(Layer):
                 self.hide_message_box()
         else:
             # start a new game
-            self.game.player = player.gen_player(60)
+            self.game.player = player.gen_player(5)
             self.game.player.save_slot =  self.slot_selected
             self.game.player.show_player()
             self.game.player.zone = 0
